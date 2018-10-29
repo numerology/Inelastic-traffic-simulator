@@ -4,16 +4,17 @@
 % Returns:
 % (:,1) - X positions
 % (:,2) - Y positions
-% (:,3) - idx of associated backhaul resource
+% (:,3) - Mirror equivalence
 
-function [ bsPositions ] = Scenario_Generation(NetSettings)
+function [ bs_positions ] = Scenario_Generation(NetSettings)
 % Generate front edge base station position,
 % together with the association with backhaul resources
 % Currently assume BS = 19
 %% Generate multiple
 assert(NetSettings.bsN == 19)
 [bs] = Scenario(NetSettings.interdistance);
-bsPositions = bs(1:19, 1:2);
-backhaulAssociation = [1 1 1 2 3 3 4 2 2 3 4 4 5 5 7 7 7 6 5]';
-bsPositions = [bsPositions backhaulAssociation];
+bs_positions = bs(1:19, 1:2);
+backhaulAssociation = [];
+bs_positions = [bs_positions backhaulAssociation]
+
 end

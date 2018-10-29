@@ -1,8 +1,7 @@
 function [bs] = Scenario(intersiteD)
-% Generate the location of base stations
-% intersiteD: distance between BSs
-% return:
-%   bs: 61 x 3 matrix, 
+% Generate front
+
+
 x_hexagon=[-1 -0.5 0.5 1 0.5 -0.5 -1];
 y_hexagon=[0 -sqrt(3)/2 -sqrt(3)/2 0 sqrt(3)/2 sqrt(3)/2 0];
 multiple=intersiteD/(2*cosd(30));

@@ -7,7 +7,7 @@ s_o=[1/3 1/3 1/3]; % shares
 %%
 phi_levels=1;alphas=[1,1,1];
 warmup=0;bsN=19;sectors=3;
-interdistance=200;t=10; model={'RWP'};
+interdistance=200; t=10; model={'RWP'};
 %% Mobility and Lik estimation
 [NetSettings, OpSettings, c_u, bs, users_pos,bs_positions]=Network_configuration(simulationTime,...
     warmup,bsN,sectors,...

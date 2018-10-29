@@ -1,15 +1,15 @@
 %% Network configuration settings
 % Pablo Caballero Garcés
 % 30/03/15
-function [ NetSettings ] = Network_Settings(saturation,bsN,interdistance,users,simulationTime,warmup)
+function [ NetSettings ] = Network_Settings(saturation,bsN,interdistance,users,simulationTime,warmup, backhaulCapacities)
 
     NetSettings=[];
     
     NetSettings.saturation=saturation; % Saturation
     
-    NetSettings.bsN=bsN; % base stations
-
-    NetSettings.bsNS=bsN*3; % |B|
+    NetSettings.bsN=bsN; % base stations |B|, only including the front
+    
+    NetSettings.R = bsN + 7; % currently only study the 19 front with 7 backhaul setting.
 
     NetSettings.interdistance=interdistance; % Inter site distance
    
@@ -24,5 +24,7 @@ function [ NetSettings ] = Network_Settings(saturation,bsN,interdistance,users,s
     NetSettings.m=5; % m for Online
     
     NetSettings.diffR=0; % THR for Online
+    
+    NetSettings.backhaulCapacity = backhaulCapacities;
     
 end   

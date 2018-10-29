@@ -2,8 +2,10 @@
 % Pablo Caballero Garces
 % 30/03/15
 function [ c_ijt ] = Link_Estimation(NetSettings,trace,bs_positions,mult_fading)
+% c_ijt = nUsers x nBasestations x time
 t=0;
-TXp=41;ThermalNoisePlusInterfig=-104;
+TXp=41;
+ThermalNoisePlusInterfig = -104;
 for tictime=NetSettings.warm_up+1:1:NetSettings.warm_up+NetSettings.simulation_time
     t=t+1;
     fprintf('.');

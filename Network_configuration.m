@@ -1,4 +1,4 @@
-function [NetSettings, OpSettings, c_uD, bsD,trace,bs_positions]=Network_configuration(simulationTime,warmup,bsN,sectors,...
+function [NetSettings, OpSettings, c_uD, bsD,trace,bs_positions,userDemands]=Network_configuration(simulationTime,warmup,bsN,sectors,...
     interdistance, model,s_o,phi_levels,sat,operators,alphas,t)
 seed=1;
 %% Network settings
@@ -35,9 +35,13 @@ for t=1:size(c_ijt,3)
     c_uD(:,t)=c_u/1000000; % in Mbps
     bsD(:,t)=bs; % bs associate
     % also associate the backhaul to form the demanding vectors
-    backhaul = bs_positions(bs, 3);
-    cDemand = zeros(NetSettings.R, 1);
-    cDemand(bs)
+    for u = 1:NetSettings.users
+        backhaul = bs_positions(bs(u), 3);
+        cDemand = zeros(NetSettings.R, 1);
+        cDemand(bs(u)) = 1;
+        cDemand(backhaul) = 1;
+        userDemands(:, u, t) = cDemand;
+    end
 end
 OpSettings.c_u=c_uD;
 OpSettings.bs=bsD;

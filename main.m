@@ -3,79 +3,78 @@ clc, close all, clear all
 o=3; % num of slices
 sat=30; % U/B (use only integers...)
 simulationTime=5000; % seconds
-s_o=[1/3 1/3 1/3]; % shares
+shareVec=[1/3 1/3 1/3]; % shares
 %%
-phi_levels=1;alphas=[1,1,1];
+phiLevels=1;alphas=[1,1,1];
 warmup=0;bsN=19;sectors=3;
 interdistance=200; t=10; model={'RWP'};
 %% Mobility and Lik estimation
-[NetSettings, OpSettings, c_u, bs, users_pos,bs_positions]=Network_configuration(simulationTime,...
-    warmup,bsN,sectors,...
-    interdistance, model,...
-    s_o,phi_levels,sat,o,alphas,0);
+[NetSettings, OpSettings, capacityPerUser, bs, usersPos,bsPosition, ...
+    userDemands]=Network_configuration(simulationTime, warmup,bsN,sectors,...
+    interdistance, model, shareVec,phiLevels,sat,o,alphas,0);
 
 %% Compute fractions
 for t=1:simulationTime
     t
-    [r,f,b]=Static_Slicing(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
-    rates_SS(:,t)=r;
-    fractions_SS(:,t)=f;
-    btd_SS(:,t)=b;
-    [r,f,b]=GPS(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
-    rates_GPS(:,t)=r;
-    fractions_GPS(:,t)=f;
-    btd_GPS(:,t)=b;
-    [r,f,b]=SCPF(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
-    rates_SCPF(:,t)=r;
-    fractions_SCPF(:,t)=f;
-    btd_SCPF(:,t)=b;
+    [r,f,b]=Static_Slicing(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
+    ratesSS(:,t)=r;
+    fractionsSS(:,t)=f;
+    btdSS(:,t)=b;
+    [r,f,b]=GPS(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
+    ratesGPS(:,t)=r;
+    fractionsGPS(:,t)=f;
+    btdGPS(:,t)=b;
+    [r,f,b]=SCPF(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
+    ratesSCPF(:,t)=r;
+    fractionsSCPF(:,t)=f;
+    btdSCPF(:,t)=b;
 end
 %%
 i1=1;
 i2=2;
 i3=3;
 subplot(3,1,1)
-plot(rates_SS(i1,:),'-.')
+plot(ratesSS(i1,:),'-.')
 hold on
-plot(rates_GPS(i1,:),'--')
-plot(rates_SCPF(i1,:),'-')
+plot(ratesGPS(i1,:),'--')
+plot(ratesSCPF(i1,:),'-')
 subplot(3,1,2)
-plot(rates_SS(i2,:),'-.')
+plot(ratesSS(i2,:),'-.')
 hold on
-plot(rates_GPS(i2,:),'--')
-plot(rates_SCPF(i2,:),'-')
+plot(ratesGPS(i2,:),'--')
+plot(ratesSCPF(i2,:),'-')
 subplot(3,1,3)
-plot(rates_SS(i3,:),'-.')
+plot(ratesSS(i3,:),'-.')
 hold on
-plot(rates_GPS(i3,:),'--')
-plot(rates_SCPF(i3,:),'-')
+plot(ratesGPS(i3,:),'--')
+plot(ratesSCPF(i3,:),'-')
 legend('SS','GPS','SCPF')
 %%
 pl=0;
 if pl==1
 %% Some plotting all users at a given time
 Scenario_draw(200);
-plot(bs_positions(1:19,1),bs_positions(1:19,2),'k^')
+plot(bsPosition(1:19,1),bsPosition(1:19,2),'k^')
 hold on
-plot(users_pos(:,1000,1),users_pos(:,1000,2),'rs')
+plot(usersPos(:,1000,1),usersPos(:,1000,2),'rs')
 axis equal
 xlim([-500, 500])
 ylim([-500, 500])
 hold off
 %% Some plotting for 5 users
 Scenario_draw(200);
-plot(bs_positions(1:19,1),bs_positions(1:19,2),'k^')
+plot(bsPosition(1:19,1),bsPosition(1:19,2),'k^')
 axis equal
 hold on
 for t=1:simulationTime
     t
-    plot(users_pos(1,t,1),users_pos(1,t,2),'s','Color',[1/4+3/4*(c_u(6,t)/max(c_u(:))),0,0])
-    plot(users_pos(2,t,1),users_pos(2,t,2),'s','Color',[0,1/4+3/4*(c_u(2,t)/max(c_u(:))),0])
-    plot(users_pos(3,t,1),users_pos(3,t,2),'s','Color',[0,0,1/4+3/4*(c_u(3,t)/max(c_u(:)))])
-    plot(users_pos(4,t,1),users_pos(4,t,2),'s','Color',[1/4+3/4*(c_u(4,t)/max(c_u(:)))...
-                                                       ,1/4+3/4*(c_u(4,t)/max(c_u(:))),0])
-    plot(users_pos(5,t,1),users_pos(5,t,2),'s','Color',[1/4+3/4*(c_u(5,t)/max(c_u(:)))...
-                                                     ,0,1/4+3/4*(c_u(5,t)/max(c_u(:)))])
+    plot(usersPos(1,t,1),usersPos(1,t,2),'s','Color',[1/4+3/4*(capacityPerUser(6,t)/max(capacityPerUser(:))),0,0])
+    plot(usersPos(2,t,1),usersPos(2,t,2),'s','Color',[0,1/4+3/4*(capacityPerUser(2,t)/max(capacityPerUser(:))),0])
+    plot(usersPos(3,t,1),usersPos(3,t,2),'s','Color',[0,0,1/4+3/4*(capacityPerUser(3,t)/max(capacityPerUser(:)))])
+    plot(usersPos(4,t,1),usersPos(4,t,2),'s','Color',[1/4+3/4*(capacityPerUser(4,t)/max(capacityPerUser(:)))...
+                                                       ,1/4+3/4*(capacityPerUser(4,t)/max(capacityPerUser(:))),0])
+    plot(usersPos(5,t,1),usersPos(5,t,2),'s','Color',[1/4+3/4*(capacityPerUser(5,t)/max(capacityPerUser(:)))...
+                                                     ,0,1/4+3/4*(capacityPerUser(5,t)/max(capacityPerUser(:)))])
     xlim([-540, 540])
     ylim([-540, 540])
     pause(eps)

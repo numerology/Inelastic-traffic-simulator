@@ -2,7 +2,7 @@ clc, close all, clear all
 %% Settings
 o=3; % num of slices
 sat=30; % U/B (use only integers...)
-simulationTime=5000; % seconds
+simulationTime=5; % seconds
 shareVec=[1/3 1/3 1/3]; % shares
 %%
 phiLevels=1;alphas=[1,1,1];
@@ -11,23 +11,24 @@ interdistance=200; t=10; model={'RWP'};
 %% Mobility and Lik estimation
 [NetSettings, OpSettings, capacityPerUser, bs, usersPos,bsPosition, ...
     userDemands]=Network_configuration(simulationTime, warmup,bsN,sectors,...
-    interdistance, model, shareVec,phiLevels,sat,o,alphas,0);
+    interdistance, shareVec, phiLevels, sat, o, alphas, 0);
 
 %% Compute fractions
 for t=1:simulationTime
     t
-    [r,f,b]=Static_Slicing(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
-    ratesSS(:,t)=r;
-    fractionsSS(:,t)=f;
-    btdSS(:,t)=b;
-    [r,f,b]=GPS(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
-    ratesGPS(:,t)=r;
-    fractionsGPS(:,t)=f;
-    btdGPS(:,t)=b;
-    [r,f,b]=SCPF(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
-    ratesSCPF(:,t)=r;
-    fractionsSCPF(:,t)=f;
-    btdSCPF(:,t)=b;
+    [rate,fraction,btd]=Static_Slicing(NetSettings, OpSettings, ...
+        capacityPerUser(:,t)' ,bs(:,t)', userDemands(:, :, t));
+    ratesSS(:,t)=rate;
+    fractionsSS(:,t)=fraction;
+    btdSS(:,t)=btd;
+%     [rate,fraction,btd]=GPS(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
+%     ratesGPS(:,t)=rate;
+%     fractionsGPS(:,t)=fraction;
+%     btdGPS(:,t)=btd;
+%     [rate,fraction,btd]=SCPF(NetSettings, OpSettings,capacityPerUser(:,t)',bs(:,t)');
+%     ratesSCPF(:,t)=rate;
+%     fractionsSCPF(:,t)=fraction;
+%     btdSCPF(:,t)=btd;
 end
 %%
 i1=1;

@@ -1,7 +1,8 @@
 %% Network configuration settings
-% Pablo Caballero Garcés
+% Pablo Caballero Garcia
 % 30/03/15
-function [ NetSettings ] = Network_Settings(saturation,bsN,interdistance,users,simulationTime,warmup)
+function [ NetSettings ] = Network_Settings(saturation, bsN, interdistance, ...
+    users, simulationTime, warmup)
 
     NetSettings=[];
     

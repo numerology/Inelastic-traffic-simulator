@@ -2,14 +2,18 @@ clc, close all, clear all
 %% Settings
 o=3; % num of slices
 sat=30; % U/B (use only integers...)
-simulationTime=5000; % seconds
+simulationTime=50; % seconds
 s_o=[1/3 1/3 1/3]; % shares
 %%
 phi_levels=1;alphas=[1,1,1];
 warmup=0;bsN=19;sectors=3;
-interdistance=200;t=10; model={'RWP'};
+interdistance=200;
+% User mobility patterns:
+% RWP for roughly uniform spatial loads.
+model={'RWP'}; 
 %% Mobility and Lik estimation
-[NetSettings, OpSettings, c_u, bs, users_pos,bs_positions]=Network_configuration(simulationTime,...
+[NetSettings, OpSettings, c_u, bs, users_pos,bs_positions] = ...
+    Network_configuration(simulationTime, ...
     warmup,bsN,sectors,...
     interdistance, model,...
     s_o,phi_levels,sat,o,alphas,0);
@@ -29,6 +33,10 @@ for t=1:simulationTime
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
+    [r,f,b]=SCG(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
+    rates_SCG(:,t)=r;
+    fractions_SCGF(:,t)=f;
+    btd_SCG(:,t)=b;
 end
 %%
 i1=1;

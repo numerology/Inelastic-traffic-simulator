@@ -3,6 +3,7 @@
 % 30/03/15
 function [ OpSettings ] = Operators_Settings(operators,s_o,belonging,NetSettings)
 
+nBasestations = NetSettings.bsNS;
 %% Number of operators
 OpSettings.operators=operators; 
 
@@ -12,6 +13,15 @@ if size(s_o,2)==operators
         %% Network shares
         OpSettings.s_o=s_o; 
         
+        %% Share distribution across BSs
+        % Under uniform load distribution, assume slices split their shares evenly
+        % across BSs.
+        shareDist = [];
+        for o = 1:operators
+            cDist = s_o(o)/nBasestations * ones(1, nBasestations);
+            shareDist = [shareDist; cDist];
+        end
+        OpSettings.shareDist = shareDist;
         %% Users per operator and ops_belong matrix
         ops_belongs=[];
         for i=1:operators

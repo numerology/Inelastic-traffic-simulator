@@ -1,9 +1,11 @@
 function [NetSettings, OpSettings, c_uD, bsD,trace,bs_positions]=Network_configuration(simulationTime,warmup,bsN,sectors,...
-    interdistance, model,s_o,phi_levels,sat,operators,alphas,t)
+    interdistance, model, s_o, phi_levels, sat, operators, alphas, t)
 seed=1;
 %% Network settings
 users=bsN*sectors*sat; % total number of users
-[ NetSettings ] = Network_Settings(sat,bsN,interdistance,users,simulationTime,warmup);
+[ NetSettings ] = Network_Settings(sat, bsN, interdistance, users, ...
+    simulationTime, warmup);
+NetSettings.model = model;
 %% Operator settings
 % equal shares
 belonging= get_belonging(s_o,users,operators);

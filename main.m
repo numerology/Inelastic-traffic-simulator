@@ -19,8 +19,7 @@ model={'RWP'};
     s_o,phi_levels,sat,o,alphas,0);
 
 %% Compute fractions
-for t=1:simulationTime
-    t
+parfor t=1:simulationTime
     [r,f,b]=Static_Slicing(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
     rates_SS(:,t)=r;
     fractions_SS(:,t)=f;

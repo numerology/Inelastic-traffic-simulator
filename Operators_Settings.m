@@ -1,5 +1,5 @@
 %% Operators configuration settings
-% Pablo Caballero Garcés
+% Pablo Caballero Garcia
 % 30/03/15
 function [ OpSettings ] = Operators_Settings(operators, shareVec, ...
     belonging, NetSettings)

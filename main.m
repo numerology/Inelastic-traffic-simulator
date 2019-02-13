@@ -16,7 +16,7 @@ interdistance=200; t=10; model={'RWP'};
 %% Compute fractions
 for t=1:simulationTime
     t
-    [rate,fraction,btd]=Static_Slicing(NetSettings, OpSettings, ...
+    [rate,fraction,btd]=StaticSlicing(NetSettings, OpSettings, ...
         capacityPerUser(:,t)' ,bs(:,t)', userDemands(:, :, t));
     ratesSS(:,t)=rate;
     fractionsSS(:,t)=fraction;

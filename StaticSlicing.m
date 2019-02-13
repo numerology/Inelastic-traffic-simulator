@@ -1,6 +1,6 @@
-function [userRates,userFraction,btd]=Static_Slicing(NetSettings, OpSettings, ...
+function [userRates, userFraction, btd] = StaticSlicing(NetSettings, OpSettings, ...
     capacityPerUser, bs, userDemands)
-% Compute the rate allocation under static slicing?
+% Compute the rate allocation under static slicing.
 % In static slicing, first all the resources are splitted according to the
 % share allocation among slices, then a maxmin is performed to determine
 % the time fraction served to each user. Finally we compute the service

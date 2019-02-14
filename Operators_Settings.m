@@ -18,7 +18,7 @@ if size(s_o,2)==operators
         % across BSs.
         shareDist = [];
         for o = 1:operators
-            cDist = s_o(o)/nBasestations * ones(1, nBasestations);
+            cDist = s_o(o) * ones(1, nBasestations);
             shareDist = [shareDist; cDist];
         end
         OpSettings.shareDist = shareDist;

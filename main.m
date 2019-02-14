@@ -3,14 +3,15 @@ clc, close all, clear all
 o=3; % num of slices
 sat=30; % U/B (use only integers...)
 simulationTime=500; % seconds
-s_o=[1/3 1/3 1/3]; % shares
-%%
 phi_levels=1;alphas=[1,1,1];
 warmup=0;bsN=19;sectors=3;
 interdistance=200;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model={'RWP'}; 
+s_o= [1/3 1/3 1/3]; % shares
+gcp;
+
 %% Mobility and Lik estimation
 [NetSettings, OpSettings, c_u, bs, users_pos,bs_positions] = ...
     Network_configuration(simulationTime, ...
@@ -19,7 +20,9 @@ model={'RWP'};
     s_o,phi_levels,sat,o,alphas,0);
 
 %% Compute fractions
+ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime
+    %{
     [r,f,b]=Static_Slicing(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
     rates_SS(:,t)=r;
     fractions_SS(:,t)=f;
@@ -28,6 +31,7 @@ parfor t=1:simulationTime
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
+    %}
     [r,f,b]=SCPF(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
@@ -36,27 +40,32 @@ parfor t=1:simulationTime
     rates_SCG(:,t)=r;
     fractions_SCGF(:,t)=f;
     btd_SCG(:,t)=b;
+    ppm.increment();
 end
 %%
-i1=1;
-i2=2;
-i3=3;
+i1=605;
+i2=1103;
+i3=1699;
+figure();
 subplot(3,1,1)
-plot(rates_SS(i1,:),'-.')
+%plot(rates_SS(i1,:),'-.b')
 hold on
-plot(rates_GPS(i1,:),'--')
-plot(rates_SCPF(i1,:),'-')
+%plot(rates_GPS(i1,:),'--r')
+plot(btd_SCPF(i1,:),'-g')
+plot(btd_SCG(i1,:),':k')
 subplot(3,1,2)
-plot(rates_SS(i2,:),'-.')
+%plot(rates_SS(i2,:),'-.b')
 hold on
-plot(rates_GPS(i2,:),'--')
-plot(rates_SCPF(i2,:),'-')
+%plot(rates_GPS(i2,:),'--r')
+plot(btd_SCPF(i2,:),'-g')
+plot(btd_SCG(i2,:),':k')
 subplot(3,1,3)
-plot(rates_SS(i3,:),'-.')
+%plot(rates_SS(i3,:),'-.b')
 hold on
-plot(rates_GPS(i3,:),'--')
-plot(rates_SCPF(i3,:),'-')
-legend('SS','GPS','SCPF')
+%plot(rates_GPS(i3,:),'--r')
+plot(btd_SCPF(i3,:),'-g')
+plot(btd_SCG(i3,:),':k')
+legend('SCPF','SCG')
 %%
 pl=0;
 if pl==1

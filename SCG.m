@@ -16,8 +16,9 @@ function [userRates, userFraction, btd] = SCG(NetSettings, OpSettings, ...
 
 assert(isequal(NetSettings.model, {'RWP'}), 'Only random waypoint model is supported.');
 V = size(OpSettings.s_o, 2);
+nBasestations = NetSettings.bsNS;
 shareDist = OpSettings.shareDist; % share distribution, V x B
-weights = OpSettings.w_i;
+weights = nBasestations * OpSettings.w_i;
 opBelongs = OpSettings.ops_belongs;
 
 % (TODO:optimize the computation here.)
@@ -26,11 +27,13 @@ for u = 1:NetSettings.users
     if (lb <= 1)
         userFraction(u) = weights(u) ./ lb;
     else
+        %disp('lb greater than 1');
         slice = opBelongs(u);
         lvb = sum(weights(bs(:) == bs(u) & opBelongs(:) == slice));
         if (lvb <= shareDist(slice, bs(u)))
             userFraction(u) = weights(u);
         else
+            disp('lb greater than 1');
             surplus = 1;
             totalMargin = 0;
             for v = 1:V

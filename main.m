@@ -1,23 +1,23 @@
 clc, close all, clear all
 %% Settings
-o=3; % num of slices
-sat=30; % U/B (use only integers...)
-simulationTime=500; % seconds
-phi_levels=1;alphas=[1,1,1];
-warmup=0;bsN=19;sectors=3;
-interdistance=200;
+o = 3; % num of slices
+sat = 30; % U/B (use only integers...)
+simulationTime = 3000; % seconds
+phiLevels = 1;alphas = [1, 1, 1];
+warmup = 0;bsN = 19;sectors = 3;
+interdistance = 200;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
-model={'RWP'}; 
-s_o= [1/3 1/3 1/3]; % shares
+model = {'RWP'}; 
+shareVec = [1/2 1/4 1/4]; % shares
 gcp;
 
 %% Mobility and Lik estimation
-[NetSettings, OpSettings, c_u, bs, users_pos,bs_positions] = ...
-    Network_configuration(simulationTime, ...
-    warmup,bsN,sectors,...
+[NetSettings, OpSettings, capacityPerUser, bs, userPos, bsPos] = ...
+    networkconfiguration(simulationTime, ...
+    warmup, bsN, sectors,...
     interdistance, model,...
-    s_o,phi_levels,sat,o,alphas,0);
+    shareVec, phiLevels, sat, o, alphas, 3);
 
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
@@ -32,17 +32,17 @@ parfor t=1:simulationTime
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
     %}
-    [r,f,b]=SCPF(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
+    [r,f,b]=SCPF(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
-    [r,f,b]=SCG(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
+    [r,f,b]=SCG(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
     rates_SCG(:,t)=r;
     fractions_SCGF(:,t)=f;
     btd_SCG(:,t)=b;
     ppm.increment();
 end
-%%
+%% Plot performance seen by some randomly selected users.
 i1=605;
 i2=1103;
 i3=1699;
@@ -66,32 +66,37 @@ hold on
 plot(btd_SCPF(i3,:),'-g')
 plot(btd_SCG(i3,:),':k')
 legend('SCPF','SCG')
+%% Take a look at the mean performance
+fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
+fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
+fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
+fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 %%
 pl=0;
 if pl==1
 %% Some plotting all users at a given time
 Scenario_draw(200);
-plot(bs_positions(1:19,1),bs_positions(1:19,2),'k^')
+plot(bsPos(1:19,1),bsPos(1:19,2),'k^')
 hold on
-plot(users_pos(:,1000,1),users_pos(:,1000,2),'rs')
+plot(userPos(:,1000,1),userPos(:,1000,2),'rs')
 axis equal
 xlim([-500, 500])
 ylim([-500, 500])
 hold off
 %% Some plotting for 5 users
 Scenario_draw(200);
-plot(bs_positions(1:19,1),bs_positions(1:19,2),'k^')
+plot(bsPos(1:19,1),bsPos(1:19,2),'k^')
 axis equal
 hold on
 for t=1:simulationTime
     t
-    plot(users_pos(1,t,1),users_pos(1,t,2),'s','Color',[1/4+3/4*(c_u(6,t)/max(c_u(:))),0,0])
-    plot(users_pos(2,t,1),users_pos(2,t,2),'s','Color',[0,1/4+3/4*(c_u(2,t)/max(c_u(:))),0])
-    plot(users_pos(3,t,1),users_pos(3,t,2),'s','Color',[0,0,1/4+3/4*(c_u(3,t)/max(c_u(:)))])
-    plot(users_pos(4,t,1),users_pos(4,t,2),'s','Color',[1/4+3/4*(c_u(4,t)/max(c_u(:)))...
-                                                       ,1/4+3/4*(c_u(4,t)/max(c_u(:))),0])
-    plot(users_pos(5,t,1),users_pos(5,t,2),'s','Color',[1/4+3/4*(c_u(5,t)/max(c_u(:)))...
-                                                     ,0,1/4+3/4*(c_u(5,t)/max(c_u(:)))])
+    plot(userPos(1,t,1),userPos(1,t,2),'s','Color',[1/4+3/4*(capacityPerUser(6,t)/max(capacityPerUser(:))),0,0])
+    plot(userPos(2,t,1),userPos(2,t,2),'s','Color',[0,1/4+3/4*(capacityPerUser(2,t)/max(capacityPerUser(:))),0])
+    plot(userPos(3,t,1),userPos(3,t,2),'s','Color',[0,0,1/4+3/4*(capacityPerUser(3,t)/max(capacityPerUser(:)))])
+    plot(userPos(4,t,1),userPos(4,t,2),'s','Color',[1/4+3/4*(capacityPerUser(4,t)/max(capacityPerUser(:)))...
+                                                       ,1/4+3/4*(capacityPerUser(4,t)/max(capacityPerUser(:))),0])
+    plot(userPos(5,t,1),userPos(5,t,2),'s','Color',[1/4+3/4*(capacityPerUser(5,t)/max(capacityPerUser(:)))...
+                                                     ,0,1/4+3/4*(capacityPerUser(5,t)/max(capacityPerUser(:)))])
     xlim([-540, 540])
     ylim([-540, 540])
     pause(eps)

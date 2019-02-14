@@ -33,7 +33,6 @@ for u = 1:NetSettings.users
         if (lvb <= shareDist(slice, bs(u)))
             userFraction(u) = weights(u);
         else
-            disp('lb greater than 1');
             surplus = 1;
             totalMargin = 0;
             for v = 1:V

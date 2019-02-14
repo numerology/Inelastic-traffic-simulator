@@ -20,7 +20,7 @@ function [ NetSettings ] = Network_Settings(saturation, bsN, interdistance, ...
     
     NetSettings.fc=2.5; % frecuency carrier (Ghz)
     
-    NetSettings.warm_up=warmup; % frecuency carrier (Ghz)
+    NetSettings.warm_up=warmup; % Specify the time of link estimation last time to pick up. (obsolete)
 
     NetSettings.m=5; % m for Online
     

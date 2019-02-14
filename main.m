@@ -2,7 +2,7 @@ clc, close all, clear all
 %% Settings
 o=3; % num of slices
 sat=30; % U/B (use only integers...)
-simulationTime=50; % seconds
+simulationTime=500; % seconds
 s_o=[1/3 1/3 1/3]; % shares
 %%
 phi_levels=1;alphas=[1,1,1];

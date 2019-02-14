@@ -29,7 +29,7 @@ trace(:,:,2)=uY;
 disp('done mobility.')
 %% Link estimation
 disp('Starting Link estimation...')
-[ c_ijt ] = Link_Estimation(NetSettings,trace,bs_positions,2);
+[ c_ijt ] = LinkEstimation(NetSettings,trace,bs_positions,2);
 for t=1:size(c_ijt,3)
     [c_u, bs]=max(c_ijt(:,:,t)');
     c_uD(:,t)=c_u/1000000; % in Mbps

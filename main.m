@@ -2,14 +2,14 @@ clc, close all, clear all
 %% Settings
 o = 3; % num of slices
 sat = 30; % U/B (use only integers...)
-simulationTime = 3000; % seconds
+simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
 interdistance = 200;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'}; 
-shareVec = [1/2 1/4 1/4]; % shares
+shareVec = [1/3 1/3 1/3]; % shares
 gcp;
 
 %% Mobility and Lik estimation
@@ -22,16 +22,15 @@ gcp;
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime
-    %{
-    [r,f,b]=Static_Slicing(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
+   
+    [r,f,b]=Static_Slicing(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
     rates_SS(:,t)=r;
     fractions_SS(:,t)=f;
     btd_SS(:,t)=b;
-    [r,f,b]=GPS(NetSettings, OpSettings,[c_u(:,t)]',[bs(:,t)]');
+    [r,f,b]=GPS(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
-    %}
     [r,f,b]=SCPF(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
@@ -69,9 +68,13 @@ legend('SCPF','SCG')
 %% Take a look at the mean performance
 fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
 fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
+fprintf('mean btd of GPS = %f\n', mean(mean(btd_GPS)));
+fprintf('mean btd of SS = %f\n', mean(mean(btd_SS)));
 fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
 fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
-%%
+fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
+fprintf('mean rate of SS = %f\n', mean(mean(rates_SS)));
+%% 
 pl=0;
 if pl==1
 %% Some plotting all users at a given time

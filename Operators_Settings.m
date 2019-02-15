@@ -16,11 +16,17 @@ if size(s_o,2)==operators
         %% Share distribution across BSs
         % Under uniform load distribution, assume slices split their shares evenly
         % across BSs.
+        %{
         shareDist = [];
         for o = 1:operators
-            cDist = s_o(o) * ones(1, nBasestations);
+            cDist = [3 * s_o(o) * ones(1, nBasestations / 3) zeros(1, nBasestations * 2 / 3)];
             shareDist = [shareDist; cDist];
         end
+        %}
+        shareDist = [ones(1, nBasestations / 3) zeros(1, nBasestations * 2 / 3);
+            zeros(1, nBasestations * 1 / 3) ones(1, nBasestations / 3) zeros(1, nBasestations * 1 / 3);
+            zeros(1, nBasestations * 2 / 3) ones(1, nBasestations / 3)
+            ];
         OpSettings.shareDist = shareDist;
         %% Users per operator and ops_belong matrix
         ops_belongs=[];

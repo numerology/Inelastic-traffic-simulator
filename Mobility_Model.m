@@ -2,7 +2,7 @@
 % Pablo Caballero Garcés
 % 30/03/15
 % (user,time,position)
-function [ trace ] = Mobility_Model(model,seed,NetSettings)
+function [ trace ] = Mobility_Model(model, seed, NetSettings)
 
 
 maxminD=[-2*173 2*173 -100 300;-2*173 2*173 -300 300;-2*173 2*173 -300 500;

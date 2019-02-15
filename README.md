@@ -10,5 +10,6 @@ If used, please cite following papers:
 ## Acknowledgement
 The progressive bar for parallel processing in Matlab is by DylanMuir 
 [ParforProgMon](https://github.com/DylanMuir/ParforProgMon).
+
 SLAW model simulator: 
 Lee, K., Hong, S., Kim, S. J., Rhee, I., & Chong, S. (2009, April). Slaw: A new mobility model for human walks. In INFOCOM 2009, IEEE (pp. 855-863). IEEE.

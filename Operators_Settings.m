@@ -13,7 +13,7 @@ if size(s_o,2)==operators
         %% Network shares
         OpSettings.s_o=s_o; 
         
-        %% Share distribution across BSs
+        %% Share distribution across BSs (default)
         % Under uniform load distribution, assume slices split their shares evenly
         % across BSs.
         %{

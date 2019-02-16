@@ -7,9 +7,9 @@ function [x] = stabrnd(alpha, beta, c, delta, m, n)
 %
 % Returns m x n matrix of iid stable random numbers with 
 %   characteristic exponent alpha in [.1,2], skewness parameter
-%   beta in [-1,1], scale c &gt; 0, and location parameter delta.
+%   beta in [-1,1], scale c > 0, and location parameter delta.
 % Based on the method of J.M. Chambers, C.L. Mallows and B.W.
-%   Stuck, &quot;A Method for Simulating Stable Random Variables,&quot; 
+%   Stuck, "A Method for Simulating Stable Random Variables," 
 %   JASA 71 (1976): 340-4.  
 % Encoded in MATLAB by J. Huston McCulloch, Ohio State
 %   University Econ. Dept. (mcculloch.2@osu.edu).  This 12/18/96
@@ -25,38 +25,38 @@ function [x] = stabrnd(alpha, beta, c, delta, m, n)
 %                              for alpha = 1.
 % With this parameterization, the stable cdf S(x; alpha, beta, 
 %   c, delta) equals S((x-delta)/c; alpha, beta, 1, 0).  See my 
-%   &quot;On the parametrization of the afocal stable distributions,&quot;
+%   "On the parametrization of the afocal stable distributions,"
 %   _Bull. London Math. Soc._ 28 (1996): 651-55, for details.
 % When alpha = 2, the distribution is Gaussian with mean delta 
 %   and variance 2*c^2, and beta has no effect.
-% When alpha &gt; 1, the mean is delta for all beta.  When alpha 
-%   &lt;= 1, the mean is undefined.
+% When alpha > 1, the mean is delta for all beta.  When alpha 
+%   <= 1, the mean is undefined.
 % When beta = 0, the distribution is symmetrical and delta is 
 %   the median for all alpha.  When alpha = 1 and beta = 0, the 
 %   distribution is Cauchy (arctangent) with median delta.
-% When the submitted alpha is &gt; 2 or &lt; .1, or beta is outside 
+% When the submitted alpha is > 2 or < .1, or beta is outside 
 %   [-1,1], an error message is generated and x is returned as a 
 %   matrix of NaNs.
-% Alpha &lt; .1 is not allowed here because of the non-negligible 
+% Alpha < .1 is not allowed here because of the non-negligible 
 %   probability of overflows.  
 
 % If you're only interested in the symmetric cases, you may just 
 %   set beta = 0 and skip the following considerations:
-% When beta &gt; 0 (&lt; 0), the distribution is skewed to the right 
+% When beta > 0 (< 0), the distribution is skewed to the right 
 %   (left).
-% When alpha &lt; 1, delta, as defined above, is the unique fractile
+% When alpha < 1, delta, as defined above, is the unique fractile
 %   that is invariant under averaging of iid contributions.  I 
-%   call such a fractile a &quot;focus of stability.&quot;  This, like the 
+%   call such a fractile a "focus of stability."  This, like the 
 %   mean, is a natural location parameter.
 % When alpha = 1, either every fractile is a focus of stability, 
 %   as in the beta = 0 Cauchy case, or else there is no focus of 
 %   stability at all, as is the case for beta ~=0.  In the latter
-%   cases, which I call &quot;afocal,&quot; delta is just an arbitrary 
+%   cases, which I call "afocal," delta is just an arbitrary 
 %   fractile that has a simple relation to the c.f.
-% When alpha &gt; 1 and beta &gt; 0, med(x) must lie very far below 
+% When alpha > 1 and beta > 0, med(x) must lie very far below 
 %   the mean as alpha approaches 1 from above.  Furthermore, as 
 %   alpha approaches 1 from below, med(x) must lie very far above
-%   the focus of stability when beta &gt; 0.  If beta ~= 0, there  
+%   the focus of stability when beta > 0.  If beta ~= 0, there  
 %   is therefore a discontinuity in the distribution as a function
 %   of alpha as alpha passes 1, when delta is held constant.
 % CMS, following an insight of Vladimir Zolotarev, remove this
@@ -68,7 +68,7 @@ function [x] = stabrnd(alpha, beta, c, delta, m, n)
 %   uous function of alpha, but whose location parameter (which I 
 %   call zeta) is a shifted version of delta that has no known 
 %   interpretation other than computational convenience.  
-%   The present program restores the more meaningful &quot;delta&quot;  
+%   The present program restores the more meaningful "delta"  
 %   parameterization by using the CMS (4.1), but with 
 %   beta*c*tan(pi*alpha/2) added back in (ie with their initial
 %   tan(alpha*phi0) deleted).  RNSTA therefore gives different 
@@ -90,25 +90,25 @@ function [x] = stabrnd(alpha, beta, c, delta, m, n)
 % V.M. Zolotarev, _One Dimensional Stable Laws_, Amer. Math. 
 %   Soc., 1986.
 % G. Samorodnitsky and M.S. Taqqu, _Stable Non-Gaussian Random
-%   Processes_, Chapman &amp; Hill, 1994.
+%   Processes_, Chapman & Hill, 1994.
 % A. Janicki and A. Weron, _Simulaton and Chaotic Behavior of 
 %   Alpha-Stable Stochastic Processes_, Dekker, 1994.
-% J.H. McCulloch, &quot;Financial Applications of Stable Distributons,&quot;
+% J.H. McCulloch, "Financial Applications of Stable Distributons,"
 %   _Handbook of Statistics_ Vol. 14, forthcoming early 1997.
 
 % Errortraps:
-if alpha < .1 || alpha > 2
+if alpha < .1 | alpha > 2
   disp('Alpha must be in [.1,2] for function STABRND.')
   alpha
   x = NaN * zeros(m,n);
   return
-end
+  end
 if abs(beta) > 1
   disp('Beta must be in [-1,1] for function STABRND.')
   beta
   x = NaN * zeros(m,n);
   return
-end
+  end
 
 % Generate exponential w and uniform phi:
 w = -log(rand(m,n));
@@ -119,7 +119,7 @@ if alpha == 2
   x = (2*sqrt(w) .* sin(phi));
   x = delta + c*x;
   return
-end
+  end
 
 % Symmetrical cases:
 if beta == 0
@@ -146,7 +146,7 @@ else
         .* cosphi ./ bphi));
     if alpha ~= 1
       x = x + beta * tan(pi * alpha/2);
-    end
+      end
   end
 end
 

@@ -1,19 +1,35 @@
 %% RWP_border_circle
 % each milisecond update
-function [uX,uY,uZ]=RWP_border_circle(users,dur,UE_height,rad,Mspeed)
+function [uX,uY,uZ]=RWP_border_circle(users, dur, UE_height, rad, Mspeed, ...
+    uniform, opSettings)
 duration=dur;
 uX=zeros(users,duration);
 uY=zeros(users,duration);
 uZ=zeros(users,duration);
 for u=1:users
     % generate init
-    r=sqrt(rand(1,1))*(rad+20);thI=rand()*2*pi;xI=r*[cos(thI)];yI=r*[sin(thI)];
+    r=sqrt(rand(1,1))*(rad+20);
+    if (uniform)
+        thI=rand()*2*pi;
+    else
+        v = opSettings.ops_belongs(u);
+        thI = 2 * pi * ((v - 1) + rand()) / opSettings.operators;
+    end
+    
+    xI=r*[cos(thI)];yI=r*[sin(thI)];
     t=2;
     x=zeros(2e5,1);y=zeros(2e5,1);
     x(1)=xI;y(1)=yI;
     while t<duration
         % generate dest
-        r=rad+20;thO=rand()*2*pi;xF=r*[cos(thO)];yF=r*[sin(thO)];
+        r=rad+20;
+        if (uniform)
+            thO=rand()*2*pi;
+        else
+            v = opSettings.ops_belongs(u);
+            thO = 2 * pi * ((v - 1) + rand()) / opSettings.operators;
+        end
+        xF=r*[cos(thO)];yF=r*[sin(thO)];
         % pick speed
         sp=Mspeed+1*rand()-0.5;
         % calculate distance in meters

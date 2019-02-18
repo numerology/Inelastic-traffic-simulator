@@ -1,8 +1,8 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 30; % U/B (use only integers...)
-simulationTime = 5000; % seconds
+sat = 10; % U/B (use only integers...)
+simulationTime = 1000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
 interdistance = 200;

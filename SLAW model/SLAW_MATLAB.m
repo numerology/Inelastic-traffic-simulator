@@ -6,17 +6,17 @@ function [v_trace] = SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, ...
 %	Waypoint Map Generator by Kyunghan Lee, KAIST, Korea
 %
 % Input arguments
-%	dist_alpha: distance alpha (1 &lt; dist_alpha &lt; 6)
+%	dist_alpha: distance alpha (1 < dist_alpha < 6)
 %	num_user: number of mobile users
 %	size_max: a side of a right square simulation area
 %	n_wp: number of waypoints
 %	v_Hurst: Hurst parameter for self-similarity of waypoints 
-%		(0.5 &lt; v_Hurst &lt; 1)
+%		(0.5 < v_Hurst < 1)
 %	Thours: Total hours of trace generation (hours)
 %	B_range: clustering range (meter)
 %		If the waypoints are in B_range, they are considered as belonged to
 %		the same cluster
-%	beta: Levy exponent for pause time, 0 &lt; beta &lt;= 2
+%	beta: Levy exponent for pause time, 0 < beta <= 2
 %	MIN_PAUSE: minimum pause time (second)
 %	MAX_PAUSE: maximum pause time (second)
 %
@@ -173,9 +173,9 @@ for t=t_start:t_gap:max_min*60
 			rPausePt(lPausePt(i)+1:end,:,i)=0;
 		end
 		
-		v_trace(i,idx_, 1) = crnt_xy(i,1);
-		v_trace(i,idx_, 2) = crnt_xy(i,2);
-		v_trace(i,idx_, 3) = t;
+		v_trace(i, idx_, 1) = crnt_xy(i,1);
+		v_trace(i, idx_, 2) = crnt_xy(i,2);
+		v_trace(i, idx_, 3) = t;
 	end
 
 	idx_ = idx_ + 1;

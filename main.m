@@ -28,19 +28,19 @@ OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime
    
-    [r,f,b]=Static_Slicing(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
+    [r,f,b] = Static_Slicing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SS(:,t)=r;
     fractions_SS(:,t)=f;
     btd_SS(:,t)=b;
-    [r,f,b]=GPS(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
+    [r,f,b] = flexibleGPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
-    [r,f,b]=SCPF(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
+    [r,f,b] = SCPF(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
-    [r,f,b]=SCG(NetSettings, OpSettings,[capacityPerUser(:,t)]',[bs(:,t)]');
+    [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCG(:,t)=r;
     fractions_SCGF(:,t)=f;
     btd_SCG(:,t)=b;
@@ -54,22 +54,22 @@ figure();
 subplot(3,1,1)
 %plot(rates_SS(i1,:),'-.b')
 hold on
-%plot(rates_GPS(i1,:),'--r')
+plot(btd_GPS(i1,:),'--r')
 plot(btd_SCPF(i1,:),'-g')
 plot(btd_SCG(i1,:),':k')
 subplot(3,1,2)
 %plot(rates_SS(i2,:),'-.b')
 hold on
-%plot(rates_GPS(i2,:),'--r')
+plot(btd_GPS(i2,:),'--r')
 plot(btd_SCPF(i2,:),'-g')
 plot(btd_SCG(i2,:),':k')
 subplot(3,1,3)
 %plot(rates_SS(i3,:),'-.b')
 hold on
-%plot(rates_GPS(i3,:),'--r')
+plot(btd_GPS(i3,:),'--r')
 plot(btd_SCPF(i3,:),'-g')
 plot(btd_SCG(i3,:),':k')
-legend('SCPF','SCG')
+legend('GPS','SCPF','SCG')
 %% Take a look at the mean performance
 fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
 fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));

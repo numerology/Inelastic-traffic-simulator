@@ -13,7 +13,7 @@ for u=1:users
         thI=rand()*2*pi;
     else
         v = opSettings.ops_belongs(u);
-        thI = 2 * pi * ((v - 1) + rand()) / opSettings.operators;
+        thI = 4 * pi * ((v - 1) + rand()) / opSettings.operators;
     end
     
     xI=r*[cos(thI)];yI=r*[sin(thI)];
@@ -27,7 +27,7 @@ for u=1:users
             thO=rand()*2*pi;
         else
             v = opSettings.ops_belongs(u);
-            thO = 2 * pi * ((v - 1) + rand()) / opSettings.operators;
+            thO = 4 * pi * ((v - 1) + rand()) / opSettings.operators;
         end
         xF=r*[cos(thO)];yF=r*[sin(thO)];
         % pick speed

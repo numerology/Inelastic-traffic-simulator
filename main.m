@@ -1,11 +1,11 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 10; % U/B (use only integers...)
-simulationTime = 1000; % seconds
+sat = 30; % U/B (use only integers...)
+simulationTime = 2000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
-interdistance = 200;
+interdistance = 1000;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'}; 
@@ -19,6 +19,11 @@ gcp;
     interdistance, model,...
     shareVec, phiLevels, sat, o, alphas, 3);
 
+%% Adjust share distribution for new proposed scheme according to the load distribution
+% the sum of share across BSs <= share * |B| per slice.
+loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
+% use a similar heuristic to allocate shares
+OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime
@@ -87,6 +92,7 @@ xlim([-500, 500])
 ylim([-500, 500])
 hold off
 %% Some plotting for 5 users
+figure();
 Scenario_draw(200);
 plot(bsPos(1:19,1),bsPos(1:19,2),'k^')
 axis equal

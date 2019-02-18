@@ -26,4 +26,6 @@ function [ NetSettings ] = Network_Settings(saturation, bsN, interdistance, ...
     
     NetSettings.diffR=0; % THR for Online
     
+    NetSettings.hlevel = 'H2';
+    
 end   

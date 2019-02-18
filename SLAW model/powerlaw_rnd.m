@@ -1,5 +1,4 @@
-function x = powerlaw_rnd(alpha, min_size, max_size, num_step, sc_pause, ...
-    p_mode)
+function x = powerlaw_rnd(alpha, min_size, max_size, num_step, sc_pause, p_mode)
 % generate random values from power-law distribution
 % 0 < alpha <= 2
 % p_mode
@@ -22,7 +21,7 @@ elseif p_mode == 2
         temp_x = rand(num_step,1);
         l = power(temp_x,1/(1-alpha));
         l = l * min_size;
-        l = l(find(l < max_size));
+        l = l(find(l<max_size));
         x = [x; l];
     end
 end

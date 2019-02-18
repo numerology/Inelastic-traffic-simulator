@@ -32,7 +32,7 @@ elseif strcmp(model,'SLAWH')
     valD='NC';dista=2;
     hlevel=NetSettings.hlevel;
     % (load precached SLAW model)
-    load(strcat('./Heterogeneous/',hlevel,'/',hlevel,'_seed',...
+    load(strcat('./SLAW model/Heterogeneity/',hlevel,'/',hlevel,'_seed',...
         num2str(seed),'.mat'));
     
     trace(:,:,1)=multSeed(:,1)*(trace(:,:,1)+dev(counter,1)); % Adapt range [0,1000] -> [-500,500]

@@ -5,7 +5,7 @@ function r_cluster = makecluster(pausept, B_range)
 %   pausept(:,1) : x location, pausept(:,2) : y location
 %   B_range : clustering range
 
-disp('... makecluster called');
+display('... makecluster called');
 
 % t_clock = clock;  
 
@@ -24,7 +24,9 @@ while length(find(nonmember~=0))
     while length(newmember)~=0
         idx=find(nonmember~=0);
         for i=1:length(idx)
-            if dist(pausept(newmember(1),:), pausept(idx(i),:)') <= B_range
+            %if dist(pausept(newmember(1),:), pausept(idx(i),:)') <=
+            %B_range  %%%MODIFIED Xavier - 13.11.2012
+            if distance(pausept(newmember(1),:)', pausept(idx(i),:)') <=B_range
                 newmember=[newmember idx(i)];
                 nonmember(idx(i))=0;
                 tmp_cluster(idx(i))=1;
@@ -43,6 +45,8 @@ while length(find(nonmember~=0))
     else
         break;
     end
+    disp('Working');
+    disp(idx);
 end
 
 disp('    Number of clusters: ');
@@ -52,4 +56,4 @@ disp(length(r_cluster(:,1)));
 % str_ttt = ['Elapsed time : ' num2str(ttt)];
 % display(str_ttt);
 
-disp('... makecluster done');			
+display('... makecluster done');

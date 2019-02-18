@@ -1,5 +1,7 @@
-function [v_trace] = SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, ...
-    v_Hurst, Thours, B_range, beta, MIN_PAUSE, MAX_PAUSE)
+function [v_trace] = SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, v_Hurst, ...
+	Thours, B_range, beta, MIN_PAUSE, MAX_PAUSE)
+%
+% SLAW_NS2(dist_alpha, num_user, size_max, n_wp, v_Hurst, Thours, B_range, beta, MIN_PAUSE, MAX_PAUSE)
 %
 % SLAW Trace Generator
 % Written by Seongik Hong, NCSU, US (3/10/2009)
@@ -23,6 +25,11 @@ function [v_trace] = SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, ...
 % Example:
 %	trace = SLAW_MATLAB(3, 20, 2000, 2000, 0.75, 10, 50, 1, 30, 60*60);
 %
+% OUTPUT: XAVIER 13.11.2012
+% Exact meanings of each arguments are specified in SLAW_MATLAB.m file. Or just type "help SLAW_MATLAB" in your MATLAB command line.
+% Then you can get a resulting array "traces" which has x/y positions according to time. traces(i,:,:) means the i-th user. traces(i,:,1)/traces(i,:,2) mean the i-th user's x/y locations, respectively.
+% traces(i,:,3) specifies time (seconds).
+%
 % Based on the method of Kyunghan Lee (KAIST), Seongik Hong (NCSU),
 %	Seong Joon Kim (NCSU), Injong Rhee (NCSU) and Song Chong (KAIST),
 %	SLAW: A Mobility Model for Human Walks, The 28th IEEE
@@ -31,7 +38,7 @@ function [v_trace] = SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, ...
 
 %%
 % simulation time (minute)
-max_min = Thours*60;
+max_min = Thours*60*60;
 
 %
 ratio_cluster = 5;
@@ -45,7 +52,7 @@ c_mode = 2;
 sc_pause=1;
 
 %sihong, sampling period (second)
-t_gap = 60;
+t_gap = 1;
 
 flight_mob = ['NS2_SLAW_' int2str(dist_alpha) '_' int2str(size_max) '.mob'];
 fid_mob = fopen(flight_mob,'wt');
@@ -56,7 +63,7 @@ fid_mob = fopen(flight_mob,'wt');
 % Generate a waypoint map and make cluster information
 % ------------------------------------------------------------------------
 
-disp('... Waypoint map generation starts');
+display('... Waypoint map generation starts');
 
 % generate a waypoint map
 pausePt=[];
@@ -83,19 +90,19 @@ num_all_pausePt=length(pausePt(:,1));
 rPausePt=zeros(num_all_pausePt, 2, num_user);
 lPausePt=zeros(num_user, 1);
 
-disp('... Waypoint map generation done');
+display('... Waypoint map generation done');
 
 
 %%
 % ------------------------------------------------------------------------
 % mobility initialize START
 % ------------------------------------------------------------------------
-disp('... Initialization starts');
+display('... Initialization starts');
 
 for i=1:num_user
 
 	if mod(i,10)==0
-		disp('.');
+		display('.');
 	end
 
 	prev_start_time(i) = 0;
@@ -106,13 +113,13 @@ for i=1:num_user
 	% sihong
 	mob_subtype(i) = 1; % 0: non-destructive, 1:destructive
 	% param = [alpha_ beta min_pt max_pt]
-	%         1 &lt; dist_alpha &lt; 6, 0 &lt; beta &lt;= 2
+	%         1 < dist_alpha < 6, 0 < beta <= 2
 	param=[dist_alpha beta MIN_PAUSE MAX_PAUSE];
 end
 
 for i=1:num_user
 	if mod(i,10)==0
-		disp('.');
+		display('.');
 	end
 
 	mob_type(i) = SLAW;
@@ -121,7 +128,7 @@ for i=1:num_user
 	mob_subtype(i) = 1; % 0: non-destructive, 1:destructive
 
 	% param = [alpha_ beta min_pt max_pt]
-	%         1 &lt; dist_alpha &lt; 6, 0 &lt; beta &lt;= 2
+	%         1 < dist_alpha < 6, 0 < beta <= 2
 	param=[dist_alpha beta MIN_PAUSE MAX_PAUSE];
 
 	%visit point list
@@ -143,14 +150,14 @@ tmp = rand(num_user,1);
 crnt_xy = prev_xy +  [tmp tmp].* (next_xy-prev_xy);
 visitedPt = zeros(num_user, num_all_pausePt);
 
-disp('... Initialization done');
+display('... Initialization done');
 
 %%
 % ------------------------------------------------------------------------
 % Trace generation
 % ------------------------------------------------------------------------
 
-disp('... Trace generation starts');
+display('... Trace generation starts');
 
 t_start = 1;
 idx_ = 1;
@@ -183,4 +190,4 @@ end
 
 fclose(fid_mob);
 
-disp('... Trace generation done');
+display('... Trace generation done');

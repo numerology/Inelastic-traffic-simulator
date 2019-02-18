@@ -1,11 +1,11 @@
-function clist = crand(n, k)
+function clist = crand(n, k);
 % function clist = crand(n, k);
 % choose k from n in a uniform manner
 
 clist=[];
 
-if k > n
-    disp('... k should not be larger than n');
+if k>n
+    display('... k should not be larger than n');
     return;
 end
 
@@ -24,4 +24,4 @@ while 1
     if length(clist)==k
         break;
     end
-end			
+end

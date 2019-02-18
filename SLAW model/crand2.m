@@ -19,8 +19,8 @@ clist=[];
 l_cluster=length(cluster(:,1));
 
 % there should be one random selection
-if k > l_cluster
-    disp('... k should not be larger than the number of clusters');
+if k>l_cluster
+    display('... k should not be larger than the number of clusters');
     return;
 end
 
@@ -64,4 +64,4 @@ if c_mode == 2
     clist = replacecluster(cluster, clist);
 end
 
-% keyboard; 			
+% keyboard; 

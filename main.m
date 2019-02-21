@@ -1,8 +1,8 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 30; % U/B (use only integers...)
-simulationTime = 2000; % seconds
+sat = 5; % U/B (use only integers...)
+simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
 interdistance = 1000;
@@ -47,9 +47,9 @@ parfor t=1:simulationTime
     ppm.increment();
 end
 %% Plot performance seen by some randomly selected users.
-i1=605;
-i2=1103;
-i3=1699;
+i1=1;
+i2=111;
+i3=222;
 figure();
 subplot(3,1,1)
 %plot(rates_SS(i1,:),'-.b')
@@ -79,6 +79,15 @@ fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
 fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
 fprintf('mean rate of SS = %f\n', mean(mean(rates_SS)));
+%% Some CDF of BTD plot
+figure()
+cdfplot(reshape(log(btd_SCG), [1, size(btd_SCG, 1) * size(btd_SCG, 2)]));
+hold on
+cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+title('CDF of BTD')
+xlabel('Log of BTD')
+ylim([0.9 1]);
+legend('SCG', 'SCPF');
 %% 
 pl=0;
 if pl==1

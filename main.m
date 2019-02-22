@@ -36,7 +36,7 @@ parfor t=1:simulationTime
     rates_fSCPF(:,t)=r;
     fractions_fSCPF(:,t)=f;
     btd_fSCPF(:,t)=b;
-    [r,f,b] = flexibleGPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    [r,f,b] = GPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
@@ -46,7 +46,7 @@ parfor t=1:simulationTime
     btd_SCPF(:,t)=b;
     [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCG(:,t)=r;
-    fractions_SCGF(:,t)=f;
+    fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
     ppm.increment();
 end

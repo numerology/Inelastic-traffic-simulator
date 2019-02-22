@@ -23,9 +23,14 @@ disp('Starting mobility...')
 UE_height=1.5;rad=500; % m
 Mspeed=1.5; %m/s
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
-                            UE_height,rad,Mspeed, 0, OpSettings);
-trace(:,:,1)=uX;
-trace(:,:,2)=uY;
+                            UE_height,rad,Mspeed, 1, OpSettings);
+trace(OpSettings.ops_belongs == 1,:,1)=uX(OpSettings.ops_belongs == 1,:);
+trace(OpSettings.ops_belongs == 1,:,2)=uY(OpSettings.ops_belongs == 1,:);
+
+[uXHet, uYHet, uZHet] = RWP_border_circle(NetSettings.users, NetSettings.simulation_time,...
+                            UE_height, rad, Mspeed, 0, OpSettings);
+trace(OpSettings.ops_belongs ~= 1,:,1)=uXHet(OpSettings.ops_belongs ~= 1,:);
+trace(OpSettings.ops_belongs ~= 1,:,2)=uYHet(OpSettings.ops_belongs ~= 1,:);
 disp('done mobility.')
 
 %% Mobility heterogeneous

@@ -32,11 +32,11 @@ parfor t=1:simulationTime
 %     rates_SS(:,t)=r;
 %     fractions_SS(:,t)=f;
 %     btd_SS(:,t)=b;
-    [r,f,b] = newSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
-    rates_newSCG(:,t)=r;
-    fractions_newSCG(:,t)=f;
-    btd_newSCG(:,t)=b;
-    [r,f,b] = flexibleGPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    [r,f,b] = flexibleSCPF(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_fSCPF(:,t)=r;
+    fractions_fSCPF(:,t)=f;
+    btd_fSCPF(:,t)=b;
+    [r,f,b] = GPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
@@ -46,7 +46,7 @@ parfor t=1:simulationTime
     btd_SCPF(:,t)=b;
     [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCG(:,t)=r;
-    fractions_SCGF(:,t)=f;
+    fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
     ppm.increment();
 end
@@ -56,41 +56,42 @@ i2=113;
 i3=243;
 figure();
 subplot(3,1,1)
-plot(btd_newSCG(i1,:),'-.b')
+plot(btd_fSCPF(i1,:),'-.b')
 hold on
 plot(btd_GPS(i1,:),'--r')
 plot(btd_SCPF(i1,:),'-g')
 plot(btd_SCG(i1,:),':k')
 subplot(3,1,2)
-plot(btd_newSCG(i2,:),'-.b')
+plot(btd_fSCPF(i2,:),'-.b')
 hold on
 plot(btd_GPS(i2,:),'--r')
 plot(btd_SCPF(i2,:),'-g')
 plot(btd_SCG(i2,:),':k')
 subplot(3,1,3)
-plot(btd_newSCG(i3,:),'-.b')
+plot(btd_fSCPF(i3,:),'-.b')
 hold on
 plot(btd_GPS(i3,:),'--r')
 plot(btd_SCPF(i3,:),'-g')
 plot(btd_SCG(i3,:),':k')
-legend('New SCG', 'GPS','SCPF','SCG')
+legend('SCG', 'GPS','SCPF','SCG')
 %% Take a look at the mean performance
 fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
 fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
 fprintf('mean btd of GPS = %f\n', mean(mean(btd_GPS)));
-fprintf('mean btd of new SCPF = %f\n', mean(mean(btd_newSCG)));
+fprintf('mean btd of new SCPF = %f\n', mean(mean(btd_fSCPF)));
 fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
 fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
-fprintf('mean rate of new SCPF = %f\n', mean(mean(rates_newSCG)));
-%%
+fprintf('mean rate of Flexible SCPF = %f\n', mean(mean(rates_fSCPF)));
+%% Some CDF of BTD plot
 figure()
+cdfplot(reshape(log(btd_SCG), [1, size(btd_SCG, 1) * size(btd_SCG, 2)]));
 hold on
-cdfplot(reshape(btd_SCPF, [1 size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(btd_newSCG, [1 size(btd_newSCG, 1) * size(btd_newSCG, 2)]));
-legend('SCPF', 'SCG');
-xlabel('BTD');
-title('CDF');
+cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+title('CDF of BTD')
+xlabel('Log of BTD')
+ylim([0.9 1]);
+legend('SCG', 'SCPF');
 %% 
 pl=0;
 if pl==1

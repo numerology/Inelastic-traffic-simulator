@@ -10,7 +10,7 @@ function [GenSpots] = makeSlawMap(size_max, n_wp, v_Hurst)
 % Input arguments
 %	size_max: a side of a right square simulation area
 %	n_wp: number of the waypoints
-%	v_Hurst: Hurst parameter (0.5 < v_Hurst < 1)
+%	v_Hurst: Hurst parameter (0.5 &lt; v_Hurst &lt; 1)
 %
 % Based on the method of Kyunghan Lee (KAIST), Seongik Hong (NCSU),
 %	Seong Joon Kim (NCSU), Injong Rhee (NCSU) and Song Chong (KAIST),
@@ -124,11 +124,11 @@ if Display == 1
 		end
 	end
 
-% 	figure;
-% 	plot(LocX+Xmin, LocY+Ymin, 'b.');
-% 	xlabel('X (m)');
-% 	ylabel('Y (m)');
-% 	title('Distribution of Generated Spots');
+	figure;
+	plot(LocX+Xmin, LocY+Ymin, 'b.');
+	xlabel('X (m)');
+	ylabel('Y (m)');
+	title('Distribution of Generated Spots');
 
 	GenSpots(:,1) = LocX;
 	GenSpots(:,2) = LocY;

@@ -42,7 +42,7 @@ for i=1:num_cluster
     aaa = l_idx/ratio_pausept;
     % add, 2008/8/17
     % when every cluster size is less than 1, 
-    % newly selected points are zero <- to prevent this condition
+    % newly selected points are zero &lt;- to prevent this condition
     if aaa < 1
         ttt = crand(l_idx,1);
         vplist(end+1:end+length(ttt),:)=pausept(idx(ttt),:);
@@ -75,4 +75,4 @@ end
 % plot(clist(:,1),clist(:,2),'rx');
 % plot(vplist(:,1),vplist(:,2),'gs');
 % legend('Total pause points', 'Selected cluster', 'Selected visit point');
-% keyboard;
+% keyboard;			

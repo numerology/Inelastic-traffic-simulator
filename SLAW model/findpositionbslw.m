@@ -12,7 +12,7 @@ function [prev_start_time, pause_start_time, pause_end_time, ...
 % Written by Seongik Hong, NCSU (8/7/2008)
 %
 % param = [alpha_ beta min_pt max_pt]
-% 1 < alpha_ < 6, 1 < beta <= 2
+% 1 &lt; alpha_ &lt; 6, 1 &lt; beta &lt;= 2
 %
 
 %%
@@ -24,7 +24,7 @@ if mob_type ~= SLAW
 end
 
 % visit point set
-ocList = o_clist(find(o_clist>0));
+ocList = o_clist(find(o_clist > 0));
 l_ocList = length(ocList);
 vPoints=visitLocations(1:lVisitLocations,:);
 isVisited(1,lVisitLocations+1:end)=1;
@@ -47,24 +47,24 @@ while (t > pause_end_time)
     % calculate distance to every pause point from prev_xy
     dist_ = sqrt((vPoints(:,1)-prev_xy(1)).^2 + (vPoints(:,2)-prev_xy(2)).^2);
     % index for other points except the previous point
-    idx = find(dist_>0);
+    idx = find(dist_ > 0);
     % set prev_xy point as 'visited'
     % 'visited' = 1
     isVisited(find(dist_==0))=1;
     switch mob_subtype
-        case 1, % destructive case
+        case 1 % destructive case
             idx = find(isVisited==0);
             % all visit points are visited
             if isempty(idx)
                 % Set round trip time
-                rttimes=t;
+                rttimes = t;
                 %
-                [new_clist new_vPoints] = ...
+                [new_clist, new_vPoints] = ...
                     crpausept2(pausePt, cluster, ratio_cluster, ratio_pausept, ocList, 3);
                 vPoints=[];
                 vPoints=new_vPoints;
                 if isempty(vPoints)
-                    display('Error: No visit point selected');
+                    disp('Error: No visit point selected');
                 end
                 isVisited(1:length(new_vPoints))=0;
                 
@@ -76,11 +76,11 @@ while (t > pause_end_time)
                 %hold on;
 
                 dist_ = sqrt((vPoints(:,1)-prev_xy(1)).^2 + (vPoints(:,2)-prev_xy(2)).^2);
-                idx = find(dist_>0);
+                idx = find(dist_ > 0);
                 
                 isChangedPoints = 1;
             end
-        otherwise, % do nothing
+        otherwise % do nothing
     end
     dist_= dist_(idx);
 	if isempty(dist_)
@@ -88,7 +88,7 @@ while (t > pause_end_time)
 	end
     weight_ = cumsum(1./(dist_).^alpha_); 
     weight_ = weight_/weight_(end);
-    next_xy = vPoints(idx(min(find(weight_>rand(1,1)))),:);
+    next_xy = vPoints(idx(min(find(weight_ > rand(1,1)))),:);
 
     flights = [flights norm(next_xy - prev_xy)];
     pauses = [pauses p_time];
@@ -104,7 +104,7 @@ if t >= prev_start_time && t < pause_start_time
     %direction = phase( (next_xy(1) - prev_xy(1)) + (next_xy(2) - prev_xy(2))*i);
     %v = norm(next_xy - prev_xy)/(pause_start_time - prev_start_time);
 %8/7
-%elseif t >= pause_start_time && t < pause_end_time
+%elseif t &gt;= pause_start_time &amp;&amp; t &lt; pause_end_time
 elseif t >= pause_start_time && t <= pause_end_time
     crnt_xy = next_xy; 
     rem_length = 0;
@@ -126,4 +126,4 @@ end
 t_deg = (t - prev_start_time);
 crnt_xy = prev_xy + (next_xy - prev_xy) * t_deg / t_gap;
 rem_length = norm(next_xy - crnt_xy);
-%------------------------------------------------------------
+%------------------------------------------------------------			

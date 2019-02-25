@@ -84,7 +84,7 @@ fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
 fprintf('mean rate of Flexible SCPF = %f\n', mean(mean(rates_fSCPF)));
 %% Take a look at the mean performance for a specific slice
-sliceIdx = 1;
+sliceIdx = 2;
 disp('For slice 1')
 fprintf('mean btd of SCPF = %f\n', ...
     mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));

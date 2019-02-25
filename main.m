@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 5; % U/B (use only integers...)
+sat = 10; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -12,7 +12,7 @@ model = {'RWP'};
 shareVec = [1/3 1/3 1/3]; % shares
 gcp;
 
-%% Mobility and Lik estimation
+%% Mobility and Link estimation
 [NetSettings, OpSettings, capacityPerUser, bs, userPos, bsPos] = ...
     networkconfiguration(simulationTime, ...
     warmup, bsN, sectors,...
@@ -83,6 +83,25 @@ fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
 fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
 fprintf('mean rate of Flexible SCPF = %f\n', mean(mean(rates_fSCPF)));
+%% Take a look at the mean performance for a specific slice
+sliceIdx = 1;
+disp('For slice 1')
+fprintf('mean btd of SCPF = %f\n', ...
+    mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean btd of SCG = %f\n', ...
+    mean(mean(btd_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean btd of GPS = %f\n', ...
+    mean(mean(btd_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean btd of new SCPF = %f\n', ...
+    mean(mean(btd_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean rate of SCPF = %f\n', ...
+    mean(mean(rates_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean rate of SCG = %f\n', ...
+    mean(mean(rates_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean rate of GPS = %f\n', ...
+    mean(mean(rates_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
+fprintf('mean rate of Flexible SCPF = %f\n', ...
+    mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
 %% Some CDF of BTD plot
 figure()
 cdfplot(reshape(log(btd_SCG), [1, size(btd_SCG, 1) * size(btd_SCG, 2)]));

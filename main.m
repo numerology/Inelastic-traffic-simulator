@@ -44,7 +44,7 @@ parfor t=1:simulationTime
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
-    [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    [r,f,b] = capacityawareSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCG(:,t)=r;
     fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
@@ -84,7 +84,7 @@ fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
 fprintf('mean rate of Flexible SCPF = %f\n', mean(mean(rates_fSCPF)));
 %% Take a look at the mean performance for a specific slice
-sliceIdx = 2;
+sliceIdx = 1;
 disp('For slice 1')
 fprintf('mean btd of SCPF = %f\n', ...
     mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));

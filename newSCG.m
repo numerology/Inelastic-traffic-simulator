@@ -52,8 +52,6 @@ for v = 1:V
 end
 
 for v = 1:V
-    bidPerUser(opBelongs == v) = shareVec(v) * nBasestations...
-        / sum(opBelongs == v);
     % Update remaining budget per BS.
     for b = 1:nBasestations
         remainingPerBs(b) = 1 - sum(bidPerUser(opBelongs ~= v & bs == b));

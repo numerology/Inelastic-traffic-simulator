@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 10; % U/B (use only integers...)
+sat = 30; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -23,7 +23,8 @@ gcp;
 % the sum of share across BSs <= share * |B| per slice.
 loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
 % use a similar heuristic to allocate shares
-OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
+% OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
+OpSettings.shareDist = 1/3 * ones(o, bsN * sectors);
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime
@@ -32,10 +33,10 @@ parfor t=1:simulationTime
 %     rates_SS(:,t)=r;
 %     fractions_SS(:,t)=f;
 %     btd_SS(:,t)=b;
-    [r,f,b] = flexibleSCPF(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
-    rates_fSCPF(:,t)=r;
-    fractions_fSCPF(:,t)=f;
-    btd_fSCPF(:,t)=b;
+%     [r,f,b] = flexibleSCPF(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+%     rates_fSCPF(:,t)=r;
+%     fractions_fSCPF(:,t)=f;
+%     btd_fSCPF(:,t)=b;
     [r,f,b] = GPS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
@@ -45,6 +46,14 @@ parfor t=1:simulationTime
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
     [r,f,b] = capacityawareSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_capSCG(:,t)=r;
+    fractions_capSCG(:,t)=f;
+    btd_capSCG(:,t)=b;
+    [r,f,b] = newSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_newSCG(:,t)=r;
+    fractions_newSCG(:,t)=f;
+    btd_newSCG(:,t)=b;
+    [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_SCG(:,t)=r;
     fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
@@ -60,57 +69,67 @@ plot(btd_fSCPF(i1,:),'-.b')
 hold on
 plot(btd_GPS(i1,:),'--r')
 plot(btd_SCPF(i1,:),'-g')
-plot(btd_SCG(i1,:),':k')
+plot(btd_capSCG(i1,:),':k')
 subplot(3,1,2)
 plot(btd_fSCPF(i2,:),'-.b')
 hold on
 plot(btd_GPS(i2,:),'--r')
 plot(btd_SCPF(i2,:),'-g')
-plot(btd_SCG(i2,:),':k')
+plot(btd_capSCG(i2,:),':k')
 subplot(3,1,3)
 plot(btd_fSCPF(i3,:),'-.b')
 hold on
 plot(btd_GPS(i3,:),'--r')
 plot(btd_SCPF(i3,:),'-g')
-plot(btd_SCG(i3,:),':k')
+plot(btd_capSCG(i3,:),':k')
 legend('SCG', 'GPS','SCPF','SCG')
 %% Take a look at the mean performance
-fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
-fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
+disp('Overall')
 fprintf('mean btd of GPS = %f\n', mean(mean(btd_GPS)));
-fprintf('mean btd of new SCPF = %f\n', mean(mean(btd_fSCPF)));
-fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
-fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
-fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
-fprintf('mean rate of Flexible SCPF = %f\n', mean(mean(rates_fSCPF)));
+fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
+fprintf('mean btd of cap SCG = %f\n', mean(mean(btd_capSCG)));
+fprintf('mean btd of new SCG = %f\n', mean(mean(btd_newSCG)));
+fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
+% fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
+% fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
+% fprintf('mean rate of cap SCG = %f\n', mean(mean(rates_capSCG)));
+% fprintf('mean rate of new SCG = %f\n', mean(mean(rates_newSCG)));
+% fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
 %% Take a look at the mean performance for a specific slice
-sliceIdx = 1;
-disp('For slice 1')
-fprintf('mean btd of SCPF = %f\n', ...
-    mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean btd of SCG = %f\n', ...
-    mean(mean(btd_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean btd of GPS = %f\n', ...
-    mean(mean(btd_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean btd of new SCPF = %f\n', ...
-    mean(mean(btd_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean rate of SCPF = %f\n', ...
-    mean(mean(rates_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean rate of SCG = %f\n', ...
-    mean(mean(rates_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean rate of GPS = %f\n', ...
-    mean(mean(rates_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
-fprintf('mean rate of Flexible SCPF = %f\n', ...
-    mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+for sliceIdx = 1:o
+    fprintf('For slice %i\n', sliceIdx);
+    fprintf('mean btd of GPS = %f\n', ...
+        mean(mean(btd_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of SCPF = %f\n', ...
+        mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of capacity aware SCG = %f\n', ...
+        mean(mean(btd_capSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of new SCG = %f\n', ...
+        mean(mean(btd_newSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of SCG = %f\n', ...
+        mean(mean(btd_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+end
+
+% fprintf('mean rate of SCPF = %f\n', ...
+%     mean(mean(rates_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
+% fprintf('mean rate of SCG = %f\n', ...
+%     mean(mean(rates_capSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+% fprintf('mean rate of GPS = %f\n', ...
+%     mean(mean(rates_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
+% fprintf('mean rate of Flexible SCPF = %f\n', ...
+%     mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
 %% Some CDF of BTD plot
 figure()
-cdfplot(reshape(log(btd_SCG), [1, size(btd_SCG, 1) * size(btd_SCG, 2)]));
+cdfplot(reshape(log(btd_GPS), [1, size(btd_capSCG, 1) * size(btd_capSCG, 2)]));
 hold on
 cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(btd_capSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(btd_newSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(btd_SCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of BTD')
 xlabel('Log of BTD')
-ylim([0.9 1]);
-legend('SCG', 'SCPF');
+%ylim([0.9 1]);
+legend('GPS', 'SCPF', 'capacity aware SCG', 'new SCG', 'SCG');
 %% 
 pl=0;
 if pl==1

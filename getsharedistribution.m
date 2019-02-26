@@ -12,8 +12,8 @@ nBS = size(loadDist, 2);
 % First need to renormalize per BS
 normalizedLoadDist = loadDist;
 for b = 1:nBS
-    normalizedLoadDist(:, b) = normalizedLoadDist(:, b) ...
-        / sum(normalizedLoadDist(:, b));
+    normalizedLoadDist(:, b) = (shareVec .* normalizedLoadDist(:, b)) ...
+        / sum(shareVec .* normalizedLoadDist(:, b));
 end
 shareDist = normalizedLoadDist;
 %{

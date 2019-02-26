@@ -30,7 +30,7 @@ trace(OpSettings.ops_belongs == 1,:,2)=uY(OpSettings.ops_belongs == 1,:);
 
 % [uXHet, uYHet, uZHet] = RWP_border_circle(NetSettings.users, NetSettings.simulation_time,...
 %                             UE_height, rad, Mspeed, 0, OpSettings);
-S = load('trace-nwp100');
+S = load('C100U1710');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 trace(OpSettings.ops_belongs ~= 1,:,1) = ...
     hetTrace(OpSettings.ops_belongs ~= 1,:,1);

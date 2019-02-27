@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 30; % U/B (use only integers...)
+sat = 5; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -57,6 +57,10 @@ parfor t=1:simulationTime
     rates_SCG(:,t)=r;
     fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
+    [r,f,b] = newsharing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_new(:,t)=r;
+    fractions_new(:,t)=f;
+    btd_new(:,t)=b;
     ppm.increment();
 end
 %% Plot performance seen by some randomly selected users.
@@ -90,6 +94,7 @@ fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
 fprintf('mean btd of cap SCG = %f\n', mean(mean(btd_capSCG)));
 fprintf('mean btd of new SCG = %f\n', mean(mean(btd_newSCG)));
 fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
+fprintf('mean btd of new sharing = %f\n', mean(mean(btd_new)));
 % fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
 % fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
 % fprintf('mean rate of cap SCG = %f\n', mean(mean(rates_capSCG)));
@@ -108,6 +113,8 @@ for sliceIdx = 1:o
         mean(mean(btd_newSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
     fprintf('mean btd of SCG = %f\n', ...
         mean(mean(btd_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of new sharing = %f\n', ...
+        mean(mean(btd_new(OpSettings.ops_belongs == sliceIdx, :, :))));
 end
 
 % fprintf('mean rate of SCPF = %f\n', ...
@@ -126,10 +133,11 @@ cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 cdfplot(reshape(log(btd_capSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 cdfplot(reshape(log(btd_newSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 cdfplot(reshape(log(btd_SCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(btd_new), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of BTD')
 xlabel('Log of BTD')
 %ylim([0.9 1]);
-legend('GPS', 'SCPF', 'capacity aware SCG', 'new SCG', 'SCG');
+legend('GPS', 'SCPF', 'capacity aware SCG', 'new SCG', 'SCG', 'new sharing');
 %% 
 pl=0;
 if pl==1

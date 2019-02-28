@@ -57,7 +57,8 @@ parfor t=1:simulationTime
     rates_SCG(:,t)=r;
     fractions_SCG(:,t)=f;
     btd_SCG(:,t)=b;
-    [r,f,b] = newsharing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    [r,f,b] = newsharing(NetSettings, OpSettings, [capacityPerUser(:,t)]',...
+        [bs(:,t)]', 10);
     rates_new(:,t)=r;
     fractions_new(:,t)=f;
     btd_new(:,t)=b;

@@ -12,9 +12,14 @@ opBelongs = OpSettings.ops_belongs;
 nUsers = NetSettings.users;
 baseline = nUsers / nBasestations;
 
+% (TODO: a bit of different, each slice should has its own GPS factor, instead 
+% of a common one.)
 for u = 1:NetSettings.users
-    nb = sum(bs == bs(u));
-    GPSFactor = exp(nb / baseline - 1) / (exp(nb / baseline - 1) + 1);
+    nvb = sum(bs == bs(u) & opBelongs == opBelongs(u));
+    GPSFactor = 1;
+    if (nvb > OpSettings.s_o(OpSettings.ops_belongs(u)) * baseline)
+        GPSFactor = 0;
+    end
     ops = unique(OpSettings.ops_belongs([bs==bs(u)])); % active tenants
     currentO = OpSettings.ops_belongs(u); % tenant of user u
     qd = ([OpSettings.ops_belongs == currentO] .* [bs==bs(u)]);

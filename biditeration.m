@@ -27,11 +27,11 @@ for slice = 1:nSlices
     end
 end
 
-ceilBucket = max(shareDist(v, :), aob);
+ceilBucket = max(shareDist(v, :), 1 - aob);
 perBsBid = inversewaterfill(shareVec(v), ceilBucket);
 outputBid = cBid;
 for b = 1:nBasestations
-    outputBid(bs == b & opBelongs == v) = perBsBid(b) / sum(find(bs == b ...
+    outputBid(bs == b & opBelongs == v) = perBsBid(b) / sum((bs == b ...
         & opBelongs == v));
 end
 

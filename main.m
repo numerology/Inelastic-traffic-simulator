@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 5; % U/B (use only integers...)
+sat = 1; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -24,7 +24,8 @@ gcp;
 loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
 % use a similar heuristic to allocate shares
 % OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
-OpSettings.shareDist = 1/3 * ones(o, bsN * sectors);
+OpSettings.shareDist = loadDist;
+OpSettings.s_o = sum(OpSettings.shareDist, 2);
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
 parfor t=1:simulationTime

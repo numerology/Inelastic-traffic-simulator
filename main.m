@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 1; % U/B (use only integers...)
+sat = 15; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -25,10 +25,10 @@ loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
 % use a similar heuristic to allocate shares
 % OpSettings.shareDist = getsharedistribution(OpSettings, loadDist);
 OpSettings.shareDist = loadDist;
-OpSettings.s_o = sum(OpSettings.shareDist, 2);
+OpSettings.s_o = [sum(OpSettings.shareDist, 2)]';
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
-parfor t=1:simulationTime
+for t=1:simulationTime
    
 %     [r,f,b] = Static_Slicing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
 %     rates_SS(:,t)=r;
@@ -46,23 +46,10 @@ parfor t=1:simulationTime
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
-    [r,f,b] = capacityawareSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
-    rates_capSCG(:,t)=r;
-    fractions_capSCG(:,t)=f;
-    btd_capSCG(:,t)=b;
-    [r,f,b] = newSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
-    rates_newSCG(:,t)=r;
-    fractions_newSCG(:,t)=f;
-    btd_newSCG(:,t)=b;
-    [r,f,b] = SCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
-    rates_SCG(:,t)=r;
-    fractions_SCG(:,t)=f;
-    btd_SCG(:,t)=b;
-    [r,f,b] = newsharing(NetSettings, OpSettings, [capacityPerUser(:,t)]',...
-        [bs(:,t)]', 10);
-    rates_new(:,t)=r;
-    fractions_new(:,t)=f;
-    btd_new(:,t)=b;
+    [r,f,b] = biddingSCG(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_biddingSCG(:,t)=r;
+    fractions_biddingSCG(:,t)=f;
+    btd_biddingSCG(:,t)=b;
     ppm.increment();
 end
 %% Plot performance seen by some randomly selected users.
@@ -93,15 +80,7 @@ legend('SCG', 'GPS','SCPF','SCG')
 disp('Overall')
 fprintf('mean btd of GPS = %f\n', mean(mean(btd_GPS)));
 fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
-fprintf('mean btd of cap SCG = %f\n', mean(mean(btd_capSCG)));
-fprintf('mean btd of new SCG = %f\n', mean(mean(btd_newSCG)));
-fprintf('mean btd of SCG = %f\n', mean(mean(btd_SCG)));
-fprintf('mean btd of new sharing = %f\n', mean(mean(btd_new)));
-% fprintf('mean rate of GPS = %f\n', mean(mean(rates_GPS)));
-% fprintf('mean rate of SCPF = %f\n', mean(mean(rates_SCPF)));
-% fprintf('mean rate of cap SCG = %f\n', mean(mean(rates_capSCG)));
-% fprintf('mean rate of new SCG = %f\n', mean(mean(rates_newSCG)));
-% fprintf('mean rate of SCG = %f\n', mean(mean(rates_SCG)));
+fprintf('mean btd of bidding SCG = %f\n', mean(mean(btd_biddingSCG)));
 %% Take a look at the mean performance for a specific slice
 for sliceIdx = 1:o
     fprintf('For slice %i\n', sliceIdx);
@@ -109,14 +88,8 @@ for sliceIdx = 1:o
         mean(mean(btd_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
     fprintf('mean btd of SCPF = %f\n', ...
         mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
-    fprintf('mean btd of capacity aware SCG = %f\n', ...
-        mean(mean(btd_capSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
-    fprintf('mean btd of new SCG = %f\n', ...
-        mean(mean(btd_newSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
-    fprintf('mean btd of SCG = %f\n', ...
-        mean(mean(btd_SCG(OpSettings.ops_belongs == sliceIdx, :, :))));
-    fprintf('mean btd of new sharing = %f\n', ...
-        mean(mean(btd_new(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of bidding SCG = %f\n', ...
+        mean(mean(btd_biddingSCG(OpSettings.ops_belongs == sliceIdx, :, :))));
 end
 
 % fprintf('mean rate of SCPF = %f\n', ...

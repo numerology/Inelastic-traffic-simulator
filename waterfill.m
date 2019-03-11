@@ -1,4 +1,4 @@
-function [p, level] = waterfill(x,P)
+function [p, level] = waterfill(x, P, weight)
 % the water-filling process
 % x: a vector with each component representing noise power
 % P: total power
@@ -28,13 +28,14 @@ function [p, level] = waterfill(x,P)
 % Reference:
 %   T. M. Cover and J. A. Thomas, "Elements of Information Theory", John Wiley & Sons, 2003.
 L = length(x);  % number of channels
-y = sort(x);     % sort the interference power in increasing order
-[a b]= size(y);
-if (a>b)
-    y = y' ;  % convert x and y to row vector if necessary
+xPerWeight = x ./ weight;
+y = sort(xPerWeight);    % sort the interference power in increasing order
+[a, b]= size(y);
+if (a > b)
+    y = y';  % convert x and y to row vector if necessary
     x = x';
 end
-delta = [0 cumsum((y(2:L)-y(1:(L-1))).*(1:L-1))];
+delta = [0 cumsum((y(2:L)-y(1:(L-1))) .* (1:L-1))];
 l = sum(P>=delta); % no. of channel with positive power
 level = y(l)+(P- delta(l))/l;   % water level
 p = (abs(level-x)+level-x)/2;   % the result of pouring water.

@@ -28,7 +28,7 @@ for slice = 1:nSlices
 end
 
 userDist = zeros(1, nBasestations);
-for b = 1:nBasestations;
+for b = 1:nBasestations
     userDist(b) = sum(opBelongs == v & bs == b);
 end
 

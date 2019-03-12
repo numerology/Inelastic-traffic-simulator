@@ -1,6 +1,6 @@
 % Generate clustered user movement trace
 %% Users settings
-dist_alpha=6;
+dist_alpha=2;
 % need to support at most 19 * 30
 num_user = 570 * 3;
 size_max = 1000;
@@ -16,7 +16,7 @@ for seed=1:1
             trace=SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, v_Hurst, ...
                 simulationTime / 60, B_range, beta, MIN_PAUSE, MAX_PAUSE);
 
-            filename = strcat('./Heterogeneity/C',num2str(n_wp),'nUser',num2str(num_user));
+            filename = strcat('./Heterogeneity/alpha',num2str(dist_alpha),'nUser',num2str(num_user));
             save(filename)
         end
     end

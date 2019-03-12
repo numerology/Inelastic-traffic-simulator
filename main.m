@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
 o = 3; % num of slices
-sat = 15; % U/B (use only integers...)
+sat = 3; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -28,7 +28,7 @@ OpSettings.shareDist = loadDist;
 OpSettings.s_o = [sum(OpSettings.shareDist, 2)]';
 %% Compute fractions
 ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
-for t=1:simulationTime
+parfor t=1:simulationTime
    
 %     [r,f,b] = Static_Slicing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
 %     rates_SS(:,t)=r;
@@ -102,17 +102,14 @@ end
 %     mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
 %% Some CDF of BTD plot
 figure()
-cdfplot(reshape(log(btd_GPS), [1, size(btd_capSCG, 1) * size(btd_capSCG, 2)]));
+cdfplot(reshape(log(btd_GPS), [1, size(btd_GPS, 1) * size(btd_GPS, 2)]));
 hold on
 cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(log(btd_capSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(log(btd_newSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(log(btd_SCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(log(btd_new), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(btd_biddingSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of BTD')
 xlabel('Log of BTD')
 %ylim([0.9 1]);
-legend('GPS', 'SCPF', 'capacity aware SCG', 'new SCG', 'SCG', 'new sharing');
+legend('GPS', 'SCPF', 'bidding SCG');
 %% 
 pl=0;
 if pl==1

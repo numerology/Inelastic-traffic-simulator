@@ -25,18 +25,16 @@ Mspeed=1.5; %m/s
 
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                             UE_height,rad,Mspeed, 1, OpSettings);
-trace(OpSettings.ops_belongs == 1,:,1)=uX(OpSettings.ops_belongs == 1,:);
-trace(OpSettings.ops_belongs == 1,:,2)=uY(OpSettings.ops_belongs == 1,:);
-
-% [uXHet, uYHet, uZHet] = RWP_border_circle(NetSettings.users, NetSettings.simulation_time,...
-%                             UE_height, rad, Mspeed, 0, OpSettings);
-S = load('C100U1710');
-hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
-trace(OpSettings.ops_belongs ~= 1,:,1) = ...
-    hetTrace(OpSettings.ops_belongs ~= 1,:,1);
-trace(OpSettings.ops_belongs ~= 1,:,2) = ...
-    hetTrace(OpSettings.ops_belongs ~= 1,:,2);
-disp('done mobility.')
+trace(:,:,1)=uX;
+trace(:,:,2)=uY;
+                        
+% S = load('C100U1710');
+% hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
+% trace(OpSettings.ops_belongs ~= 1,:,1) = ...
+%     hetTrace(OpSettings.ops_belongs ~= 1,:,1);
+% trace(OpSettings.ops_belongs ~= 1,:,2) = ...
+%     hetTrace(OpSettings.ops_belongs ~= 1,:,2);
+% disp('done mobility.')
 
 %% Mobility heterogeneous
 % disp('Starting mobility...')

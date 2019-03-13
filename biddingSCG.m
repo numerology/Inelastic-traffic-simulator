@@ -22,12 +22,12 @@ shareDist = OpSettings.shareDist;
 
 % First do two rounds of bidding. Initialize by either all zero or equal
 % weight.
-% cBid = zeros(1, nUsers); % all zero.
+cBid = zeros(1, nUsers); % all zero.
 
 % equal weight.
-for v = 1:nSlices
-    cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
-end
+% for v = 1:nSlices
+%     cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
+% end
 
 % First round
 for v = 1:nSlices
@@ -40,7 +40,7 @@ for v = 1:nSlices
 end
 
 for u = 1:nUsers
-    userFraction(u) = cBid(u) / sum(cBid(bs == bs(u)));
+    userFraction(u) = cBid(u); % / sum(cBid(bs == bs(u)));
 end
 
 userRates = userFraction .* capacityPerUser;

@@ -22,7 +22,7 @@ for t = 1:simulationTime
         end
     end
 end
-loadDist = loadDist / simulationTime;
+loadDist = loadDist;
 for b = 1:nBS
     loadDist(:, b) = loadDist(:, b) / sum(loadDist(:, b));
 end

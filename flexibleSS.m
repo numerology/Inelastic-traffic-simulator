@@ -1,6 +1,6 @@
-function [userRates, userFraction, btd] = flexibleGPS(netSettings, ...
+function [userRates, userFraction, btd] = flexibleSS(netSettings, ...
     opSettings, capacityPerUser, bs)
-% GPS resource allocation enabling specifying share allocation per base
+% Static slicing resource allocation enabling specifying share allocation per base
 % station.
 % Params:
 %   netSettings, opSettings: simulation setup. opSettings.shareDist is the
@@ -11,18 +11,11 @@ function [userRates, userFraction, btd] = flexibleGPS(netSettings, ...
 
 for u=1:netSettings.users
     b = bs(u);
-    ops = unique(opSettings.ops_belongs([bs==bs(u)]));
     slice = opSettings.ops_belongs(u);
     % number of users on the same slice at the same bs.
     qd = sum(opSettings.ops_belongs == slice & bs == bs(u)); 
-    if(opSettings.shareDist(slice, b) == 0)
-        b
-        slice
-    end
     assert(opSettings.shareDist(slice, b) > 0, 'zero allocation for active user');
-    userFraction(u) = opSettings.shareDist(slice, b)/...
-                                sum(opSettings.shareDist(ops, b))/...
-                                sum(qd);
+    userFraction(u) = opSettings.shareDist(slice, b) / sum(qd);
 end
 userRates = userFraction .* capacityPerUser;
 btd = 1 ./ userRates;

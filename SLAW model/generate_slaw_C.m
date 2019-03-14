@@ -1,6 +1,6 @@
 % Generate clustered user movement trace
 %% Users settings
-dist_alpha=2;
+dist_alpha=4;
 % need to support at most 19 * 30
 num_user = 570 * 3;
 size_max = 1000;

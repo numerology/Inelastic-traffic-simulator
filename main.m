@@ -1,6 +1,6 @@
 clc, close all, clear all
 %% Settings
-o = 4; % num of slices
+o = 3; % num of slices
 sat = 10; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
@@ -9,7 +9,7 @@ interdistance = 1000;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'}; 
-shareVec = 1/4 * ones(1,4); % shares
+shareVec = 1/3 * ones(1,3); % shares
 gcp;
 
 %% Mobility and Link estimation
@@ -107,9 +107,9 @@ hold on
 cdfplot(reshape((btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 cdfplot(reshape((btd_biddingSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of BTD')
-xlabel('Log of BTD')
+xlabel('BTD')
 %ylim([0.9 1]);
-legend('GPS', 'SCPF', 'bidding SCG');
+legend('SS', 'SCPF', 'bidding SCG');
 %% 
 pl=0;
 if pl==1

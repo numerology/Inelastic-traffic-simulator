@@ -1,4 +1,4 @@
-function [userRates, userFraction, btd] = biddingSCG(NetSettings, ...
+function [userRates, userFraction, btd] = MAXWEIGHT(NetSettings, ...
     OpSettings, capacityPerUser, bs)
 %biddingSCG SCG by first bidding for two rounds for user weights
 % Params:
@@ -19,6 +19,7 @@ opBelongs = OpSettings.ops_belongs;
 remainingPerBs = ones(1, nBasestations);
 bidPerUser = zeros(size(OpSettings.w_i));
 shareDist = OpSettings.shareDist;
+nRounds = 5; % Number of bidding rounds needed. Empirical value. Subject to nSlices. 
 
 % First do two rounds of bidding. Initialize by either all zero or equal
 % weight.
@@ -29,19 +30,10 @@ cBid = zeros(1, nUsers); % all zero.
 %     cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
 % end
 
-% First round
-for v = 1:nSlices
-    cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
-end
-
-% Second round
-for v = 1:nSlices
-    cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
-end
-
-% Third round
-for v = 1:nSlices
-    cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
+for round = 1:nRounds
+    for v = 1:nSlices
+        cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
+    end
 end
 
 % Checking if there is base station overcommitted

@@ -39,6 +39,20 @@ for v = 1:nSlices
     cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
 end
 
+% Third round
+for v = 1:nSlices
+    cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
+end
+
+% Checking if there is base station overcommitted
+for b = 1:nBasestations
+    if(sum(cBid(bs == b)) > 1.0001)
+        b
+        sum(cBid(bs == b))
+    end
+    assert(sum(cBid(bs == b)) <= 1.0001, 'Base station is overbooked.');
+end
+
 for u = 1:nUsers
     userFraction(u) = cBid(u); % / sum(cBid(bs == bs(u)));
 end

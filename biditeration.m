@@ -23,7 +23,7 @@ for slice = 1:nSlices
         continue
     end
     for b = 1:nBasestations
-        aob = aob + sum(cBid(opBelongs == slice & bs == b));
+        aob(b) = aob(b) + sum(cBid(opBelongs == slice & bs == b));
     end
 end
 

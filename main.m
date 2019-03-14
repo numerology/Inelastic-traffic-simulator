@@ -1,7 +1,7 @@
 clc, close all, clear all
 %% Settings
-o = 3; % num of slices
-sat = 3; % U/B (use only integers...)
+o = 4; % num of slices
+sat = 10; % U/B (use only integers...)
 simulationTime = 5000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
@@ -9,7 +9,7 @@ interdistance = 1000;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'}; 
-shareVec = [1/3 1/3 1/3]; % shares
+shareVec = 1/4 * ones(1,4); % shares
 gcp;
 
 %% Mobility and Link estimation
@@ -102,10 +102,10 @@ end
 %     mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
 %% Some CDF of BTD plot
 figure()
-cdfplot(reshape(log(btd_GPS), [1, size(btd_GPS, 1) * size(btd_GPS, 2)]));
+cdfplot(reshape((btd_GPS), [1, size(btd_GPS, 1) * size(btd_GPS, 2)]));
 hold on
-cdfplot(reshape(log(btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape(log(btd_biddingSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape((btd_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape((btd_biddingSCG), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of BTD')
 xlabel('Log of BTD')
 %ylim([0.9 1]);

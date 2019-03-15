@@ -1,5 +1,6 @@
-function [rates,fractions,btd]=GPS(NetSettings, OpSettings,c_u,bs)
-for u=1:NetSettings.users
+function [rates,fractions,btd]= GPS (NetSettings, OpSettings, c_u, bs)
+nUsers = length(bs);
+for u = 1 : nUsers
     ops=unique(OpSettings.ops_belongs([bs==bs(u)]));
     o_in=OpSettings.ops_belongs(u);
     qd=([OpSettings.ops_belongs==o_in].*[bs==bs(u)]);

@@ -16,8 +16,6 @@ nSlices = size(OpSettings.s_o, 2);
 nBasestations = NetSettings.bsNS;
 shareVec = OpSettings.s_o;
 opBelongs = OpSettings.ops_belongs;
-remainingPerBs = ones(1, nBasestations);
-bidPerUser = zeros(size(OpSettings.w_i));
 shareDist = OpSettings.shareDist;
 nRounds = 10; % Number of bidding rounds needed. Empirical value. Subject to nSlices. 
 

@@ -1,15 +1,15 @@
 clc, close all, clear all
 %% Settings
-o = 4; % num of slices
-sat = 3; % U/B (use only integers...)
-simulationTime = 5000; % seconds
+o = 3; % num of slices
+sat = 1; % U/B (use only integers...)
+simulationTime = 1000; % seconds
 phiLevels = 1;alphas = [1, 1, 1];
 warmup = 0;bsN = 19;sectors = 3;
 interdistance = 1000;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'}; 
-shareVec = 1/4 * ones(1,4); % shares
+shareVec = 1/3 * ones(1,3); % shares
 gcp;
 
 %% Mobility and Link estimation
@@ -38,7 +38,7 @@ parfor t=1:simulationTime
 %     rates_fSCPF(:,t)=r;
 %     fractions_fSCPF(:,t)=f;
 %     btd_fSCPF(:,t)=b;
-    [r,f,b] = flexibleSS(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    [r,f,b] = Static_Slicing(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_GPS(:,t)=r;
     fractions_GPS(:,t)=f;
     btd_GPS(:,t)=b;
@@ -46,6 +46,10 @@ parfor t=1:simulationTime
     rates_SCPF(:,t)=r;
     fractions_SCPF(:,t)=f;
     btd_SCPF(:,t)=b;
+    [r,f,b] = DIFFPRICE(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
+    rates_DIFFPRICE(:,t)=r;
+    fractions_DIFFPRICE(:,t)=f;
+    btd_DIFFPRICE(:,t)=b;
     [r,f,b] = MAXWEIGHT(NetSettings, OpSettings, [capacityPerUser(:,t)]', [bs(:,t)]');
     rates_MAXWEIGHT(:,t)=r;
     fractions_MAXWEIGHT(:,t)=f;
@@ -80,7 +84,8 @@ legend('SCG', 'GPS','SCPF','SCG')
 disp('Overall')
 fprintf('mean btd of GPS = %f\n', mean(mean(btd_GPS)));
 fprintf('mean btd of SCPF = %f\n', mean(mean(btd_SCPF)));
-fprintf('mean btd of bidding SCG = %f\n', mean(mean(btd_MAXWEIGHT)));
+fprintf('mean btd of DIFFPRICE = %f\n', mean(mean(btd_DIFFPRICE)));
+fprintf('mean btd of MAXWEIGHT = %f\n', mean(mean(btd_MAXWEIGHT)));
 %% Take a look at the mean performance for a specific slice
 for sliceIdx = 1:o
     fprintf('For slice %i\n', sliceIdx);
@@ -88,8 +93,10 @@ for sliceIdx = 1:o
         mean(mean(btd_GPS(OpSettings.ops_belongs == sliceIdx, :, :))));
     fprintf('mean btd of SCPF = %f\n', ...
         mean(mean(btd_SCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
-    fprintf('mean btd of bidding SCG = %f\n', ...
+    fprintf('mean btd of MAXWEIGHT = %f\n', ...
         mean(mean(btd_MAXWEIGHT(OpSettings.ops_belongs == sliceIdx, :, :))));
+    fprintf('mean btd of DIFFPRICE = %f\n', ...
+        mean(mean(btd_DIFFPRICE(OpSettings.ops_belongs == sliceIdx, :, :))));
 end
 
 % fprintf('mean rate of SCPF = %f\n', ...
@@ -102,14 +109,15 @@ end
 %     mean(mean(rates_fSCPF(OpSettings.ops_belongs == sliceIdx, :, :))));
 %% Some CDF of BTD plot
 figure()
-cdfplot(reshape((rates_GPS), [1, size(btd_GPS, 1) * size(btd_GPS, 2)]));
+cdfplot(reshape(log(rates_GPS), [1, size(btd_GPS, 1) * size(btd_GPS, 2)]));
 hold on
-cdfplot(reshape((rates_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
-cdfplot(reshape((rates_MAXWEIGHT), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(rates_SCPF), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(rates_MAXWEIGHT), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
+cdfplot(reshape(log(rates_DIFFPRICE), [1, size(btd_SCPF, 1) * size(btd_SCPF, 2)]));
 title('CDF of log BTD')
 xlabel('BTD')
 %ylim([0.9 1]);
-legend('SS', 'SCPF', 'bidding SCG');
+legend('SS', 'SCPF', 'MAXWEIGHT', 'DIFFPRICE');
 %% 
 pl=0;
 if pl==1

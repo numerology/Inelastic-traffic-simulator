@@ -19,7 +19,7 @@ opBelongs = OpSettings.ops_belongs;
 remainingPerBs = ones(1, nBasestations);
 bidPerUser = zeros(size(OpSettings.w_i));
 shareDist = OpSettings.shareDist;
-nRounds = 5; % Number of bidding rounds needed. Empirical value. Subject to nSlices. 
+nRounds = 10; % Number of bidding rounds needed. Empirical value. Subject to nSlices. 
 
 % First do two rounds of bidding. Initialize by either all zero or equal
 % weight.
@@ -42,7 +42,7 @@ for b = 1:nBasestations
         b
         sum(cBid(bs == b))
     end
-    assert(sum(cBid(bs == b)) <= 1.0001, 'Base station is overbooked.');
+    %assert(sum(cBid(bs == b)) <= 1.0001, 'Base station is overbooked.');
 end
 
 for u = 1:nUsers

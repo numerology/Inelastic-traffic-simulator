@@ -44,7 +44,7 @@ for b = 1:nBasestations
 end
 
 for u = 1:nUsers
-    userFraction(u) = cBid(u); % / sum(cBid(bs == bs(u)));
+    userFraction(u) = cBid(u) / sum(cBid(bs == bs(u)));
 end
 
 userRates = userFraction .* capacityPerUser;

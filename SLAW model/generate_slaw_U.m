@@ -1,8 +1,8 @@
 %% Users settings
 dist_alpha=0.5;
-num_user=320;
-size_max=500;
-Thours=0.002;
+num_user= 190 * 3;
+size_max=1000;
+Thours = 5000 / 60;
 B_range=1;
 beta=1;
 MIN_PAUSE=1;
@@ -13,7 +13,7 @@ for seed=1:1
 %% Generate user movements
 trace=SLAW_MATLAB(dist_alpha, num_user, size_max, n_wp, v_Hurst,Thours, B_range, beta, MIN_PAUSE, MAX_PAUSE);
 
-filename = strcat('./Hetereogeneity/U',num2str(n_wp),'seed',num2str(seed));
+filename = strcat('./Heterogeneity/U',num2str(n_wp),'seed',num2str(seed));
 save(filename)
         end
     end

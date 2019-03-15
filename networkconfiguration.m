@@ -28,7 +28,7 @@ Mspeed=1.5; %m/s
 % trace(OpSettings.ops_belongs <= 1,:,1) = uX(OpSettings.ops_belongs <= 1, :);
 % trace(OpSettings.ops_belongs <= 1,:,2) = uY(OpSettings.ops_belongs <= 1, :);
                         
-S = load('C100U1710');
+S = load('U100seed1');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 nHetTraceUser = size(hetTrace, 1);
 

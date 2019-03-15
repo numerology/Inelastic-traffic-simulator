@@ -4,10 +4,10 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 10;
+simulationTime = 1000;
 shareVec = 1/3 * ones(1, 3);
-rhoVec = 3 * ones(3, 2); % mean load distribution, V x B
-shareDist = 1/3 * ones(3, 2);
+rhoVec = 100 * [0.5 0.25 0.25;0.25 0.5 0.25;0.25 0.25 0.5]'; % mean load distribution, V x B
+shareDist = [0.5 0.25 0.25;0.25 0.5 0.25;0.25 0.25 0.5]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
 capacity = 1; % Uniform fixed capacity
@@ -48,10 +48,14 @@ ratesGPS = cell(1, simulationTime);
 ratesMW = cell(1, simulationTime);
 ratesSCPF = cell(1, simulationTime);
 ppm = ParforProgMon('Simulating resource sharing : ', simulationTime);
-for t = 1:simulationTime
+parfor t = 1:simulationTime
     % Adjust profile for backward compatibility.
     tmpNetSettings = netSettings;
     tmpNetSettings.users = length(bsAssociation{t});
+    if (tmpNetSettings.users == 0)
+        ppm.increment();
+        continue;
+    end
     tmpOpSettings = opSettings;
     tmpOpSettings.ops_belongs = opBelongs{t};
     tmpOpSettings.shareDist = shareDist;
@@ -80,11 +84,16 @@ flatRateSCPF = horzcat(ratesSCPF{:});
 
 figure()
 hold on
-cdfplot(flatRateGPS);
-cdfplot(flatRateMW);
-cdfplot(flatRateSCPF);
-title('CDF of rate')
-xlabel('Rate')
+cdfplot(1./flatRateGPS);
+cdfplot(1./flatRateMW);
+cdfplot(1./flatRateSCPF);
+title('CDF of BTD')
+xlabel('BTD')
 legend('GPS', 'MAXWEIGHT', 'SCPF');
+
+disp('Overall')
+fprintf('mean btd of GPS = %f\n', mean(1 ./ flatRateGPS));
+fprintf('mean btd of SCPF = %f\n', mean(1 ./ flatRateSCPF));
+fprintf('mean btd of MAXWEIGHT = %f\n', mean(1 ./ flatRateMW));
 
 

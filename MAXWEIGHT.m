@@ -17,7 +17,7 @@ nBasestations = NetSettings.bsNS;
 shareVec = OpSettings.s_o;
 opBelongs = OpSettings.ops_belongs;
 shareDist = OpSettings.shareDist;
-nRounds = 10; % Number of bidding rounds needed. Empirical value. Subject to nSlices. 
+eps = 1e-5; % threshold for convergence. 
 
 % First do two rounds of bidding. Initialize by either all zero or equal
 % weight.
@@ -27,8 +27,9 @@ cBid = zeros(1, nUsers); % all zero.
 % for v = 1:nSlices
 %     cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
 % end
-
-for round = 1:nRounds
+prevBid = cBid - 1;
+while(norm(prevBid - cBid) > eps)
+    prevBid = cBid;
     for v = 1:nSlices
         cBid = biditeration(cBid, v, shareDist, shareVec, opBelongs, bs);
     end

@@ -12,12 +12,12 @@ function [userRates, userFraction, btd] = MAXWEIGHT_BR(netSettings, ...
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
 %   btd: perceived user BTDs.
 
-nUsers = NetSettings.users;
-nSlices = size(OpSettings.s_o, 2);
-nBasestations = NetSettings.bsNS;
-shareVec = OpSettings.s_o;
-opBelongs = OpSettings.ops_belongs;
-shareDist = OpSettings.shareDist;
+nUsers = netSettings.users;
+nSlices = size(opSettings.s_o, 2);
+nBasestations = netSettings.bsNS;
+shareVec = opSettings.s_o;
+opBelongs = opSettings.ops_belongs;
+shareDist = opSettings.shareDist;
 eps = 1e-5; % threshold for convergence. 
 
 % Initialize by equal weight. Log utility is not defined at zero.
@@ -26,13 +26,17 @@ for v = 1:nSlices
     cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
 end
 prevBid = cBid + 1;
+cnt = 0;
 while(norm(prevBid - cBid) > eps)
     prevBid = cBid;
     for v = 1:nSlices
         cBid = bestresponseiteration(cBid, v, shareDist, shareVec, ...
             opBelongs, bs, capacityPerUser);
     end
+    cnt = cnt + 1;
+    %assert(cnt < 1000, 'bidding does not converge.'); % Cant wait forever.
 end
+fprintf('Required %f rounds to converge.\n', cnt);
 
 % Checking if there is base station overcommitted
 for b = 1:nBasestations

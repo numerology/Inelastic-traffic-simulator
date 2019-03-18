@@ -1,4 +1,5 @@
-function [util] = bidtoutility(cBid, v, bs, opBelongs, capacityPerUser, shareVec)
+function [util] = bidtoutility(cBid, v, bs, opBelongs, capacityPerUser, ...
+    shareVec)
 % bidtoutility Given current bid per user, return the utility function of tenant
 % v.
 % Params:

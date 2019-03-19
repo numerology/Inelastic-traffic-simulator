@@ -117,6 +117,20 @@ xlabel('BTD')
 legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
     'MAXWEIGHT - BR', 'SCPF');
 
+figure()
+hold on
+cdfplot(flatRateStaticSS);
+cdfplot(flatRateSS);
+cdfplot(flatRateStaticGPS);
+cdfplot(flatRateGPS);
+cdfplot(flatRateMW);
+cdfplot(flatRateMWBR);
+cdfplot(flatRateSCPF);
+title('CDF of rate')
+xlabel('rate')
+legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
+    'MAXWEIGHT - BR', 'SCPF');
+
 disp('Overall')
 fprintf('mean btd of static SS = %f\n', mean(1 ./ flatRateStaticSS));
 fprintf('mean btd of SS = %f\n', mean(1 ./ flatRateSS));

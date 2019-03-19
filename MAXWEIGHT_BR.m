@@ -34,6 +34,9 @@ while(norm(prevBid - cBid) > eps)
             opBelongs, bs, capacityPerUser);
     end
     cnt = cnt + 1;
+    if (cnt == 100)
+        break;
+    end
     %assert(cnt < 1000, 'bidding does not converge.'); % Cant wait forever.
 end
 fprintf('Required %f rounds to converge.\n', cnt);

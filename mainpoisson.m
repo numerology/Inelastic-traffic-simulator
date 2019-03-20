@@ -4,9 +4,9 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 200;
+simulationTime = 2000;
 shareVec = 1/3 * ones(1, 3);
-rhoVec = 10 * [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]'; % mean load distribution, V x B
+rhoVec = 3 * [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]'; % mean load distribution, V x B
 shareDist = [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
@@ -109,13 +109,15 @@ cdfplot(1./flatRateStaticSS);
 cdfplot(1./flatRateSS);
 cdfplot(1./flatRateStaticGPS);
 cdfplot(1./flatRateGPS);
-cdfplot(1./flatRateMW);
+handleMWPA = cdfplot(1./flatRateMW);
 cdfplot(1./flatRateMWBR);
-cdfplot(1./flatRateSCPF);
+handleSCPF = cdfplot(1./flatRateSCPF);
 title('CDF of BTD')
 xlabel('BTD')
 legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
     'MAXWEIGHT - BR', 'SCPF');
+set(handleSCPF, 'Marker', 'o');
+set(handleMWPA, 'Marker', '+');
 
 figure()
 hold on
@@ -123,13 +125,15 @@ cdfplot(flatRateStaticSS);
 cdfplot(flatRateSS);
 cdfplot(flatRateStaticGPS);
 cdfplot(flatRateGPS);
-cdfplot(flatRateMW);
+handleMWPA = cdfplot(flatRateMW);
 cdfplot(flatRateMWBR);
-cdfplot(flatRateSCPF);
+handleSCPF = cdfplot(flatRateSCPF);
 title('CDF of rate')
 xlabel('rate')
 legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
     'MAXWEIGHT - BR', 'SCPF');
+set(handleSCPF, 'Marker', 'o');
+set(handleMWPA, 'Marker', '+');
 
 disp('Overall')
 fprintf('mean btd of static SS = %f\n', mean(1 ./ flatRateStaticSS));
@@ -166,12 +170,14 @@ cdfplot(utilStaticSS);
 cdfplot(utilSS);
 cdfplot(utilStaticGPS);
 cdfplot(utilGPS);
-cdfplot(utilSCPF);
-cdfplot(utilMW);
+handleSCPF = cdfplot(utilSCPF);
+handleMWPA = cdfplot(utilMW);
 cdfplot(utilMWBR);
 title('CDF of utility function');
 xlabel('utility')
 legend('static SS', 'SS', 'static GPS', 'GPS', 'SCPF', 'MAXWEIGHT-PA', ...
     'MAXWEIGHT-BR');
+set(handleSCPF, 'Marker', 'o');
+set(handleMWPA, 'Marker', '+');
     
 

@@ -15,6 +15,11 @@ nBasestations = size(shareDist, 2);
 nUsers = length(opBelongs);
 nUsersOfV = sum(opBelongs == v);
 
+if (nUsersOfV == 0) % in case there is no user on slice v.
+    nextBid = cBid;
+    return
+end
+
 aob = zeros(1, nBasestations);
 for slice = 1:nSlices
     if (slice == v)

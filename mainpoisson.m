@@ -4,10 +4,10 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 2000;
-shareVec = 1/3 * ones(1, 3);
-rhoVec = 3 * [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]'; % mean load distribution, V x B
-shareDist = [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]';
+simulationTime = 500;
+shareVec = [0.4 0.3 0.3];
+rhoVec = 3 * [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]'; % mean load distribution, V x B
+shareDist = [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
 capacity = 1; % Uniform fixed capacity
@@ -24,7 +24,7 @@ opBelongs = cell(1, simulationTime);
 capacities = cell(1, simulationTime);
 ppm = ParforProgMon('Generating network profile: ', simulationTime);
 parfor t = 1:simulationTime
-    loadDist = poissrnd(rhoVec);
+    loadDist = 3 * poissrnd(rhoVec);
     nUsers = sum(sum(loadDist));
     bsVec = zeros(1, nUsers);
     opVec = zeros(1, nUsers);
@@ -143,6 +143,63 @@ fprintf('mean btd of GPS = %f\n', mean(1 ./ flatRateGPS));
 fprintf('mean btd of SCPF = %f\n', mean(1 ./ flatRateSCPF));
 fprintf('mean btd of MAXWEIGHT-PA = %f\n', mean(1 ./ flatRateMW));
 fprintf('mean btd of MAXWEIGHT-BR = %f\n', mean(1 ./ flatRateMWBR));
+%% Slice specific analysis
+ratesStaticGPS1 = filterbyslice(ratesStaticGPS, opBelongs, 1);
+ratesGPS1 = filterbyslice(ratesGPS, opBelongs, 1);
+ratesStaticSS1 = filterbyslice(ratesStaticSS, opBelongs, 1);
+ratesSS1 = filterbyslice(ratesSS, opBelongs, 1);
+ratesMW1 = filterbyslice(ratesMW, opBelongs, 1);
+ratesMWBR1 = filterbyslice(ratesMWBR, opBelongs, 1);
+ratesSCPF1 = filterbyslice(ratesSCPF, opBelongs, 1);
+
+flatRateStaticGPS1 = horzcat(ratesStaticGPS1{:});
+flatRateGPS1 = horzcat(ratesGPS1{:});
+flatRateStaticSS1 = horzcat(ratesStaticSS1{:});
+flatRateSS1 = horzcat(ratesSS1{:});
+flatRateMW1 = horzcat(ratesMW1{:});
+flatRateMWBR1 = horzcat(ratesMWBR1{:});
+flatRateSCPF1 = horzcat(ratesSCPF1{:});
+
+figure()
+hold on
+cdfplot(1./flatRateStaticSS1);
+cdfplot(1./flatRateSS1);
+cdfplot(1./flatRateStaticGPS1);
+cdfplot(1./flatRateGPS1);
+handleMWPA = cdfplot(1./flatRateMW1);
+cdfplot(1./flatRateMWBR1);
+handleSCPF = cdfplot(1./flatRateSCPF1);
+title('CDF of BTD of slice 1')
+xlabel('BTD')
+legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
+    'MAXWEIGHT - BR', 'SCPF');
+set(handleSCPF, 'Marker', 'o');
+set(handleMWPA, 'Marker', '+');
+
+figure()
+hold on
+cdfplot(flatRateStaticSS1);
+cdfplot(flatRateSS1);
+cdfplot(flatRateStaticGPS1);
+cdfplot(flatRateGPS1);
+handleMWPA = cdfplot(flatRateMW1);
+cdfplot(flatRateMWBR1);
+handleSCPF = cdfplot(flatRateSCPF1);
+title('CDF of rate of slice 1')
+xlabel('rate')
+legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
+    'MAXWEIGHT - BR', 'SCPF');
+set(handleSCPF, 'Marker', 'o');
+set(handleMWPA, 'Marker', '+');
+
+disp('For a typical user on slice 1')
+fprintf('mean btd of static SS = %f\n', mean(1 ./ flatRateStaticSS1));
+fprintf('mean btd of SS = %f\n', mean(1 ./ flatRateSS1));
+fprintf('mean btd of static GPS = %f\n', mean(1 ./ flatRateStaticGPS1));
+fprintf('mean btd of GPS = %f\n', mean(1 ./ flatRateGPS1));
+fprintf('mean btd of SCPF = %f\n', mean(1 ./ flatRateSCPF1));
+fprintf('mean btd of MAXWEIGHT-PA = %f\n', mean(1 ./ flatRateMW1));
+fprintf('mean btd of MAXWEIGHT-BR = %f\n', mean(1 ./ flatRateMWBR1));
 
 %% Exam the utility function
 

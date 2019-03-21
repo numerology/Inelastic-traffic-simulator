@@ -94,7 +94,8 @@ for i = 1:length(varFactors)
     flatRateSCPF = horzcat(ratesSCPF{:});
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
     btdGainVecMWPA(i) = mean(1./flatRateGPS) / mean(1./flatRateMW);
-    btdGainVecMWBR(i) = mean(1./flatRateGPS) / mean(1./flatRateMWBR);
+    btdGainVecMWBR(i) = mean(1./flatRateGPS) ...
+        / mean(1./flatRateMWBR(flatRateMWBR > 1e-5));
     utilGPS = zeros(1, simulationTime);
     utilSCPF = zeros(1, simulationTime);
     utilMW = zeros(1, simulationTime);
@@ -116,12 +117,14 @@ figure(1);
 hold on
 plot(varFactors, btdGainVecSCPF, 'b+-');
 plot(varFactors, btdGainVecMWPA, 'ro-');
+plot(varFactors, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
-legend('SCPF', 'MAXWEIGHT-practical approach');
+legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 
 figure(2);
 hold on
 plot(varFactors, utilityGainVecSCPF, 'b+-');
 plot(varFactors, utilityGainVecMWPA, 'ro-');
+plot(varFactors, utilityGainVecMWBR, 'kx-');
 title('Utility gain over GPS vs. variance factor');
-legend('SCPF', 'MAXWEIGHT-practical approach');
+legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');

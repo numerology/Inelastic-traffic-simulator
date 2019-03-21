@@ -34,21 +34,21 @@ while(norm(prevBid - cBid) > eps)
             opBelongs, bs, capacityPerUser);
     end
     cnt = cnt + 1;
-    if (cnt == 100)
+    if (cnt == 5)
         break;
     end
     %assert(cnt < 1000, 'bidding does not converge.'); % Cant wait forever.
 end
-fprintf('Required %f rounds to converge.\n', cnt);
+% fprintf('Required %f rounds to converge.\n', cnt);
 
 % Checking if there is base station overcommitted
-for b = 1:nBasestations
-    if(sum(cBid(bs == b)) > 1.0001)
-        b
-        sum(cBid(bs == b))
-    end
-    assert(sum(cBid(bs == b)) <= 1.0001, 'Base station is overbooked.');
-end
+% for b = 1:nBasestations
+%     if(sum(cBid(bs == b)) > 1.0001)
+%         b;
+%         sum(cBid(bs == b));
+%     end
+%     assert(sum(cBid(bs == b)) <= 1.0001, 'Base station is overbooked.');
+% end
 
 for u = 1:nUsers
     userFraction(u) = cBid(u) / sum(cBid(bs == bs(u)));

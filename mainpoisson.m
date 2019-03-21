@@ -5,9 +5,9 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 simulationTime = 500;
-shareVec = [0.4 0.3 0.3];
-rhoVec = 3 * [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]'; % mean load distribution, V x B
-shareDist = [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]';
+shareVec = [1 1 1];
+rhoVec = 3 * [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]'; % mean load distribution, V x B
+shareDist = [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
 capacity = 1; % Uniform fixed capacity

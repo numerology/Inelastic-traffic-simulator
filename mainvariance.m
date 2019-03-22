@@ -5,12 +5,14 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 2000;
-shareVec = [1 1 1];
-relativeRhoVec = 3 * [0.8 0.1 0.1;
-    0.1 0.8 0.1;
-    0.1 0.1 0.8]'; % mean load distribution, V x B
-shareDist = [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]';
+simulationTime = 20000;
+shareVec = 3 * [0.4 0.3 0.3];
+relativeRhoVec = 3 * [0.4 0.1 0.5;
+    0.4 0.3 0.3;
+    0.4 0.5 0.1]'; % mean load distribution, V x B
+shareDist = [0.4 0.1 0.5;
+    0.4 0.3 0.3;
+    0.4 0.5 0.1]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
 

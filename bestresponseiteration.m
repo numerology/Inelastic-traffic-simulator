@@ -68,7 +68,7 @@ for user = 1:nUsers
     end
 end
 
-options = optimoptions('fmincon','Display','off');
+options = optimoptions('fmincon','Display','off','Algorithm','sqp');
 initial = 1e-3 * ones(size(cBid))';
 nextBid = fmincon(@(x) -bidtoutility(x, v, bs, opBelongs, capacityPerUser, ...
     shareVec), initial, constMat, constVec, eqMat, eqVec, zeros(size(initial)), [], [], ...

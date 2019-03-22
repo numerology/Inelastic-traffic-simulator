@@ -18,7 +18,7 @@ nBasestations = netSettings.bsNS;
 shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 shareDist = opSettings.shareDist;
-eps = 1e-5; % threshold for convergence. 
+eps = 1e-6; % threshold for convergence. 
 
 % Initialize by equal weight. Log utility is not defined at zero.
 cBid = zeros(1, nUsers);
@@ -34,7 +34,7 @@ while(norm(prevBid - cBid) > eps)
             opBelongs, bs, capacityPerUser);
     end
     cnt = cnt + 1;
-    if (cnt == 5)
+    if (cnt == 20)
         break;
     end
     %assert(cnt < 1000, 'bidding does not converge.'); % Cant wait forever.

@@ -5,14 +5,14 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 2000;
-shareVec = 3 * [0.4 0.3 0.3];
-relativeRhoVec = 6 * [0.4 0.1 0.5;
-    0.4 0.3 0.3;
-    0.4 0.5 0.1]'; % mean load distribution, V x B
-shareDist = [0.4 0.1 0.5;
-    0.4 0.3 0.3;
-    0.4 0.5 0.1]';
+simulationTime = 5000;
+shareVec = 3 * [1/3 1/3 1/3];
+relativeRhoVec = 6 * [0.8 0.1 0.1;
+    0.1 0.8 0.1;
+    0.1 0.1 0.8]'; % mean load distribution, V x B
+shareDist = [0.8 0.1 0.1;
+    0.1 0.8 0.1;
+    0.1 0.1 0.8]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
 
@@ -111,7 +111,7 @@ for i = 1:length(varFactors)
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
     btdGainVecMWPA(i) = mean(1./flatRateGPS) / mean(1./flatRateMW);
     btdGainVecMWBR(i) = mean(1./flatRateGPS) ...
-        / mean(1./flatRateMWBR(flatRateMWBR > 1e-4));
+        / nanmean(1./flatRateMWBR(flatRateMWBR > 1e-4));
     utilGPS = zeros(1, simulationTime);
     utilSCPF = zeros(1, simulationTime);
     utilMW = zeros(1, simulationTime);
@@ -189,24 +189,25 @@ meanUtilMWBR1 = zeros(1, length(varFactors));
 meanUtilSCPF1 = zeros(1, length(varFactors));
 
 for i = 1:length(varFactors)
-    slice1 = horzcat(opBelongs{i, :});
+    slice1 = (horzcat(opBelongs{i, :}) == 1);
     flatRateGPS1 = horzcat(ratesGPS{i, :});
     flatRateGPS1 = flatRateGPS1(slice1);
     flatRateMW1 = horzcat(ratesMW{i, :});
     flatRateMW1 = flatRateMW1(slice1);
     flatRateMWBR1 = horzcat(ratesMWBR{i, :});
     flatRateMWBR1 = flatRateMWBR1(slice1);
+    flatRateMWBR1 = flatRateMWBR1(flatRateMWBR1 > 1e-4);
     flatRateSCPF1 = horzcat(ratesSCPF{i, :});
     flatRateSCPF1 = flatRateSCPF1(slice1);
     meanBtdGPS1(i) = mean(1./flatRateGPS1);
     meanBtdMW1(i) = mean(1./flatRateMW1);
-    meanBtdMWBR1(i) = mean(1./flatRateMWBR1);
+    meanBtdMWBR1(i) = nanmean(1./flatRateMWBR1);
     meanBtdSCPF1(i) = mean(1./flatRateSCPF1);
     
     btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
     btdGainVecMWPA1(i) = mean(1./flatRateGPS1) / mean(1./flatRateMW1);
     btdGainVecMWBR1(i) = mean(1./flatRateGPS1) ...
-        / mean(1./flatRateMWBR1(flatRateMWBR1 > 1e-6));
+        / nanmean(1./flatRateMWBR1);
     
     % (TODO:) Make utility computation per slice.
 %     utilGPS1 = zeros(1, simulationTime);

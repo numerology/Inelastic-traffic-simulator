@@ -4,10 +4,10 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 500;
-shareVec = [1 1 1];
-rhoVec = 3 * [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]'; % mean load distribution, V x B
-shareDist = [0.8 0.1 0.1;0.1 0.8 0.1;0.1 0.1 0.8]';
+simulationTime = 5000;
+shareVec = 3 * [0.4 0.3 0.3];
+rhoVec = 6 * [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]'; % mean load distribution, V x B
+shareDist = [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
 capacity = 1; % Uniform fixed capacity
@@ -24,7 +24,7 @@ opBelongs = cell(1, simulationTime);
 capacities = cell(1, simulationTime);
 ppm = ParforProgMon('Generating network profile: ', simulationTime);
 parfor t = 1:simulationTime
-    loadDist = 3 * poissrnd(rhoVec);
+    loadDist = 1 * poissrnd(rhoVec);
     nUsers = sum(sum(loadDist));
     bsVec = zeros(1, nUsers);
     opVec = zeros(1, nUsers);
@@ -73,15 +73,15 @@ parfor t = 1:simulationTime
     [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
         bsAssociation{t});
     ratesGPS{t} = r;
-    [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-        bsAssociation{t});
-    ratesStaticGPS{t} = r;
-    [r, f, b] = flexibleSS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-        bsAssociation{t});
-    ratesSS{t} = r;
-    [r, f, b] = Static_Slicing(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-        bsAssociation{t});
-    ratesStaticSS{t} = r;
+%     [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+%         bsAssociation{t});
+%     ratesStaticGPS{t} = r;
+%     [r, f, b] = flexibleSS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+%         bsAssociation{t});
+%     ratesSS{t} = r;
+%     [r, f, b] = Static_Slicing(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+%         bsAssociation{t});
+%     ratesStaticSS{t} = r;
     [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...
         bsAssociation{t});
     ratesSCPF{t} = r;
@@ -95,45 +95,45 @@ parfor t = 1:simulationTime
 end
 
 %% Some analysis
-flatRateStaticGPS = horzcat(ratesStaticGPS{:});
+%flatRateStaticGPS = horzcat(ratesStaticGPS{:});
 flatRateGPS = horzcat(ratesGPS{:});
-flatRateStaticSS = horzcat(ratesStaticSS{:});
-flatRateSS = horzcat(ratesSS{:});
+%flatRateStaticSS = horzcat(ratesStaticSS{:});
+%flatRateSS = horzcat(ratesSS{:});
 flatRateMW = horzcat(ratesMW{:});
 flatRateMWBR = horzcat(ratesMWBR{:});
 flatRateSCPF = horzcat(ratesSCPF{:});
 
 figure()
 hold on
-cdfplot(1./flatRateStaticSS);
-cdfplot(1./flatRateSS);
-cdfplot(1./flatRateStaticGPS);
+%cdfplot(1./flatRateStaticSS);
+%cdfplot(1./flatRateSS);
+%cdfplot(1./flatRateStaticGPS);
 cdfplot(1./flatRateGPS);
 handleMWPA = cdfplot(1./flatRateMW);
 cdfplot(1./flatRateMWBR);
 handleSCPF = cdfplot(1./flatRateSCPF);
 title('CDF of BTD')
 xlabel('BTD')
-legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
+legend('GPS', 'MAXWEIGHT - PA', ...
     'MAXWEIGHT - BR', 'SCPF');
-set(handleSCPF, 'Marker', 'o');
-set(handleMWPA, 'Marker', '+');
+%set(handleSCPF, 'Marker', 'o');
+%set(handleMWPA, 'Marker', '+');
 
 figure()
 hold on
-cdfplot(flatRateStaticSS);
-cdfplot(flatRateSS);
-cdfplot(flatRateStaticGPS);
+% cdfplot(flatRateStaticSS);
+% cdfplot(flatRateSS);
+% cdfplot(flatRateStaticGPS);
 cdfplot(flatRateGPS);
 handleMWPA = cdfplot(flatRateMW);
 cdfplot(flatRateMWBR);
 handleSCPF = cdfplot(flatRateSCPF);
 title('CDF of rate')
 xlabel('rate')
-legend('Static SS', 'SS', 'Static GPS', 'GPS', 'MAXWEIGHT - PA', ...
+legend('GPS', 'MAXWEIGHT - PA',...
     'MAXWEIGHT - BR', 'SCPF');
-set(handleSCPF, 'Marker', 'o');
-set(handleMWPA, 'Marker', '+');
+%set(handleSCPF, 'Marker', 'o');
+%set(handleMWPA, 'Marker', '+');
 
 disp('Overall')
 fprintf('mean btd of static SS = %f\n', mean(1 ./ flatRateStaticSS));

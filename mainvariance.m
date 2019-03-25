@@ -6,13 +6,13 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 simulationTime = 5000;
-shareVec = 3 * [1/3 1/3 1/3];
-relativeRhoVec = 6 * [0.8 0.1 0.1;
-    0.1 0.8 0.1;
-    0.1 0.1 0.8]'; % mean load distribution, V x B
-shareDist = [0.8 0.1 0.1;
-    0.1 0.8 0.1;
-    0.1 0.1 0.8]';
+shareVec = 3 * [0.4 0.3 0.3];
+relativeRhoVec = 6 * [0.4 0.1 0.5;
+    0.4 0.3 0.3;
+    0.4 0.5 0.1]'; % mean load distribution, V x B
+shareDist = [0.4 0.1 0.5;
+    0.4 0.3 0.3;
+    0.4 0.5 0.1]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
 
@@ -51,7 +51,7 @@ for i = 1:length(varFactors)
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     ppm = ParforProgMon('Generating network profile: ', simulationTime);
-    for t = 1:simulationTime
+    parfor t = 1:simulationTime
         loadDist = varFactor * poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);
@@ -97,6 +97,9 @@ for i = 1:length(varFactors)
         [r, f, b] = MAXWEIGHT_BR(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesMWBR{i, t} = r;
+        if (sum(ratesMWBR{i, t} < 1e-4) > 0)
+            ratesMWBR{i, t}(ratesMWBR{i, t} < 1e-4) = nan;
+        end
         ppm.increment();
     end
     flatRateGPS = horzcat(ratesGPS{i, :});
@@ -105,7 +108,7 @@ for i = 1:length(varFactors)
     flatRateSCPF = horzcat(ratesSCPF{i, :});
     meanBtdGPS(i) = mean(1./flatRateGPS);
     meanBtdMW(i) = mean(1./flatRateMW);
-    meanBtdMWBR(i) = mean(1./flatRateMWBR);
+    meanBtdMWBR(i) = nanmean(1./flatRateMWBR);
     meanBtdSCPF(i) = mean(1./flatRateSCPF);
     
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
@@ -172,7 +175,8 @@ plot(varFactors, meanUtilMWBR, 'kx-');
 title('Average utility vs. variance factor');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 
-%% Get some idea on slice 1
+%% Get some idea on slice idx
+idx = 2;
 btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecMWPA1 = zeros(1, length(varFactors));
 btdGainVecMWBR1 = zeros(1, length(varFactors));
@@ -189,16 +193,16 @@ meanUtilMWBR1 = zeros(1, length(varFactors));
 meanUtilSCPF1 = zeros(1, length(varFactors));
 
 for i = 1:length(varFactors)
-    slice1 = (horzcat(opBelongs{i, :}) == 1);
+    sliceIdx = (horzcat(opBelongs{i, :}) == idx);
     flatRateGPS1 = horzcat(ratesGPS{i, :});
-    flatRateGPS1 = flatRateGPS1(slice1);
+    flatRateGPS1 = flatRateGPS1(sliceIdx);
     flatRateMW1 = horzcat(ratesMW{i, :});
-    flatRateMW1 = flatRateMW1(slice1);
+    flatRateMW1 = flatRateMW1(sliceIdx);
     flatRateMWBR1 = horzcat(ratesMWBR{i, :});
-    flatRateMWBR1 = flatRateMWBR1(slice1);
+    flatRateMWBR1 = flatRateMWBR1(sliceIdx);
     flatRateMWBR1 = flatRateMWBR1(flatRateMWBR1 > 1e-4);
     flatRateSCPF1 = horzcat(ratesSCPF{i, :});
-    flatRateSCPF1 = flatRateSCPF1(slice1);
+    flatRateSCPF1 = flatRateSCPF1(sliceIdx);
     meanBtdGPS1(i) = mean(1./flatRateGPS1);
     meanBtdMW1(i) = mean(1./flatRateMW1);
     meanBtdMWBR1(i) = nanmean(1./flatRateMWBR1);
@@ -236,7 +240,7 @@ plot(varFactors, meanBtdGPS1, 'gd-');
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdMW1, 'ro-');
 plot(varFactors, meanBtdMWBR1, 'kx-');
-title('Average btd vs. variance factor of slice 1');
+title('Average btd vs. variance factor of slice 2');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 
 figure(6)
@@ -244,5 +248,5 @@ hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecMWPA1, 'ro-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
-title('BTD gain over GPS vs. variance factor on slice 1');
+title('BTD gain over GPS vs. variance factor on slice 2');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');

@@ -5,7 +5,7 @@ function [inverseP] = inversewaterfill(total, ceiling, nUsers)
 
 L = length(ceiling); % number of buckets
 totalVol = sum(ceiling);
-assert(total <= totalVol, 'No feasible allocation found for water fill.');
+assert(total <= totalVol + 0.01, 'No feasible allocation found for water fill.');
 
 ceilPerUser = ceiling ./ nUsers;
 [upsortLevels, perm] = sort(ceilPerUser);

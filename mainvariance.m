@@ -5,14 +5,14 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 5000;
-shareVec = 3 * [0.4 0.3 0.3];
-relativeRhoVec = 6 * [0.4 0.1 0.5;
-    0.4 0.3 0.3;
-    0.4 0.5 0.1]'; % mean load distribution, V x B
-shareDist = [0.4 0.1 0.5;
-    0.4 0.3 0.3;
-    0.4 0.5 0.1]';
+simulationTime = 20000;
+shareVec = [14/9 13/18 13/18];
+relativeRhoVec = [3.6 * [2/3 1/6 1/6];
+                  3.6 * [2/3 1/6 1/6];
+                  10.8 * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+shareDist = [2/3 1/6 1/6;
+    2/3 1/6 1/6;
+    2/9 7/18 7/18]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
 
@@ -22,7 +22,7 @@ opSettings = [];
 opSettings.s_o = shareVec;
 opSettings.shareDist = shareDist;
 
-varFactors = 1:5;
+varFactors = 1:9;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecMWPA = zeros(1, length(varFactors));
 btdGainVecMWBR = zeros(1, length(varFactors));

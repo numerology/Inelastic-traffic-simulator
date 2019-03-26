@@ -5,14 +5,16 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 20000;
-shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [3.6 * [2/3 1/6 1/6];
-                  3.6 * [2/3 1/6 1/6];
-                  10.8 * [2/9 7/18 7/18]]'; % mean load distribution, V x B
-shareDist = [2/3 1/6 1/6;
-    2/3 1/6 1/6;
-    2/9 7/18 7/18]';
+simulationTime = 1000;
+shareVec = 3 * [1/3 1/3 1/3];
+relativeRhoVec = 6 * [0.8 0.1 0.1;
+                      0.1 0.8 0.1;
+                      0.1 0.1 0.8
+                      ]'; % mean load distribution, V x B
+shareDist = [0.8 0.1 0.1;
+              0.1 0.8 0.1;
+              0.1 0.1 0.8;
+              ]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
 
@@ -22,7 +24,7 @@ opSettings = [];
 opSettings.s_o = shareVec;
 opSettings.shareDist = shareDist;
 
-varFactors = 1:9;
+varFactors = 1:5;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecMWPA = zeros(1, length(varFactors));
 btdGainVecMWBR = zeros(1, length(varFactors));
@@ -149,9 +151,9 @@ legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 
 figure(2);
 hold on
-plot(varFactors, utilityGainVecSCPF, 'b+-');
-plot(varFactors, utilityGainVecMWPA, 'ro-');
-plot(varFactors, utilityGainVecMWBR, 'kx-');
+plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
+plot(varFactors, meanUtilMW - meanUtilGPS, 'ro-');
+plot(varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
 title('Utility gain over GPS vs. variance factor');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 

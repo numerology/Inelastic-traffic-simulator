@@ -6,7 +6,7 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 
-simulationTime = 50000;
+simulationTime = 2000;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [6 * [2/3 1/6 1/6];
                   6 * [2/3 1/6 1/6];
@@ -49,12 +49,12 @@ meanUtilSCPF = zeros(1, length(varFactors));
 %% Run simulations
 for i = 1:length(varFactors)
     varFactor = varFactors(i);
-    rhoVec = relativeRhoVec / varFactor;
+    rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     ppm = ParforProgMon('simulating: ', simulationTime);
     parfor t = 1:simulationTime
-        loadDist = varFactor * poissrnd(rhoVec);
+        loadDist = poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);
         opVec = zeros(1, nUsers);

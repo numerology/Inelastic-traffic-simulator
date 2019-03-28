@@ -1,4 +1,5 @@
-
+*.err
+*.out
 *.asv
 *.mat
 *.mob

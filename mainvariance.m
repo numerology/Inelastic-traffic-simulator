@@ -6,18 +6,19 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 
-simulationTime = 50000;
+simulationTime = 10000;
+perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [6 * [2/3 1/6 1/6];
-                  6 * [2/3 1/6 1/6];
-                  6 * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 shareDist = [2/3 1/6 1/6;
     2/3 1/6 1/6;
     2/9 7/18 7/18]';
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-
+threshold = 0.5 * capacity / perBSLoad; % min rate requirement
 netSettings = [];
 netSettings.bsNS = nBaseStations;
 opSettings = [];
@@ -41,6 +42,10 @@ meanBtdGPS = zeros(1, length(varFactors));
 meanBtdMW = zeros(1, length(varFactors));
 meanBtdMWBR = zeros(1, length(varFactors));
 meanBtdSCPF = zeros(1, length(varFactors));
+meanEffRateGPS = zeros(1, length(varFactors));
+meanEffRateMW = zeros(1, length(varFactors));
+meanEffRateMWBR = zeros(1, length(varFactors));
+meanEffRateSCPF = zeros(1, length(varFactors));
 meanUtilGPS = zeros(1, length(varFactors));
 meanUtilMW = zeros(1, length(varFactors));
 meanUtilMWBR = zeros(1, length(varFactors));
@@ -112,7 +117,7 @@ for i = 1:length(varFactors)
     meanBtdMW(i) = mean(1./flatRateMW);
     meanBtdMWBR(i) = nanmean(1./flatRateMWBR);
     meanBtdSCPF(i) = mean(1./flatRateSCPF);
-    
+  
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
     btdGainVecMWPA(i) = mean(1./flatRateGPS) / mean(1./flatRateMW);
     btdGainVecMWBR(i) = mean(1./flatRateGPS) ...
@@ -121,8 +126,8 @@ for i = 1:length(varFactors)
     utilSCPF = zeros(1, simulationTime);
     utilMW = zeros(1, simulationTime);
     utilMWBR = zeros(1, simulationTime);
-
-    parfor t = 1:simulationTime
+    
+    parfor t = 1:simulationTime % stats
         utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, opBelongs{i, t});
         utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, opBelongs{i, t});
         utilMW(t) = ratetoutil(ratesMW{i, t}, shareVec, opBelongs{i, t});
@@ -139,8 +144,36 @@ for i = 1:length(varFactors)
     utilityGainVecSCPF(i) = nanmean(utilGPS) / nanmean(utilSCPF); 
     utilityGainVecMWPA(i) = nanmean(utilGPS) / nanmean(utilMW);
     utilityGainVecMWBR(i) = nanmean(utilGPS) / nanmean(utilMWBR);
+    
+    flatRateGPS(flatRateGPS < threshold) = 0;
+    flatRateMW(flatRateMW < threshold) = 0;
+    flatRateMWBR(flatRateMWBR < threshold) = 0;
+    flatRateSCPF(flatRateSCPF < threshold) = 0;
+    meanEffRateGPS(i) = nanmean(flatRateGPS);
+    meanEffRateMW(i) = nanmean(flatRateMW);
+    meanEffRateMWBR(i) = nanmean(flatRateMWBR);
+    meanEffRateSCPF(i) = nanmean(flatRateSCPF);
 end
 %% Plot
+figure(7);
+hold on
+plot(varFactors, meanEffRateGPS, 'gd-');
+plot(varFactors, meanEffRateSCPF, 'b+-');
+plot(varFactors, meanEffRateMW, 'ro-');
+plot(varFactors, meanEffRateMWBR, 'kx-');
+title('Average rate above threshold vs. variance factor');
+legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'effrate-vs-var.fig');
+
+figure(8);
+hold on
+plot(varFactors, meanEffRateSCPF./meanEffRateGPS, 'b+-');
+plot(varFactors, meanEffRateMW./meanEffRateGPS, 'ro-');
+plot(varFactors, meanEffRateMWBR./meanEffRateGPS, 'kx-');
+title('Average rate above threshold gain over GPS vs. variance factor');
+legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'effrate-gain-vs-var.fig');
+
 figure(1);
 hold on
 plot(varFactors, btdGainVecSCPF, 'b+-');

@@ -5,11 +5,11 @@
 clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
-simulationTime = 20000;
+simulationTime = 50000;
 shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [3.6 * [2/3 1/6 1/6];
-                  3.6 * [2/3 1/6 1/6];
-                  10.8 * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+relativeRhoVec = [6 * [2/3 1/6 1/6];
+                  6 * [2/3 1/6 1/6];
+                  6 * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 shareDist = [2/3 1/6 1/6;
     2/3 1/6 1/6;
     2/9 7/18 7/18]';
@@ -50,7 +50,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec / varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    ppm = ParforProgMon('Generating network profile: ', simulationTime);
+    ppm = ParforProgMon('simulating: ', simulationTime);
     parfor t = 1:simulationTime
         loadDist = varFactor * poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
@@ -146,6 +146,7 @@ plot(varFactors, btdGainVecMWPA, 'ro-');
 plot(varFactors, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'btd-gain-vs-var.fig');
 
 figure(2);
 hold on
@@ -154,6 +155,7 @@ plot(varFactors, utilityGainVecMWPA, 'ro-');
 plot(varFactors, utilityGainVecMWBR, 'kx-');
 title('Utility gain over GPS vs. variance factor');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'util-gain-vs-var.fig');
 
 % Absolute rate
 figure(3);
@@ -164,6 +166,7 @@ plot(varFactors, meanBtdMW, 'ro-');
 plot(varFactors, meanBtdMWBR, 'kx-');
 title('Average btd vs. variance factor');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'btd-vs-var.fig');
 
 % Absolute utility
 figure(4);
@@ -174,9 +177,10 @@ plot(varFactors, meanUtilMW, 'ro-');
 plot(varFactors, meanUtilMWBR, 'kx-');
 title('Average utility vs. variance factor');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+saveas(gcf, 'util-vs-var.fig');
 
 %% Get some idea on slice idx
-idx = 2;
+idx = 1;
 btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecMWPA1 = zeros(1, length(varFactors));
 btdGainVecMWBR1 = zeros(1, length(varFactors));
@@ -240,7 +244,7 @@ plot(varFactors, meanBtdGPS1, 'gd-');
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdMW1, 'ro-');
 plot(varFactors, meanBtdMWBR1, 'kx-');
-title('Average btd vs. variance factor of slice 2');
+title('Average btd vs. variance factor of slice 1');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
 
 figure(6)
@@ -248,5 +252,5 @@ hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecMWPA1, 'ro-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
-title('BTD gain over GPS vs. variance factor on slice 2');
+title('BTD gain over GPS vs. variance factor on slice 1');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');

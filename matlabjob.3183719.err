@@ -1,0 +1,69 @@
+
+--------------------------------------------------------------------------------
+       Segmentation violation detected at Tue Mar 26 17:22:49 2019 -0500
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  GNU C Library            : 2.17 stable
+  Graphics Driver          : Unknown software 
+  Java Version             : Java 1.8.0_152-b16 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  MATLAB Architecture      : glnxa64
+  MATLAB Entitlement ID    : 1496533
+  MATLAB Root              : /home1/apps/matlab/2018b
+  MATLAB Version           : 9.5.0.944444 (R2018b)
+  OpenGL                   : software
+  Operating System         : "CentOS Linux release 7.6.1810 (Core) "
+  Process ID               : 73847
+  Processor ID             : x86 Family 6 Model 85 Stepping 4, GenuineIntel
+  Session Key              : 053fafb4-37e9-4d39-89f7-4144161dcaaa
+  Static TLS mitigation    : Disabled: Unable to open display
+  Window System            : No active display
+
+Fault Count: 1
+
+
+Abnormal termination
+
+Register State (from fault):
+  RAX = 0000000000000000  RBX = 0000000000000000
+  RCX = 00002b6610000558  RDX = 00002b6608016c50
+  RSP = 00002b660ffff330  RBP = 00002b660ffff380
+  RSI = 00002b6608016c50  RDI = 0000000000000000
+
+   R8 = 00002b6608016c50   R9 = 0000000000000000
+  R10 = 00002b65de8d7600  R11 = 00002b6ae5bd7a00
+  R12 = 00002b660ffff3a0  R13 = 00002b660ffff340
+  R14 = 00002b6ae58c41f0  R15 = 00002b66101f1b30
+
+  RIP = 00002b67f4c06641  EFL = 0000000000010246
+
+   CS = 0033   FS = 0000   GS = 0000
+
+Stack Trace (from fault):
+[  0] 0x00002b67f4c06641                        bin/glnxa64/libmwhgutils.so+00620097 _ZN7hgutils17BaseObjectCOSInfo9getClientEv+00000001
+[  1] 0x00002b67f426376f                             bin/glnxa64/libmwhg.so+02504559
+[  2] 0x00002b67f4280a38                             bin/glnxa64/libmwhg.so+02624056
+[  3] 0x00002b67f4281cb7                             bin/glnxa64/libmwhg.so+02628791
+[  4] 0x00002b67f42d5eb5                             bin/glnxa64/libmwhg.so+02973365
+[  5] 0x00002b67f43d4478                             bin/glnxa64/libmwhg.so+04015224
+[  6] 0x00002b67f44350d9                             bin/glnxa64/libmwhg.so+04411609
+[  7] 0x00002b65ddb16a11                       bin/glnxa64/libmwservices.so+02996753
+[  8] 0x00002b65ddb17422                       bin/glnxa64/libmwservices.so+02999330
+[  9] 0x00002b65ddb17d3b                       bin/glnxa64/libmwservices.so+03001659 _Z25svWS_ProcessPendingEventsiib+00000187
+[ 10] 0x00002b65f6e1c32c                            bin/glnxa64/libmwmcr.so+00709420
+[ 11] 0x00002b65f6e1cb08                            bin/glnxa64/libmwmcr.so+00711432
+[ 12] 0x00002b65f6e14d92                            bin/glnxa64/libmwmcr.so+00679314
+[ 13] 0x00002b65e0116dd5                             /lib64/libpthread.so.0+00032213
+[ 14] 0x00002b65de896ead                                   /lib64/libc.so.6+01040045 clone+00000109
+[ 15] 0x0000000000000000                                   <unknown-module>+00000000
+
+** This crash report has been saved to disk as /home1/06064/jxzheng/matlab_crash_dump.73847-1 **
+
+
+
+MATLAB is exiting because of fatal error
+/tmp/slurmd/job3183719/slurm_script: line 14: 73847 Killed                  matlab -nodesktop -nodisplay -nosplash < mainvariance.m

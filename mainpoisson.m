@@ -6,11 +6,14 @@ clc, close all, clear all, gcp;
 nSlice = 3;
 simulationTime = 5000;
 shareVec = 3 * [0.4 0.3 0.3];
-rhoVec = 6 * [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]'; % mean load distribution, V x B
+perBSLoad = 6;
+rhoVec = perBSLoad * [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]'; % mean load distribution, V x B
 shareDist = [0.4 0.1 0.5;0.4 0.3 0.3;0.4 0.5 0.1]';
 
 nBaseStations = size(rhoVec, 2); % Since it's a simpler model, sectors are not mentioned
 capacity = 1; % Uniform fixed capacity
+
+threshold = 0.5 * capacity / perBSLoad;
 
 netSettings = [];
 netSettings.bsNS = nBaseStations;

@@ -6,7 +6,7 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 
-simulationTime = 50000;
+simulationTime = 10000;
 perBSLoad = 6;
 
 shareVec = [14/9 13/18 13/18];

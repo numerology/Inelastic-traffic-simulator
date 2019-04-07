@@ -1,4 +1,4 @@
-function [userRates, userFraction, btd] = DIFFPRICE(NetSettings, OpSettings, ...
+function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
     capacityPerUser, bs, minReq)
 % Share constrained sharing with guarantee
 % Currently only works under parallel resource usage. The the userDemands will
@@ -69,32 +69,6 @@ for b = 1:nBasestations
                     totalSurplus * (lvb - shareDist(v, b)) / totalWeight) / ...
                     sum(opBelongs == v & bs == b);
             end
-        end
-    end
-end
-
-% (TODO:optimize the computation here.)
-for u = 1:NetSettings.users
-    lb = sum(weights(bs(:)==bs(u)));
-    if (lb <= 1)
-        userFraction(u) = weights(u) ./ lb;
-    else
-        %disp('lb greater than 1');
-        slice = opBelongs(u);
-        lvb = sum(weights(bs(:) == bs(u) & opBelongs(:) == slice));
-        if (lvb <= shareDist(slice, bs(u)))
-            userFraction(u) = weights(u);
-        else
-            surplus = 1;
-            totalMargin = 0;
-            for v = 1:nSlices
-                localLvb = sum(weights(bs(:) == bs(u) & opBelongs(:) == v));
-                surplus = surplus - min(localLvb, shareDist(v, bs(u)));
-                totalMargin = totalMargin + max(0, localLvb ...
-                    - shareDist(v, bs(u)));
-            end
-            userFraction(u) = weights(u) / lvb * (shareDist(slice, bs(u)) ...
-                + (lvb - shareDist(slice, bs(u))) / totalMargin * surplus);
         end
     end
 end

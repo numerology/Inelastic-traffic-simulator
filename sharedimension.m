@@ -16,7 +16,7 @@ spareShare = zeros(B, 1);
 shareDist = zeros(size(meanLoadDist));
 for v = 1:V
     for b = 1:B
-        minimalShare(v, b) = poissinv(1 - eps, minLoadDist(v, b)) ...
+        minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
             * minRateReq(v);
     end
 end
@@ -31,11 +31,13 @@ for b = 1:B
     spareShare(b) = 1 - sum(minimalShare(:, b));
     % currently, allocate spare share prop to minimal allocation.
     for v = 1:V
-        shareDist(v, b) = minimalShare(v, b) + spareShare(b) ...
-            * minimalShare(v, b) / sum(minimalShare(:, b));
+        if (sum(minimalShare(:, b)) == 0)
+            shareDist(v, b) = spareShare(b) / V;
+        else
+            shareDist(v, b) = minimalShare(v, b) + spareShare(b) ...
+                * minimalShare(v, b) / sum(minimalShare(:, b));
+        end
     end
 end
-
-
 
 end

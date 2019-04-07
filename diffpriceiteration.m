@@ -36,15 +36,37 @@ for b = 1:nBasestations
     nob = sum(opBelongs == v & bs == b);
     % incrementally test 3 cases to figure out how much bid is needed.
     if (aob(b) / (capacity / minRate / nob - 1) <= 1 - aob(b))
-        lobVec(b) = aob(b) / (capacity / minRate / nob - 1);
+        minBidReq(b) = aob(b) / (capacity / minRate / nob - 1);
     elseif (nob * minRate / capacity <= shareDist(v, b))
-        lobVec(b) = nob * minRate / capacity;
+        minBidReq(b) = nob * minRate / capacity;
     else
         totalSurplus = 1 - shareDist(v, b);
         totalWeight = 0;
         for cSlice = 1:nSlices
-            totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice & bs == b)) - shareDist(cSlice, b));
-            
+            if (cSlice == v)
+                continue
+            end
+            totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
+                & bs == b)) - shareDist(cSlice, b));
+            totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
+                sum(cBid(opBelongs == cSlice & bs == b)));
         end
+        minBidReq(b) = shareDist(v, b) + totalWeight / (totalSurplus / ...
+            (nob * minRate / capacity - shareDist(v, b)) - 1);
     end
+end
+
+% distribute lob to each user.
+assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
+surplusShare = shareVec(v) - sum(minBidReq);
+
+nextBid = cBid;
+for b = 1:nBasestations
+    nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
+        & bs == b);
+end
+
+nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
+    / sum(opBelongs == v);
+
 end

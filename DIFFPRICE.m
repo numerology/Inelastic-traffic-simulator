@@ -21,6 +21,7 @@ nBasestations = netSettings.bsNS;
 shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 shareDist = opSettings.shareDist;
+userFraction = zeros(1, nUsers);
 eps = 1e-6; % threshold for convergence. 
 
 % Initialize by equal weight. Log utility is not defined at zero.
@@ -44,6 +45,33 @@ while(norm(prevBid - cBid) > eps)
     end
 end
 
+% Provision resources
+for b = 1:nBasestations
+    lb = sum(cBid(bs == b));
+    if (lb <= 1)
+        userFraction(bs == b) = cBid(bs == b) / lb;
+    else
+        for v = 1:nSlices
+            lvb = sum(cBid(bs == b & opBelongs == v));
+            if (lvb <= shareDist(v, b))
+                userFraction(bs == b & opBelongs == v) = cBid(bs == b ...
+                    & opBelongs == v);
+            else
+                totalSurplus = 1;
+                totalWeight = 0;
+                for cSlice = 1:nSlices
+                    totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
+                        & bs == b)) - shareDist(cSlice, b));
+                    totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
+                        sum(cBid(opBelongs == cSlice & bs == b)));
+                end
+                userFraction(bs == b & opBelongs == v) = (shareDist(v, b) + ...
+                    totalSurplus * (lvb - shareDist(v, b)) / totalWeight) / ...
+                    sum(opBelongs == v & bs == b);
+            end
+        end
+    end
+end
 
 % (TODO:optimize the computation here.)
 for u = 1:NetSettings.users

@@ -11,7 +11,6 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 
 nSlices = size(shareDist, 1);
 nBasestations = size(shareDist, 2);
-nUsers = length(opBelongs);
 nUsersOfV = sum(opBelongs == v);
 capacity = unique(capacityPerUser);
 assert(length(capacity) == 1, 'Only allow uniform capacity');

@@ -39,6 +39,7 @@ while(norm(prevBid - cBid) > eps)
         cBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
             opBelongs, bs, capacityPerUser, minReq(v));
     end
+    assert(all(cBid > 0), 'Unexpected negative bids.')
     cnt = cnt + 1;
     if (cnt == 40)
         disp('break to prevent looping forever, convergence might not achieved.');

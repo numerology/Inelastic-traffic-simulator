@@ -15,7 +15,7 @@ for u=1:netSettings.users
     slice = opSettings.ops_belongs(u);
     % number of users on the same slice at the same bs.
     qd = sum(opSettings.ops_belongs == slice & bs == bs(u)); 
-    assert(opSettings.shareDist(slice, b) > 0, 'zero allocation for active user');
+%    assert(opSettings.shareDist(slice, b) > 0, 'zero allocation for active user');
     userFraction(u) = opSettings.shareDist(slice, b)/...
                                 sum(opSettings.shareDist(ops, b))/...
                                 sum(qd);

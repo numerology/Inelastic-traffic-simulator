@@ -201,7 +201,7 @@ plot(varFactors, meanBtdDP1, 'ro-');
 plot(varFactors, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
 legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
-savefig(sprintf('btd-vs-var-slice1-%s.fig', datestring));
+savefig(sprintf('btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
 hold on
@@ -210,7 +210,7 @@ plot(varFactors, btdGainVecDP1, 'ro-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
 legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
-savefig(sprintf('btd-gain-vs-var-slice1-%s.fig', datestring));
+savefig(sprintf('btd-gain-vs-var-slice2-%s.fig', datestring));
 
 idx = 1;
 btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.

@@ -2,7 +2,7 @@
 clc, close all, clear all, gcp;
 nSlice = 3;
 
-simulationTime = 30000;
+simulationTime = 10000;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
@@ -19,7 +19,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:0.25:3;
+varFactors = 1:5;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
 btdGainVecMWBR = zeros(1, length(varFactors));

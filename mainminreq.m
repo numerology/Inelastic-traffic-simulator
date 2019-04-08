@@ -6,7 +6,7 @@ clc, close all, clear all, gcp;
 %% Settings
 nSlice = 3;
 
-simulationTime = 10000;
+simulationTime = 50000;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
@@ -106,7 +106,7 @@ for i = 1:length(varFactors)
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             ratesMWBR{i, t}(ratesMWBR{i, t} < 1e-4) = nan;
         end
-        ppm.increment();
+        %ppm.increment();
     end
     flatRateGPS = horzcat(ratesGPS{i, :});
     flatRateDP = horzcat(ratesDP{i, :});

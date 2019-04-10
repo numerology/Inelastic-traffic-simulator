@@ -19,7 +19,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-pVec = 0.8:(-0.1):0.2;
+pVec = 1 ./ (2:7);
 btdGainVecSCPF = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(pVec));
 btdGainVecMWBR = zeros(1, length(pVec));
@@ -48,7 +48,7 @@ meanUtilSCPF = zeros(1, length(pVec));
 %% Run simulations
 for i = 1:length(pVec)
     currentP = pVec(i);
-    rhoVec = round(relativeRhoVec / currentP);
+    rhoVec = (relativeRhoVec / currentP);
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, minSharePerBS);

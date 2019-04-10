@@ -1,5 +1,6 @@
 % no gui version of mainminreq.m
 clc, close all, clear all, gcp;
+warning('off','all');
 nSlice = 3;
 
 simulationTime = 500;

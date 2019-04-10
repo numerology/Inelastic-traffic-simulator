@@ -2,11 +2,11 @@
 clc, close all, clear all, gcp;
 nSlice = 3;
 
-simulationTime = 2000;
+simulationTime = 1;
 perBSLoad = 18;
 shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-                  perBSLoad * [2/3 1/6 1/6];
+relativeRhoVec = [4/3 * perBSLoad * [2/3 1/6 1/6];
+                  4/3 * perBSLoad * [2/3 1/6 1/6];
                   perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
@@ -32,6 +32,11 @@ ratesMWBR = cell(length(pVec), simulationTime);
 ratesSCPF = cell(length(pVec), simulationTime);
 opBelongs = cell(length(pVec), simulationTime);
 
+pOutageSCPF = zeros(1, length(pVec)); % it's an outage as long as there is one user not meeting minreq.
+pOutageGPS = zeros(1, length(pVec));
+pOutageDP = zeros(1, length(pVec));
+pOutageMWBR = zeros(1, length(pVec));
+
 meanBtdGPS = zeros(1, length(pVec));
 meanBtdDP = zeros(1, length(pVec));
 meanBtdMWBR = zeros(1, length(pVec));
@@ -53,6 +58,10 @@ for i = 1:length(pVec)
     capacities = cell(1, simulationTime);
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, minSharePerBS);
     
+    outageSCPF = zeros(1, simulationTime); 
+    outageGPS = zeros(1, simulationTime);
+    outageDP = zeros(1, simulationTime);
+    outageMWBR = zeros(1, simulationTime);
     parfor t = 1:simulationTime
         loadDist = binornd(rhoVec, currentP * ones(size(rhoVec)));
         nUsers = sum(sum(loadDist));
@@ -89,20 +98,30 @@ for i = 1:length(pVec)
         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesGPS{i, t} = r;
+        outageGPS(t) = any(r < unique(minRateReq));
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesSCPF{i, t} = r;
+        outageSCPF(t) = any(r < unique(minRateReq));
         [r, f, b] = DIFFPRICE(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t}, minRateReq);
         ratesDP{i, t} = r;
+        outageDP(t) = any(r < unique(minRateReq));
         [r, f, b] = MAXWEIGHT_BR(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesMWBR{i, t} = r;
+        outageMWBR(t) = any(r < unique(minRateReq));
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             ratesMWBR{i, t}(ratesMWBR{i, t} < 1e-4) = nan;
         end
         fprintf('finish at time %d', t);
     end
+    
+    pOutageDP(i) = sum(outageDP) / simulationTime;
+    pOutageGPS(i) = sum(outageGPS) / simulationTime;
+    pOutageMWBR(i) = sum(outageMWBR) / simulationTime;
+    pOutageSCPF(i) = sum(outageSCPF) / simulationTime;
+    
     flatRateGPS = horzcat(ratesGPS{i, :});
     flatRateDP = horzcat(ratesDP{i, :});
     flatRateMWBR = horzcat(ratesMWBR{i, :});
@@ -143,6 +162,16 @@ end
 
 % Plot results
 datestring = datestr(now, 30);
+
+figure(7)
+hold on
+plot(1 - pVec, pOutageSCPF, 'b+-');
+plot(1 - pVec, pOutageDP, 'ro-');
+plot(1 - pVec, pOutageMWBR, 'kx-');
+plot(1 - pVec, pOutageGPS, 'gd-');
+title('P(outage) vs. variance factor');
+legend('SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response', 'GPS');
+savefig(sprintf('poutage-vs-var-%s.fig', datestring));
 
 figure(1);
 hold on
@@ -200,7 +229,7 @@ plot(1 - pVec, meanBtdGPS1, 'gd-');
 plot(1 - pVec, meanBtdSCPF1, 'b+-');
 plot(1 - pVec, meanBtdDP1, 'ro-');
 plot(1 - pVec, meanBtdMWBR1, 'kx-');
-title('Average btd vs. variance factor of slice 1');
+title('Average btd vs. variance factor of slice 2');
 legend('GPS', 'SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response');
 savefig(sprintf('btd-vs-var-slice2-%s.fig', datestring));
 

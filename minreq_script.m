@@ -11,7 +11,7 @@ relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.1 * capacity / perBSLoad * ones(1, nSlice); % min rate requirement
+minRateReq = 0.1 * capacity / (3 * perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -101,6 +101,7 @@ for i = 1:length(pVec)
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             ratesMWBR{i, t}(ratesMWBR{i, t} < 1e-4) = nan;
         end
+        fprintf('finish at time %d', t);
     end
     flatRateGPS = horzcat(ratesGPS{i, :});
     flatRateDP = horzcat(ratesDP{i, :});

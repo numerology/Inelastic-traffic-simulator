@@ -2,12 +2,12 @@
 clc, close all, clear all, gcp;
 nSlice = 3;
 
-simulationTime = 4000;
-perBSLoad = 6;
+simulationTime = 2000;
+perBSLoad = 12;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
                   perBSLoad * [2/3 1/6 1/6];
-                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+                  1.5 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
@@ -201,7 +201,7 @@ plot(1 - pVec, meanBtdSCPF1, 'b+-');
 plot(1 - pVec, meanBtdDP1, 'ro-');
 plot(1 - pVec, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
-legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+legend('GPS', 'SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response');
 savefig(sprintf('btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
@@ -210,7 +210,7 @@ plot(1 - pVec, btdGainVecSCPF1, 'b+-');
 plot(1 - pVec, btdGainVecDP1, 'ro-');
 plot(1 - pVec, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
-legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response');
 savefig(sprintf('btd-gain-vs-var-slice2-%s.fig', datestring));
 
 idx = 1;
@@ -258,7 +258,7 @@ plot(1 - pVec, meanBtdSCPF1, 'b+-');
 plot(1 - pVec, meanBtdDP1, 'ro-');
 plot(1 - pVec, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
-legend('GPS', 'SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+legend('GPS', 'SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response');
 savefig(sprintf('btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
@@ -267,7 +267,7 @@ plot(1 - pVec, btdGainVecSCPF1, 'b+-');
 plot(1 - pVec, btdGainVecDP1, 'ro-');
 plot(1 - pVec, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
-legend('SCPF', 'MAXWEIGHT-practical approach', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE', 'MAXWEIGHT-best response');
 savefig(sprintf('btd-gain-vs-var-slice1-%s.fig', datestring));
 
 

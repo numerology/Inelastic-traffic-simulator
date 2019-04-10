@@ -1,6 +1,6 @@
 clear;
 share = 0.5; % share of slice 1.
-advIntensityVec = 1:0.5:5;
+advIntensityVec = 1:0.2:3;
 repetition = 20;
 rateVec1Equal = zeros(repetition, length(advIntensityVec));
 rateVec2Equal = zeros(repetition, length(advIntensityVec));
@@ -17,7 +17,7 @@ for i = 1:length(advIntensityVec)
         in(r) = in(r).setVariable('advArrivalRate', advIntensityVec(i));
         in(r) = in(r).setVariable('weightScheme', 1);
         in(r) = setModelParameter(in(r), 'SaveOutput','on', ...
-            'OutputSaveName','out', 'StiffnessThreshold', 20000, 'StopTime', '100');
+            'OutputSaveName','out', 'StiffnessThreshold', 20000, 'StopTime', '50');
     end 
     for r = (repetition + 1):(2 * repetition)
         in(r) = Simulink.SimulationInput('SCPF_simple');
@@ -26,7 +26,7 @@ for i = 1:length(advIntensityVec)
         in(r) = in(r).setVariable('advArrivalRate', advIntensityVec(i));
         in(r) = in(r).setVariable('weightScheme', 2);
         in(r) = setModelParameter(in(r), 'SaveOutput','on', ...
-            'OutputSaveName','out', 'StiffnessThreshold', 20000, 'StopTime', '100');
+            'OutputSaveName','out', 'StiffnessThreshold', 20000, 'StopTime', '50');
     end
     simOut = parsim(in, 'ShowProgress', 'on');
     

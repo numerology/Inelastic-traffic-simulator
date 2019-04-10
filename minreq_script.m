@@ -1,8 +1,9 @@
 % no gui version of mainminreq.m
 clc, close all, clear all, gcp;
+warning('off','all');
 nSlice = 3;
 
-simulationTime = 2000;
+simulationTime = 500;
 perBSLoad = 18;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];

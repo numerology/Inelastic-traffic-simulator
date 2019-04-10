@@ -48,7 +48,7 @@ meanUtilSCPF = zeros(1, length(pVec));
 %% Run simulations
 for i = 1:length(pVec)
     currentP = pVec(i);
-    rhoVec = ceil(relativeRhoVec / currentP);
+    rhoVec = round(relativeRhoVec / currentP);
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, minSharePerBS);

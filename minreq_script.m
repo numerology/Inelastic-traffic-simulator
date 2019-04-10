@@ -3,7 +3,7 @@ clc, close all, clear all, gcp;
 nSlice = 3;
 
 simulationTime = 10000;
-perBSLoad = 6;
+perBSLoad = 18;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
                   perBSLoad * [2/3 1/6 1/6];

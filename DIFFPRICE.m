@@ -1,5 +1,5 @@
 function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
-    capacityPerUser, bs, minReq)
+    capacityPerUser, bs, minReq, waterfilling)
 % Share constrained sharing with guarantee
 % Currently only works under parallel resource usage. The the userDemands will
 % be overrided.
@@ -10,6 +10,8 @@ function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
 %   capacityPerUser: capacity perceived per user
 %   bs: base station association vector, bs(u) is the BS serving user u.
 %   minReq: 1 x V, minimal rate required by slices
+%   waterfilling: logical, whether to use waterfilling or equal allocating
+%   surplus.
 % Return:
 %   userRates: perceived rate of each user.
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
@@ -37,7 +39,7 @@ while(norm(prevBid - cBid) > eps)
     prevBid = cBid;
     for v = 1:nSlices
         cBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-            opBelongs, bs, capacityPerUser, minReq(v));
+            opBelongs, bs, capacityPerUser, minReq(v), waterfilling);
     end
     assert(all(cBid > 0), 'Unexpected negative bids.')
     cnt = cnt + 1;

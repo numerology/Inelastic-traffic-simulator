@@ -1,5 +1,5 @@
 function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-    opBelongs, bs, capacityPerUser, minRate)
+    opBelongs, bs, capacityPerUser, minRate, waterfilling)
 % diffpriceiteration Generate the bid per user when it is slice v's turn to
 % bid.
 % Params:
@@ -8,6 +8,10 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 %   shareDist: V x B, share distribution
 %   opBelongs: nUsers x 1, slice association per user
 %   bs: nUsers x 1, bs association per user
+%   capacityPerUser: 1 x nUsers
+%   minRate: minimal rate requirement, scalar
+%   waterfilling: logical, 1 when want to user waterfilling to allocate
+%   bids, otherwise surplus bids will be allocated equally.
 
 nSlices = size(shareDist, 1);
 nBasestations = size(shareDist, 2);
@@ -57,15 +61,27 @@ end
 
 % distribute lob to each user.
 % assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
-surplusShare = shareVec(v) - sum(minBidReq);
+if (waterfilling)
+    sliceUserDist = zeros(1, nBasestations);
+    for b = 1:nBasestations
+        sliceUserDist = sum(opBelongs == v & bs == b);
+    end
+    loVec = waterfill(minBidReq, shareVec(v), sliceUserDist);
+    nextBid = cBid;
+    for b = 1:nBasestations
+        nextBid(opBelongs == v & bs == b) = loVec(b) / sliceUserDist(b);
+    end
+else
+    surplusShare = shareVec(v) - sum(minBidReq);
+    nextBid = cBid;
+    for b = 1:nBasestations
+        nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
+            & bs == b);
+    end
 
-nextBid = cBid;
-for b = 1:nBasestations
-    nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
-        & bs == b);
+    nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
+        / sum(opBelongs == v);
 end
 
-nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
-    / sum(opBelongs == v);
 
 end

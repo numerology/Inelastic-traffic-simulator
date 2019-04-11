@@ -4,7 +4,7 @@
 #SBATCH -o matlabjob.%j.out
 #SBATCH -N 1
 #SBATCH -n 48
-#SBATCH -p skx-normal
+#SBATCH -p skx-dev
 #SBATCH -t 2:00:00
 #SBATCH -A Statistical-multiple
 #SBATCH --mail-user=jxzheng@utexas.edu

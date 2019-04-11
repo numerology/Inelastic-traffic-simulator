@@ -1,7 +1,7 @@
 clear;
 share = 0.5; % share of slice 1.
 advIntensityVec = 1:0.2:3;
-repetition = 300;
+repetition = 1000;
 rateVec1Equal = zeros(repetition, length(advIntensityVec));
 rateVec2Equal = zeros(repetition, length(advIntensityVec));
 rateVec1Dps = zeros(repetition, length(advIntensityVec));

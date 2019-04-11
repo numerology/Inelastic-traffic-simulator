@@ -12,9 +12,9 @@ relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.3 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
+minRateReq = 0.2 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
-outageTol = 0.3;
+outageTol = 0.2;
 netSettings = [];
 netSettings.bsNS = nBaseStations;
 opSettings = [];

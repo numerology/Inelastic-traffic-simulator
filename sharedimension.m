@@ -1,5 +1,5 @@
 function [shareDist] = sharedimension(minRateReq, meanLoadDist, shareVec, ...
-    eps, minShare)
+    eps, minShare, prob)
 % sharedimension Find a share allocation for each slice such that the
 % minimal rate requirement is satisfied with probability > 1-eps.
 % Params:
@@ -17,7 +17,9 @@ spareShare = zeros(B, 1);
 shareDist = zeros(size(meanLoadDist));
 for v = 1:V
     for b = 1:B
-        minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
+%         minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
+%             * minRateReq(v);
+        minimalShare(v, b) = binoinv(1 - eps, meanLoadDist(v, b), prob) ...
             * minRateReq(v);
     end
 end

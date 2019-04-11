@@ -3,12 +3,12 @@ clc, close all, clear all, gcp;
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 500;
-perBSLoad = 18;
-shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-                  perBSLoad * [2/3 1/6 1/6];
-                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+simulationTime = 3000;
+perBSLoad = 6;
+shareVec = [1 1 1];
+relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;

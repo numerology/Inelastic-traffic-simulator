@@ -56,7 +56,7 @@ for b = 1:nBasestations
 end
 
 % distribute lob to each user.
-assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
+% assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
 surplusShare = shareVec(v) - sum(minBidReq);
 
 nextBid = cBid;

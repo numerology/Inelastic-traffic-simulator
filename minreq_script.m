@@ -3,7 +3,7 @@ clc, close all, clear all, gcp;
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 5000;
+simulationTime = 1;
 perBSLoad = 6;
 shareVec = [1 1 1];
 relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
@@ -12,7 +12,7 @@ relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.5 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
+minRateReq = 0.3 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.3;
 netSettings = [];

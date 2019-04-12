@@ -106,6 +106,12 @@ for i = 1:length(pVec)
                 ./ sum(tmpOpSettings.ops_belongs == v);
         end
         tmpOpSettings.w_i = weightPerUser;
+        
+        perUserMinRateReq = zeros(1, nUsers);
+        for v = 1:nSlice
+            perUserMinRateReq(opVec == v) = minRateReq(v);
+        end
+        
         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesGPS{i, t} = r;

@@ -64,7 +64,7 @@ end
 if (waterfilling)
     sliceUserDist = zeros(1, nBasestations);
     for b = 1:nBasestations
-        sliceUserDist = sum(opBelongs == v & bs == b);
+        sliceUserDist(b) = sum(opBelongs == v & bs == b);
     end
     loVec = waterfill(minBidReq, shareVec(v), sliceUserDist);
     nextBid = cBid;

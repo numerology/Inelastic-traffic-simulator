@@ -1,9 +1,10 @@
 % no gui version of mainminreq.m
-clc, close all, clear all, gcp;
+clc, close all, clear all;
+parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 2000;
+simulationTime = 40;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];

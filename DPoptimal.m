@@ -1,8 +1,7 @@
-function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
-    capacityPerUser, bs, minReq, waterfilling)
-% Share constrained sharing with guarantee
-% Resources are provisioned according to DIFFPRICE.
-% 
+function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
+    capacityPerUser, bs)
+% DPoptimal Social optimal bidding/rate allocation under DIFFPRICE resource
+% sharing criterion.
 % Params:
 %   NetSettings: network profile
 %   OpSettings: operator profile
@@ -23,41 +22,32 @@ shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
-eps = 1e-6; % threshold for convergence. 
 
-% Initialize by equal weight. Log utility is not defined at zero.
-cBid = zeros(1, nUsers);
-
+% Optimize bid based on bidtoutility
+options = optimoptions('fmincon','Display','off','Algorithm','sqp');
+% bidding constraint
+constMat = zeros(nUsers, nSlices);
+constVec = shareVec';
 for v = 1:nSlices
-    cBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
+    constMat(:, v) = (opBelongs == v);
 end
-prevBid = cBid + 1;
-cnt = 0;
+initialBid = 1e-5 * ones(nUsers, 1);
+optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
+    shareVec, shareDist), initialBid, constMat, constVec, [], [], zeros(nUsers, 1), ...
+    ones(nUsers, 1), [], options);
 
-while(norm(prevBid - cBid) > eps) 
-    prevBid = cBid;
-    for v = 1:nSlices
-        cBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-            opBelongs, bs, capacityPerUser, minReq(v), waterfilling);
-    end
-    assert(all(cBid > 0), 'Unexpected negative bids.')
-    cnt = cnt + 1;
-    if (cnt == 40)
-        disp('break to prevent looping forever, convergence might not achieved.');
-    end
-end
+cBid = optimBid';
 
-% Provision resources
+% Compute the rate allocation
 for b = 1:nBasestations
     lb = sum(cBid(bs == b));
     if (lb <= 1)
-        userFraction(bs == b) = cBid(bs == b) / lb;
+        userFraction(bs == b) = cBid(bs == b) ./ lb;
     else
         for v = 1:nSlices
             lvb = sum(cBid(bs == b & opBelongs == v));
             if (lvb <= shareDist(v, b))
-                userFraction(bs == b & opBelongs == v) = cBid(bs == b ...
-                    & opBelongs == v);
+                userFraction(bs == b & opBelongs == v) = cBid(bs == b & opBelongs == v);
             else
                 totalSurplus = 1;
                 totalWeight = 0;
@@ -67,9 +57,10 @@ for b = 1:nBasestations
                     totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
                         sum(cBid(opBelongs == cSlice & bs == b)));
                 end
-                userFraction(bs == b & opBelongs == v) = (shareDist(v, b) + ...
-                    totalSurplus * (lvb - shareDist(v, b)) / totalWeight) / ...
-                    sum(opBelongs == v & bs == b);
+                fvb = shareDist(v, b) + totalSurplus / totalWeight * (lvb ...
+                    - shareDist(v, b));
+                userFraction(bs == b & opBelongs == v) = cBid(bs == b & ...
+                    opBelongs == v) .* fvb ./ lvb;
             end
         end
     end

@@ -135,7 +135,7 @@ for i = 1:length(pVec)
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             ratesMWBR{i, t}(ratesMWBR{i, t} < 1e-4) = nan;
         end
-        fprintf('finish at time %d', t);
+        fprintf('finish at time %d\n', t);
     end
     
     pOutageDP(i) = sum(outageDP) / simulationTime;

@@ -26,10 +26,10 @@ userFraction = zeros(1, nUsers);
 % Optimize bid based on bidtoutility
 options = optimoptions('fmincon','Display','off','Algorithm','sqp');
 % bidding constraint
-constMat = zeros(nUsers, nSlices);
+constMat = zeros(nSlices, nUsers);
 constVec = shareVec';
 for v = 1:nSlices
-    constMat(:, v) = (opBelongs == v);
+    constMat(v, :) = (opBelongs == v)';
 end
 initialBid = 1e-5 * ones(nUsers, 1);
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...

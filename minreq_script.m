@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 2000;
+simulationTime = 3000;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
@@ -24,15 +24,15 @@ opSettings.s_o = shareVec;
 pVec = 1 ./ (2:7);
 btdGainVecSCPF = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(pVec));
-btdGainVecDPWA = zeros(1, length(pVec));
+btdGainVecDPoptimal = zeros(1, length(pVec));
 btdGainVecMWBR = zeros(1, length(pVec));
 utilityGainVecSCPF = zeros(1, length(pVec)); % overall utility gain over (flexible) GPS.
 utilityGainVecDP = zeros(1, length(pVec));
-utilityGainVecDPWA = zeros(1, length(pVec));
+utilityGainVecDPoptimal = zeros(1, length(pVec));
 utilityGainVecMWBR = zeros(1, length(pVec));
 ratesGPS = cell(length(pVec), simulationTime); % Save ordinary data for regression.
 ratesDP = cell(length(pVec), simulationTime);
-ratesDPWA = cell(length(pVec), simulationTime);
+ratesDPoptimal = cell(length(pVec), simulationTime);
 ratesMWBR = cell(length(pVec), simulationTime);
 ratesSCPF = cell(length(pVec), simulationTime);
 opBelongs = cell(length(pVec), simulationTime);
@@ -40,22 +40,22 @@ opBelongs = cell(length(pVec), simulationTime);
 pOutageSCPF = zeros(1, length(pVec)); % it's an outage as long as there is one user not meeting minreq.
 pOutageGPS = zeros(1, length(pVec));
 pOutageDP = zeros(1, length(pVec));
-pOutageDPWA = zeros(1, length(pVec));
+pOutageDPoptimal = zeros(1, length(pVec));
 pOutageMWBR = zeros(1, length(pVec));
 
 meanBtdGPS = zeros(1, length(pVec));
 meanBtdDP = zeros(1, length(pVec));
-meanBtdDPWA = zeros(1, length(pVec));
+meanBtdDPo = zeros(1, length(pVec));
 meanBtdMWBR = zeros(1, length(pVec));
 meanBtdSCPF = zeros(1, length(pVec));
 meanEffRateGPS = zeros(1, length(pVec));
 meanEffRateDP = zeros(1, length(pVec));
-meanEffRateDPWA = zeros(1, length(pVec));
+meanEffRateDPoptimal = zeros(1, length(pVec));
 meanEffRateMWBR = zeros(1, length(pVec));
 meanEffRateSCPF = zeros(1, length(pVec));
 meanUtilGPS = zeros(1, length(pVec));
 meanUtilDP = zeros(1, length(pVec));
-meanUtilDPWA = zeros(1, length(pVec));
+meanUtilDPoptimal = zeros(1, length(pVec));
 meanUtilMWBR = zeros(1, length(pVec));
 meanUtilSCPF = zeros(1, length(pVec));
 
@@ -71,7 +71,7 @@ for i = 1:length(pVec)
     outageSCPF = zeros(1, simulationTime); 
     outageGPS = zeros(1, simulationTime);
     outageDP = zeros(1, simulationTime);
-    outageDPWA = zeros(1, simulationTime);
+    outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
     parfor t = 1:simulationTime
         loadDist = binornd(rhoVec, currentP * ones(size(rhoVec)));
@@ -113,7 +113,7 @@ for i = 1:length(pVec)
         end
         
         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-            bsAssociation{t});
+            bsAssociation{t}, perUserMinRateReq);
         ratesGPS{i, t} = r;
         outageGPS(t) = any(r < unique(minRateReq));
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...
@@ -124,10 +124,10 @@ for i = 1:length(pVec)
             bsAssociation{t}, minRateReq, 0);
         ratesDP{i, t} = r;
         outageDP(t) = any(r < unique(minRateReq));
-        [r, f, b] = DIFFPRICE(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-            bsAssociation{t}, minRateReq, 1);
-        ratesDPWA{i, t} = r;
-        outageDPWA(t) = any(r < unique(minRateReq));
+        [r, f, b] = DPoptimal(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+            bsAssociation{t});
+        ratesDPoptimal{i, t} = r;
+        outageDPoptimal(t) = any(r < unique(minRateReq));
         [r, f, b] = MAXWEIGHT_BR(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesMWBR{i, t} = r;
@@ -139,38 +139,38 @@ for i = 1:length(pVec)
     end
     
     pOutageDP(i) = sum(outageDP) / simulationTime;
-    pOutageDPWA(i) = sum(outageDPWA) / simulationTime;
+    pOutageDPoptimal(i) = sum(outageDPoptimal) / simulationTime;
     pOutageGPS(i) = sum(outageGPS) / simulationTime;
     pOutageMWBR(i) = sum(outageMWBR) / simulationTime;
     pOutageSCPF(i) = sum(outageSCPF) / simulationTime;
     
     flatRateGPS = horzcat(ratesGPS{i, :});
     flatRateDP = horzcat(ratesDP{i, :});
-    flatRateDPWA = horzcat(ratesDPWA{i, :});
+    flatRateDPoptimal = horzcat(ratesDPoptimal{i, :});
     flatRateMWBR = horzcat(ratesMWBR{i, :});
     flatRateSCPF = horzcat(ratesSCPF{i, :});
     meanBtdGPS(i) = mean(1./flatRateGPS);
     meanBtdDP(i) = mean(1./flatRateDP);
-    meanBtdDPWA(i) = mean(1./flatRateDPWA);
+    meanBtdDPoptimal(i) = mean(1./flatRateDPoptimal);
     meanBtdMWBR(i) = nanmean(1./flatRateMWBR);
     meanBtdSCPF(i) = mean(1./flatRateSCPF);
   
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
     btdGainVecDP(i) = mean(1./flatRateGPS) / mean(1./flatRateDP);
-    btdGainVecDPWA(i) = mean(1./flatRateGPS) / mean(1./flatRateDPWA);
+    btdGainVecDPoptimal(i) = mean(1./flatRateGPS) / mean(1./flatRateDPoptimal);
     btdGainVecMWBR(i) = mean(1./flatRateGPS) ...
         / nanmean(1./flatRateMWBR(flatRateMWBR > 1e-4));
     utilGPS = zeros(1, simulationTime);
     utilSCPF = zeros(1, simulationTime);
     utilDP = zeros(1, simulationTime);
-    utilDPWA = zeros(1, simulationTime);
+    utilDPoptimal = zeros(1, simulationTime);
     utilMWBR = zeros(1, simulationTime);
     
     parfor t = 1:simulationTime % stats
         utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, opBelongs{i, t});
         utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, opBelongs{i, t});
         utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t});
-        utilDPWA(t) = ratetoutil(ratesDPWA{i, t}, shareVec, opBelongs{i, t});
+        utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, opBelongs{i, t});
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             utilMWBR(t) = nan;
         else
@@ -179,12 +179,12 @@ for i = 1:length(pVec)
     end
     meanUtilGPS(i) = nanmean(utilGPS);
     meanUtilDP(i) = nanmean(utilDP);
-    meanUtilDPWA(i) = nanmean(utilDPWA);
+    meanUtilDPoptimal(i) = nanmean(utilDPoptimal);
     meanUtilMWBR(i) = nanmean(utilMWBR);
     meanUtilSCPF(i) = nanmean(utilSCPF);
     utilityGainVecSCPF(i) = nanmean(utilGPS) / nanmean(utilSCPF); 
     utilityGainVecDP(i) = nanmean(utilGPS) / nanmean(utilDP);
-    utilityGainVecDPWA(i) = nanmean(utilGPS) / nanmean(utilDPWA);
+    utilityGainVecDPoptimal(i) = nanmean(utilGPS) / nanmean(utilDPoptimal);
     utilityGainVecMWBR(i) = nanmean(utilGPS) / nanmean(utilMWBR);
     
 end
@@ -196,11 +196,11 @@ figure(7)
 hold on
 plot(1 - pVec, pOutageSCPF, 'b+-');
 plot(1 - pVec, pOutageDP, 'ro-');
-plot(1 - pVec, pOutageDPWA, 'ch-');
+plot(1 - pVec, pOutageDPoptimal, 'ch-');
 plot(1 - pVec, pOutageMWBR, 'kx-');
 plot(1 - pVec, pOutageGPS, 'gd-');
 title('P(outage) vs. variance factor');
-legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', ...
+legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', ...
     'MAXWEIGHT-best response', 'GPS');
 savefig(sprintf('figs/poutage-vs-var-uniform-%s.fig', datestring));
 
@@ -208,31 +208,31 @@ figure(1);
 hold on
 plot(1 - pVec, btdGainVecSCPF, 'b+-');
 plot(1 - pVec, btdGainVecDP, 'ro-');
-plot(1 - pVec, btdGainVecDPWA, 'ch-');
+plot(1 - pVec, btdGainVecDPoptimal, 'ch-');
 plot(1 - pVec, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
-legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
 figure(2);
 hold on
 plot(1 - pVec, meanUtilSCPF - meanUtilGPS, 'b+-');
 plot(1 - pVec, meanUtilDP - meanUtilGPS, 'ro-');
-plot(1 - pVec, meanUtilDPWA - meanUtilGPS, 'ch-');
+plot(1 - pVec, meanUtilDPoptimal - meanUtilGPS, 'ch-');
 plot(1 - pVec, meanUtilMWBR - meanUtilGPS, 'kx-');
 title('Utility gain over GPS vs. variance factor');
-legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/util-gain-vs-var-%s.fig', datestring));
 
 % Get some idea on slice idx
 idx = 2;
 btdGainVecSCPF1 = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
 btdGainVecDP1 = zeros(1, length(pVec));
-btdGainVecDPWA1 = zeros(1, length(pVec));
+btdGainVecDPoptimal1 = zeros(1, length(pVec));
 btdGainVecMWBR1 = zeros(1, length(pVec));
 meanBtdGPS1 = zeros(1, length(pVec));
 meanBtdDP1 = zeros(1, length(pVec));
-meanBtdDPWA1 = zeros(1, length(pVec));
+meanBtdDPoptimal1 = zeros(1, length(pVec));
 meanBtdMWBR1 = zeros(1, length(pVec));
 meanBtdSCPF1 = zeros(1, length(pVec));
 
@@ -242,8 +242,8 @@ for i = 1:length(pVec)
     flatRateGPS1 = flatRateGPS1(sliceIdx);
     flatRateDP1 = horzcat(ratesDP{i, :});
     flatRateDP1 = flatRateDP1(sliceIdx);
-    flatRateDPWA1 = horzcat(ratesDPWA{i, :});
-    flatRateDPWA1 = flatRateDPWA1(sliceIdx);
+    flatRateDPoptimal1 = horzcat(ratesDPoptimal{i, :});
+    flatRateDPoptimal1 = flatRateDPoptimal1(sliceIdx);
     flatRateMWBR1 = horzcat(ratesMWBR{i, :});
     flatRateMWBR1 = flatRateMWBR1(sliceIdx);
     flatRateMWBR1 = flatRateMWBR1(flatRateMWBR1 > 1e-4);
@@ -251,13 +251,13 @@ for i = 1:length(pVec)
     flatRateSCPF1 = flatRateSCPF1(sliceIdx);
     meanBtdGPS1(i) = mean(1./flatRateGPS1);
     meanBtdDP1(i) = mean(1./flatRateDP1);
-    meanBtdDPWA1(i) = mean(1./flatRateDPWA1);
+    meanBtdDPoptimal1(i) = mean(1./flatRateDPoptimal1);
     meanBtdMWBR1(i) = nanmean(1./flatRateMWBR1);
     meanBtdSCPF1(i) = mean(1./flatRateSCPF1);
     
     btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
     btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
-    btdGainVecDPWA1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPWA1);
+    btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
     btdGainVecMWBR1(i) = mean(1./flatRateGPS1) ...
         / nanmean(1./flatRateMWBR1);
 end
@@ -267,30 +267,30 @@ hold on
 plot(1 - pVec, meanBtdGPS1, 'gd-');
 plot(1 - pVec, meanBtdSCPF1, 'b+-');
 plot(1 - pVec, meanBtdDP1, 'ro-');
-plot(1 - pVec, meanBtdDPWA1, 'ch-');
+plot(1 - pVec, meanBtdDPoptimal1, 'ch-');
 plot(1 - pVec, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 2');
-legend('GPS', 'SCPF', 'DIFFPRICE-surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('GPS', 'SCPF', 'DIFFPRICE-surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
 hold on
 plot(1 - pVec, btdGainVecSCPF1, 'b+-');
 plot(1 - pVec, btdGainVecDP1, 'ro-');
-plot(1 - pVec, btdGainVecDPWA1, 'ch-');
+plot(1 - pVec, btdGainVecDPoptimal1, 'ch-');
 plot(1 - pVec, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 2');
-legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice2-%s.fig', datestring));
 
 idx = 1;
 btdGainVecSCPF1 = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
 btdGainVecDP1 = zeros(1, length(pVec));
-btdGainVecDPWA1 = zeros(1, length(pVec));
+btdGainVecDPoptimal1 = zeros(1, length(pVec));
 btdGainVecMWBR1 = zeros(1, length(pVec));
 meanBtdGPS1 = zeros(1, length(pVec));
 meanBtdDP1 = zeros(1, length(pVec));
-meanBtdDPWA1 = zeros(1, length(pVec));
+meanBtdDPoptimal1 = zeros(1, length(pVec));
 meanBtdMWBR1 = zeros(1, length(pVec));
 meanBtdSCPF1 = zeros(1, length(pVec));
 
@@ -300,8 +300,8 @@ for i = 1:length(pVec)
     flatRateGPS1 = flatRateGPS1(sliceIdx);
     flatRateDP1 = horzcat(ratesDP{i, :});
     flatRateDP1 = flatRateDP1(sliceIdx);
-    flatRateDPWA1 = horzcat(ratesDPWA{i, :});
-    flatRateDPWA1 = flatRateDPWA1(sliceIdx);
+    flatRateDPoptimal1 = horzcat(ratesDPoptimal{i, :});
+    flatRateDPoptimal1 = flatRateDPoptimal1(sliceIdx);
     flatRateMWBR1 = horzcat(ratesMWBR{i, :});
     flatRateMWBR1 = flatRateMWBR1(sliceIdx);
     flatRateMWBR1 = flatRateMWBR1(flatRateMWBR1 > 1e-4);
@@ -309,13 +309,13 @@ for i = 1:length(pVec)
     flatRateSCPF1 = flatRateSCPF1(sliceIdx);
     meanBtdGPS1(i) = mean(1./flatRateGPS1);
     meanBtdDP1(i) = mean(1./flatRateDP1);
-    meanBtdDPWA1(i) = mean(1./flatRateDPWA1);
+    meanBtdDPoptimal1(i) = mean(1./flatRateDPoptimal1);
     meanBtdMWBR1(i) = nanmean(1./flatRateMWBR1);
     meanBtdSCPF1(i) = mean(1./flatRateSCPF1);
     
     btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
     btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
-    btdGainVecDPWA1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPWA1);
+    btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
     btdGainVecMWBR1(i) = mean(1./flatRateGPS1) ...
         / nanmean(1./flatRateMWBR1);
 end
@@ -326,20 +326,20 @@ hold on
 plot(1 - pVec, meanBtdGPS1, 'gd-');
 plot(1 - pVec, meanBtdSCPF1, 'b+-');
 plot(1 - pVec, meanBtdDP1, 'ro-');
-plot(1 - pVec, meanBtdDPWA1, 'ch-');
+plot(1 - pVec, meanBtdDPoptimal1, 'ch-');
 plot(1 - pVec, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
-legend('GPS', 'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('GPS', 'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
 hold on
 plot(1 - pVec, btdGainVecSCPF1, 'b+-');
 plot(1 - pVec, btdGainVecDP1, 'ro-');
-plot(1 - pVec, btdGainVecDPWA1, 'ch-');
+plot(1 - pVec, btdGainVecDPoptimal1, 'ch-');
 plot(1 - pVec, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
-legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'MAXWEIGHT-best response');
+legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice1-%s.fig', datestring));
 
 

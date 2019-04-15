@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 3000;
+simulationTime = 2000;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
@@ -73,7 +73,7 @@ for i = 1:length(pVec)
     outageDP = zeros(1, simulationTime);
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
-    for t = 1:simulationTime
+    parfor t = 1:simulationTime
         loadDist = binornd(rhoVec, currentP * ones(size(rhoVec)));
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);

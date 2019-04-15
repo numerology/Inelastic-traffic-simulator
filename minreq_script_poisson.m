@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 5000;
+simulationTime = 10000;
 perBSLoad = 6;
 shareVec = [14/9 13/18 13/18];
 relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
@@ -21,52 +21,52 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-pVec = 1 ./ (2:7);
-btdGainVecSCPF = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
-btdGainVecDP = zeros(1, length(pVec));
-btdGainVecDPoptimal = zeros(1, length(pVec));
-btdGainVecMWBR = zeros(1, length(pVec));
-utilityGainVecSCPF = zeros(1, length(pVec)); % overall utility gain over (flexible) GPS.
-utilityGainVecDP = zeros(1, length(pVec));
-utilityGainVecDPoptimal = zeros(1, length(pVec));
-utilityGainVecMWBR = zeros(1, length(pVec));
-ratesGPS = cell(length(pVec), simulationTime); % Save ordinary data for regression.
-ratesDP = cell(length(pVec), simulationTime);
-ratesDPoptimal = cell(length(pVec), simulationTime);
-ratesMWBR = cell(length(pVec), simulationTime);
-ratesSCPF = cell(length(pVec), simulationTime);
-opBelongs = cell(length(pVec), simulationTime);
+varFactors = 1:5;
+btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
+btdGainVecDP = zeros(1, length(varFactors));
+btdGainVecDPoptimal = zeros(1, length(varFactors));
+btdGainVecMWBR = zeros(1, length(varFactors));
+utilityGainVecSCPF = zeros(1, length(varFactors)); % overall utility gain over (flexible) GPS.
+utilityGainVecDP = zeros(1, length(varFactors));
+utilityGainVecDPoptimal = zeros(1, length(varFactors));
+utilityGainVecMWBR = zeros(1, length(varFactors));
+ratesGPS = cell(length(varFactors), simulationTime); % Save ordinary data for regression.
+ratesDP = cell(length(varFactors), simulationTime);
+ratesDPoptimal = cell(length(varFactors), simulationTime);
+ratesMWBR = cell(length(varFactors), simulationTime);
+ratesSCPF = cell(length(varFactors), simulationTime);
+opBelongs = cell(length(varFactors), simulationTime);
 
-pOutageSCPF = zeros(1, length(pVec)); % it's an outage as long as there is one user not meeting minreq.
-pOutageGPS = zeros(1, length(pVec));
-pOutageDP = zeros(1, length(pVec));
-pOutageDPoptimal = zeros(1, length(pVec));
-pOutageMWBR = zeros(1, length(pVec));
+pOutageSCPF = zeros(1, length(varFactors)); % it's an outage as long as there is one user not meeting minreq.
+pOutageGPS = zeros(1, length(varFactors));
+pOutageDP = zeros(1, length(varFactors));
+pOutageDPoptimal = zeros(1, length(varFactors));
+pOutageMWBR = zeros(1, length(varFactors));
 
-meanBtdGPS = zeros(1, length(pVec));
-meanBtdDP = zeros(1, length(pVec));
-meanBtdDPo = zeros(1, length(pVec));
-meanBtdMWBR = zeros(1, length(pVec));
-meanBtdSCPF = zeros(1, length(pVec));
-meanEffRateGPS = zeros(1, length(pVec));
-meanEffRateDP = zeros(1, length(pVec));
-meanEffRateDPoptimal = zeros(1, length(pVec));
-meanEffRateMWBR = zeros(1, length(pVec));
-meanEffRateSCPF = zeros(1, length(pVec));
-meanUtilGPS = zeros(1, length(pVec));
-meanUtilDP = zeros(1, length(pVec));
-meanUtilDPoptimal = zeros(1, length(pVec));
-meanUtilMWBR = zeros(1, length(pVec));
-meanUtilSCPF = zeros(1, length(pVec));
+meanBtdGPS = zeros(1, length(varFactors));
+meanBtdDP = zeros(1, length(varFactors));
+meanBtdDPo = zeros(1, length(varFactors));
+meanBtdMWBR = zeros(1, length(varFactors));
+meanBtdSCPF = zeros(1, length(varFactors));
+meanEffRateGPS = zeros(1, length(varFactors));
+meanEffRateDP = zeros(1, length(varFactors));
+meanEffRateDPoptimal = zeros(1, length(varFactors));
+meanEffRateMWBR = zeros(1, length(varFactors));
+meanEffRateSCPF = zeros(1, length(varFactors));
+meanUtilGPS = zeros(1, length(varFactors));
+meanUtilDP = zeros(1, length(varFactors));
+meanUtilDPoptimal = zeros(1, length(varFactors));
+meanUtilMWBR = zeros(1, length(varFactors));
+meanUtilSCPF = zeros(1, length(varFactors));
 
 %% Run simulations
-for i = 1:length(pVec)
-    currentP = pVec(i);
-    rhoVec = (relativeRhoVec / currentP);
+for i = 1:length(varFactors)
+    varFactor = varFactors(i);
+    rhoVec = relativeRhoVec / varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
-        minSharePerBS, currentP, 1);
+        minSharePerBS, varFactor, 0);
     
     outageSCPF = zeros(1, simulationTime); 
     outageGPS = zeros(1, simulationTime);
@@ -74,7 +74,7 @@ for i = 1:length(pVec)
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
     parfor t = 1:simulationTime
-        loadDist = binornd(rhoVec, currentP * ones(size(rhoVec)));
+        loadDist = varFactor * poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);
         opVec = zeros(1, nUsers);
@@ -194,11 +194,11 @@ datestring = datestr(now, 30);
 
 figure(7)
 hold on
-plot(1 - pVec, pOutageSCPF, 'b+-');
-plot(1 - pVec, pOutageDP, 'ro-');
-plot(1 - pVec, pOutageDPoptimal, 'ch-');
-plot(1 - pVec, pOutageMWBR, 'kx-');
-plot(1 - pVec, pOutageGPS, 'gd-');
+plot(1 - varFactors, pOutageSCPF, 'b+-');
+plot(1 - varFactors, pOutageDP, 'ro-');
+plot(1 - varFactors, pOutageDPoptimal, 'ch-');
+plot(1 - varFactors, pOutageMWBR, 'kx-');
+plot(1 - varFactors, pOutageGPS, 'gd-');
 title('P(outage) vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', ...
     'MAXWEIGHT-best response', 'GPS');
@@ -206,37 +206,37 @@ savefig(sprintf('figs/poutage-vs-var-uniform-%s.fig', datestring));
 
 figure(1);
 hold on
-plot(1 - pVec, btdGainVecSCPF, 'b+-');
-plot(1 - pVec, btdGainVecDP, 'ro-');
-plot(1 - pVec, btdGainVecDPoptimal, 'ch-');
-plot(1 - pVec, btdGainVecMWBR, 'kx-');
+plot(1 - varFactors, btdGainVecSCPF, 'b+-');
+plot(1 - varFactors, btdGainVecDP, 'ro-');
+plot(1 - varFactors, btdGainVecDPoptimal, 'ch-');
+plot(1 - varFactors, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
 figure(2);
 hold on
-plot(1 - pVec, meanUtilSCPF - meanUtilGPS, 'b+-');
-plot(1 - pVec, meanUtilDP - meanUtilGPS, 'ro-');
-plot(1 - pVec, meanUtilDPoptimal - meanUtilGPS, 'ch-');
-plot(1 - pVec, meanUtilMWBR - meanUtilGPS, 'kx-');
+plot(1 - varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
+plot(1 - varFactors, meanUtilDP - meanUtilGPS, 'ro-');
+plot(1 - varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
+plot(1 - varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
 title('Utility gain over GPS vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/util-gain-vs-var-%s.fig', datestring));
 
 % Get some idea on slice idx
 idx = 2;
-btdGainVecSCPF1 = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
-btdGainVecDP1 = zeros(1, length(pVec));
-btdGainVecDPoptimal1 = zeros(1, length(pVec));
-btdGainVecMWBR1 = zeros(1, length(pVec));
-meanBtdGPS1 = zeros(1, length(pVec));
-meanBtdDP1 = zeros(1, length(pVec));
-meanBtdDPoptimal1 = zeros(1, length(pVec));
-meanBtdMWBR1 = zeros(1, length(pVec));
-meanBtdSCPF1 = zeros(1, length(pVec));
+btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
+btdGainVecDP1 = zeros(1, length(varFactors));
+btdGainVecDPoptimal1 = zeros(1, length(varFactors));
+btdGainVecMWBR1 = zeros(1, length(varFactors));
+meanBtdGPS1 = zeros(1, length(varFactors));
+meanBtdDP1 = zeros(1, length(varFactors));
+meanBtdDPoptimal1 = zeros(1, length(varFactors));
+meanBtdMWBR1 = zeros(1, length(varFactors));
+meanBtdSCPF1 = zeros(1, length(varFactors));
 
-for i = 1:length(pVec)
+for i = 1:length(varFactors)
     sliceIdx = (horzcat(opBelongs{i, :}) == idx);
     flatRateGPS1 = horzcat(ratesGPS{i, :});
     flatRateGPS1 = flatRateGPS1(sliceIdx);
@@ -264,37 +264,37 @@ end
 
 figure(3)
 hold on
-plot(1 - pVec, meanBtdGPS1, 'gd-');
-plot(1 - pVec, meanBtdSCPF1, 'b+-');
-plot(1 - pVec, meanBtdDP1, 'ro-');
-plot(1 - pVec, meanBtdDPoptimal1, 'ch-');
-plot(1 - pVec, meanBtdMWBR1, 'kx-');
+plot(1 - varFactors, meanBtdGPS1, 'gd-');
+plot(1 - varFactors, meanBtdSCPF1, 'b+-');
+plot(1 - varFactors, meanBtdDP1, 'ro-');
+plot(1 - varFactors, meanBtdDPoptimal1, 'ch-');
+plot(1 - varFactors, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 2');
 legend('GPS', 'SCPF', 'DIFFPRICE-surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
 hold on
-plot(1 - pVec, btdGainVecSCPF1, 'b+-');
-plot(1 - pVec, btdGainVecDP1, 'ro-');
-plot(1 - pVec, btdGainVecDPoptimal1, 'ch-');
-plot(1 - pVec, btdGainVecMWBR1, 'kx-');
+plot(1 - varFactors, btdGainVecSCPF1, 'b+-');
+plot(1 - varFactors, btdGainVecDP1, 'ro-');
+plot(1 - varFactors, btdGainVecDPoptimal1, 'ch-');
+plot(1 - varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 2');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice2-%s.fig', datestring));
 
 idx = 1;
-btdGainVecSCPF1 = zeros(1, length(pVec)); % BTD gain over (flexible) GPS.
-btdGainVecDP1 = zeros(1, length(pVec));
-btdGainVecDPoptimal1 = zeros(1, length(pVec));
-btdGainVecMWBR1 = zeros(1, length(pVec));
-meanBtdGPS1 = zeros(1, length(pVec));
-meanBtdDP1 = zeros(1, length(pVec));
-meanBtdDPoptimal1 = zeros(1, length(pVec));
-meanBtdMWBR1 = zeros(1, length(pVec));
-meanBtdSCPF1 = zeros(1, length(pVec));
+btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
+btdGainVecDP1 = zeros(1, length(varFactors));
+btdGainVecDPoptimal1 = zeros(1, length(varFactors));
+btdGainVecMWBR1 = zeros(1, length(varFactors));
+meanBtdGPS1 = zeros(1, length(varFactors));
+meanBtdDP1 = zeros(1, length(varFactors));
+meanBtdDPoptimal1 = zeros(1, length(varFactors));
+meanBtdMWBR1 = zeros(1, length(varFactors));
+meanBtdSCPF1 = zeros(1, length(varFactors));
 
-for i = 1:length(pVec)
+for i = 1:length(varFactors)
     sliceIdx = (horzcat(opBelongs{i, :}) == idx);
     flatRateGPS1 = horzcat(ratesGPS{i, :});
     flatRateGPS1 = flatRateGPS1(sliceIdx);
@@ -323,25 +323,21 @@ end
 
 figure(5)
 hold on
-plot(1 - pVec, meanBtdGPS1, 'gd-');
-plot(1 - pVec, meanBtdSCPF1, 'b+-');
-plot(1 - pVec, meanBtdDP1, 'ro-');
-plot(1 - pVec, meanBtdDPoptimal1, 'ch-');
-plot(1 - pVec, meanBtdMWBR1, 'kx-');
+plot(1 - varFactors, meanBtdGPS1, 'gd-');
+plot(1 - varFactors, meanBtdSCPF1, 'b+-');
+plot(1 - varFactors, meanBtdDP1, 'ro-');
+plot(1 - varFactors, meanBtdDPoptimal1, 'ch-');
+plot(1 - varFactors, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
 legend('GPS', 'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
 hold on
-plot(1 - pVec, btdGainVecSCPF1, 'b+-');
-plot(1 - pVec, btdGainVecDP1, 'ro-');
-plot(1 - pVec, btdGainVecDPoptimal1, 'ch-');
-plot(1 - pVec, btdGainVecMWBR1, 'kx-');
+plot(1 - varFactors, btdGainVecSCPF1, 'b+-');
+plot(1 - varFactors, btdGainVecDP1, 'ro-');
+plot(1 - varFactors, btdGainVecDPoptimal1, 'ch-');
+plot(1 - varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice1-%s.fig', datestring));
-
-
-
-

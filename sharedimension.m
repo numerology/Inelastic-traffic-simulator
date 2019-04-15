@@ -1,5 +1,5 @@
 function [shareDist] = sharedimension(minRateReq, meanLoadDist, shareVec, ...
-    eps, minShare, prob)
+    eps, minShare, prob, binomial)
 % sharedimension Find a share allocation for each slice such that the
 % minimal rate requirement is satisfied with probability > 1-eps.
 % Params:
@@ -7,6 +7,8 @@ function [shareDist] = sharedimension(minRateReq, meanLoadDist, shareVec, ...
 % meanLoadDist: V x B
 % shareVec: 1 x V
 % minShare: minimal share allocated to a slice at each resource.
+% binomial: logical, 1 when dimension according to binomial distribution, 0
+% when poisson dist.
 % Return:
 % shareDist: V x B
 
@@ -17,10 +19,15 @@ spareShare = zeros(B, 1);
 shareDist = zeros(size(meanLoadDist));
 for v = 1:V
     for b = 1:B
-%         minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
-%             * minRateReq(v);
-        minimalShare(v, b) = binoinv(1 - eps, meanLoadDist(v, b), prob) ...
-            * minRateReq(v);
+        if (binomial)
+            minimalShare(v, b) = binoinv(1 - eps, meanLoadDist(v, b), prob) ...
+                * minRateReq(v);
+        else
+            minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
+                * minRateReq(v);
+        end
+
+        
     end
 end
 % check 

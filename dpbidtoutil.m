@@ -11,10 +11,15 @@ function [util] = dpbidtoutil(cBid, bs, opBelongs, capacityPerUser, ...
 
 nUsers = length(bs);
 nSlices = length(shareVec);
-nBasestation = max(bs);
+nBasestations = size(shareDist, 2);
 ratesPerUser = zeros(1, nUsers);
 
-for b = 1:nBasestation
+assert(length(cBid) == nUsers, 'Invalid length of bids.');
+assert(length(opBelongs) == nUsers, 'Invalid length of opBelongs.');
+assert(length(capacityPerUser) == nUsers, 'Invalid length of capacity.');
+assert(all(size(shareDist) == [nSlices, nBasestations]));
+
+for b = 1:nBasestations
     lb = sum(cBid(bs == b));
     if (lb <= 1)
         ratesPerUser(bs == b) = capacityPerUser(bs == b) .* cBid(bs == b) ./ lb;
@@ -41,6 +46,8 @@ for b = 1:nBasestation
         end
     end
 end
+
+assert(all(ratesPerUser > 0), 'negative user rates');
 
 util = 0;
 for v = 1:nSlices

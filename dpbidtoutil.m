@@ -51,6 +51,9 @@ assert(all(ratesPerUser > 0), 'negative user rates');
 
 util = 0;
 for v = 1:nSlices
+    if (sum(opBelongs == v) == 0)
+        continue
+    end
     util = util + shareVec(v) / sum(opBelongs == v) * sum(log(ratesPerUser(opBelongs == v)));
 end
 

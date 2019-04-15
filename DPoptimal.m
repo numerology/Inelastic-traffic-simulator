@@ -31,7 +31,7 @@ constVec = shareVec';
 for v = 1:nSlices
     constMat(v, :) = (opBelongs == v)';
 end
-initialBid = 1 / nUsers * ones(nUsers, 1);
+initialBid = 1e-5 * ones(nUsers, 1);
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
     shareVec, shareDist), initialBid, constMat, constVec, [], [], 1e-5 * ones(nUsers, 1), ...
     ones(nUsers, 1), [], options);

@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -J min_rate_req_simulation
+#SBATCH -e matlabjob.%j.err
+#SBATCH -o matlabjob.%j.out
+#SBATCH -N 1
+#SBATCH -n 48
+#SBATCH -p skx-dev
+#SBATCH -t 2:00:00
+#SBATCH -A Statistical-multiple
+#SBATCH --mail-user=jxzheng@utexas.edu
+#SBATCH --mail-type=all
+
+module load matlab
+matlab -nodesktop -nodisplay -nosplash < minreq_script_poisson.m

@@ -66,11 +66,21 @@ if (waterfilling)
     for b = 1:nBasestations
         sliceUserDist(b) = sum(opBelongs == v & bs == b);
     end
-    loVec = waterfill(minBidReq, shareVec(v), sliceUserDist);
+    surplus = shareVec(v) - sum(minBidReq);
+    if (surplus >= 0)
+        % Can fulfill all the min rate req.
+        addition = waterfill(minBidReq, surplus, sliceUserDist); % TODO: weights may vary?
+        loVec = minBidReq + addition;
+    else
+        % Cannot fulfill the minimal rate req.
+        % Assign bid propto minBidReq
+        loVec = shareVec(v) .* minBidReq ./ sum(minBidReq);
+    end
     nextBid = cBid;
     for b = 1:nBasestations
         nextBid(opBelongs == v & bs == b) = loVec(b) / sliceUserDist(b);
     end
+    assert(all(nextBid > 0), 'Unexpected negative bid.');
 else
     surplusShare = shareVec(v) - sum(minBidReq);
     nextBid = cBid;

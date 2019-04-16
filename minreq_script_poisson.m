@@ -134,6 +134,9 @@ for i = 1:length(varFactors)
             bsAssociation{t}, minRateReq, 1);
         ratesDPWF{i, t} = r;
         outageDPWF(t) = any(r < unique(minRateReq));
+        if (sum(ratesDPWF{i, t} < 1e-4) > 0)
+            ratesDPWF{i, t}(ratesDPWF{i, t} < 1e-4) = nan;
+        end
         [r, f, b] = DPoptimal(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesDPoptimal{i, t} = r;
@@ -170,7 +173,8 @@ for i = 1:length(varFactors)
   
     btdGainVecSCPF(i) = mean(1./flatRateGPS) / mean(1./flatRateSCPF); 
     btdGainVecDP(i) = mean(1./flatRateGPS) / mean(1./flatRateDP);
-    btdGainVecDPWF(i) = mean(1./flatRateGPS) / mean(1./flatRateDPWF);
+    btdGainVecDPWF(i) = mean(1./flatRateGPS) ...
+        / nanmean(1./flatRateDPWF(flatRateDPWF > 1e-4));
     btdGainVecDPoptimal(i) = mean(1./flatRateGPS) / mean(1./flatRateDPoptimal);
     btdGainVecMWBR(i) = mean(1./flatRateGPS) ...
         / nanmean(1./flatRateMWBR(flatRateMWBR > 1e-4));
@@ -185,7 +189,11 @@ for i = 1:length(varFactors)
         utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, opBelongs{i, t});
         utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, opBelongs{i, t});
         utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t});
-        utilDPWF(t) = ratetoutil(ratesDPWF{i, t}, shareVec, opBelongs{i, t});
+        if (sum(ratesDPWF{i, t} < 1e-4) > 0)
+            utilDPWF(t) = nan;
+        else
+            utilDPWF(t) = ratetoutil(ratesDPWF{i, t}, shareVec, opBelongs{i, t});
+        end
         utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, opBelongs{i, t});
         if (sum(ratesMWBR{i, t} < 1e-4) > 0)
             utilMWBR(t) = nan;
@@ -287,7 +295,7 @@ for i = 1:length(varFactors)
     
     btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
     btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
-    btdGainVecDPWF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPWF1);
+    btdGainVecDPWF1(i) = mean(1./flatRateGPS1) / nanmean(1./flatRateDPWF1);
     btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
     btdGainVecMWBR1(i) = mean(1./flatRateGPS1) ...
         / nanmean(1./flatRateMWBR1);
@@ -353,7 +361,7 @@ for i = 1:length(varFactors)
     
     btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
     btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
-    btdGainVecDPWF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPWF1);
+    btdGainVecDPWF1(i) = mean(1./flatRateGPS1) / nanmean(1./flatRateDPWF1);
     btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
     btdGainVecMWBR1(i) = mean(1./flatRateGPS1) ...
         / nanmean(1./flatRateMWBR1);

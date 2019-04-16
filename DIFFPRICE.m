@@ -37,10 +37,11 @@ cnt = 0;
 while(norm(prevBid - cBid) > eps) 
     prevBid = cBid;
     for v = 1:nSlices
-        cBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
+        nextBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
             opBelongs, bs, capacityPerUser, minReq(v), waterfilling);
     end
-    assert(all(cBid > 0), 'Unexpected negative bids.')
+    assert(all(nextBid > 0), 'Unexpected negative bids.')
+    cBid = nextBid;
     cnt = cnt + 1;
     if (cnt == 40)
         disp('break to prevent looping forever, convergence might not achieved.');

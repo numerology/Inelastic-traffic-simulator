@@ -1,10 +1,10 @@
 % no gui version of mainminreq.m
 clc, close all, clear all;
-%parpool('local', 4);
+parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 10;
+simulationTime = 3000;
 perBSLoad = 6;
 shareVec = [1 1 1];
 relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
@@ -73,7 +73,7 @@ for i = 1:length(varFactors)
     outageDP = zeros(1, simulationTime);
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
-    for t = 1:simulationTime
+    parfor t = 1:simulationTime
         loadDist = varFactor * poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);

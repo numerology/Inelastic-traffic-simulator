@@ -74,14 +74,16 @@ if (waterfilling)
 else
     surplusShare = shareVec(v) - sum(minBidReq);
     nextBid = cBid;
-    for b = 1:nBasestations
-        nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
-            & bs == b);
-    end
-
-    nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
-        / sum(opBelongs == v);
+    if (surplusShare < 0)
+        nextBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
+    else
+        for b = 1:nBasestations
+            nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
+                & bs == b);
+        end
+        nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
+            / sum(opBelongs == v);
+    end   
 end
-
 
 end

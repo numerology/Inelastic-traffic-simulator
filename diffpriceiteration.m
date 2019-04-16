@@ -58,6 +58,9 @@ for b = 1:nBasestations
             (nob * minRate / capacity - shareDist(v, b)) - 1);
     end
 end
+% If there is no other slices, possible to have minBidReq == 0.
+% Set a lowerbound to prevent this.
+minBidReq(minBidReq < 1e-4) = 1e-4;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
 
 % distribute lob to each user.

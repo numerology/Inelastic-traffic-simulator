@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 3000;
+simulationTime = 10000;
 perBSLoad = 6;
 shareVec = [1 1 1];
 relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];

@@ -227,7 +227,7 @@ figure(1);
 hold on
 plot(varFactors, btdGainVecSCPF, 'b+-');
 plot(varFactors, btdGainVecDP, 'ro-');
-plot(varFactors, btdGainVecDP, 'bx:');
+plot(varFactors, btdGainVecDPWF, 'bx:');
 plot(varFactors, btdGainVecDPoptimal, 'ch-');
 plot(varFactors, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
@@ -238,7 +238,7 @@ figure(2);
 hold on
 plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
 plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
-plot(varFactors, meanUtilDP - meanUtilGPS, 'bx:');
+plot(varFactors, meanUtilDPWF - meanUtilGPS, 'bx:');
 plot(varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
 plot(varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
 title('Utility gain over GPS vs. variance factor');
@@ -371,7 +371,7 @@ figure(6)
 hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecDP1, 'ro-');
-plot(varFactors, btdGainVecDP1, 'bx:');
+plot(varFactors, btdGainVecDPWF1, 'bx:');
 plot(varFactors, btdGainVecDPoptimal1, 'ch-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');

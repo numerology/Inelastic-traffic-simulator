@@ -1,19 +1,19 @@
 % no gui version of mainminreq.m
 clc, close all, clear all;
-parpool('local', 40);
+%parpool('local', 4);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 10000;
+simulationTime = 10;
 perBSLoad = 6;
-shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-                  perBSLoad * [2/3 1/6 1/6];
-                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+shareVec = [1 1 1];
+relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.25 * capacity / (3 * perBSLoad) * ones(1, nSlice); % min rate requirement
+minRateReq = 0.25 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -73,7 +73,7 @@ for i = 1:length(varFactors)
     outageDP = zeros(1, simulationTime);
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
-    parfor t = 1:simulationTime
+    for t = 1:simulationTime
         loadDist = varFactor * poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);

@@ -13,27 +13,29 @@ function [userRates, userFraction, btd] = flexibleGPS(netSettings, ...
 nUsers = netSettings.users;
 nSlices = size(opSettings.s_o, 2);
 nBasestations = netSettings.bsNS;
-shareVec = opSettings.s_o;
+%shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
 
 for b = 1:nBasestations
     ops = unique(opBelongs(bs == b));
-    sumWeight = sum(shareVec(ops));
+    sumWeight = sum(shareDist(ops, b));
     for v = 1:nSlices
         nLocalUsers = sum(opBelongs == v & bs == b);
-        minRequiredBid = sum(minRateReq(opBelongs == v & bs == b)) ...
-            * sumWeight;
+        minRequiredFraction = sum(minRateReq(opBelongs == v & bs == b) ...
+            ./capacityPerUser(opBelongs == v & bs == b));
+        minRequiredBid = minRequiredFraction * sumWeight;
         if (minRequiredBid > shareDist(v, b))
             % Allocate bid propto minRateReq
-            userFraction(opBelongs == v & bs == b) = shareDist(v, b) ...
-                ./ sum(minRateReq(opBelongs == v & bs == b)) ./ sumWeight ...
-                .* minRateReq(opBelongs == v & bs == b);
+            userFraction(opBelongs == v & bs == b) = shareDist(v, b) / sumWeight .* ...
+                minRateReq(opBelongs == v & bs == b) ./ capacityPerUser(opBelongs == v & bs == b) ...
+                ./ minRequiredFraction;
         else
             % First allocate the minimal, then equal allocation
             surPlus = shareDist(v, b) - minRequiredBid;
             userFraction(opBelongs == v & bs == b) = minRateReq(opBelongs == v & bs == b) ...
+                ./ capacityPerUser(opBelongs == v & bs == b) ...
                 + surPlus / nLocalUsers / sumWeight; 
         end
     end

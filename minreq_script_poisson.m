@@ -6,14 +6,14 @@ nSlice = 3;
 
 simulationTime = 10000;
 perBSLoad = 6;
-shareVec = [1 1 1];
-relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
+shareVec = [14/9 13/18 13/18];
+relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [2/3 1/6 1/6];
+                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.25 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
+minRateReq = 0.25 * capacity / (3 * perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -194,11 +194,11 @@ datestring = datestr(now, 30);
 
 figure(7)
 hold on
-plot(1 - varFactors, pOutageSCPF, 'b+-');
-plot(1 - varFactors, pOutageDP, 'ro-');
-plot(1 - varFactors, pOutageDPoptimal, 'ch-');
-plot(1 - varFactors, pOutageMWBR, 'kx-');
-plot(1 - varFactors, pOutageGPS, 'gd-');
+plot(varFactors, pOutageSCPF, 'b+-');
+plot(varFactors, pOutageDP, 'ro-');
+plot(varFactors, pOutageDPoptimal, 'ch-');
+plot(varFactors, pOutageMWBR, 'kx-');
+plot(varFactors, pOutageGPS, 'gd-');
 title('P(outage) vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', ...
     'MAXWEIGHT-best response', 'GPS');

@@ -58,6 +58,7 @@ for b = 1:nBasestations
             (nob * minRate / capacity - shareDist(v, b)) - 1);
     end
 end
+assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
 
 % distribute lob to each user.
 % assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');

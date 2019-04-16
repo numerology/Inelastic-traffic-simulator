@@ -206,20 +206,20 @@ savefig(sprintf('figs/poutage-vs-var-uniform-%s.fig', datestring));
 
 figure(1);
 hold on
-plot(1 - varFactors, btdGainVecSCPF, 'b+-');
-plot(1 - varFactors, btdGainVecDP, 'ro-');
-plot(1 - varFactors, btdGainVecDPoptimal, 'ch-');
-plot(1 - varFactors, btdGainVecMWBR, 'kx-');
+plot(varFactors, btdGainVecSCPF, 'b+-');
+plot(varFactors, btdGainVecDP, 'ro-');
+plot(varFactors, btdGainVecDPoptimal, 'ch-');
+plot(varFactors, btdGainVecMWBR, 'kx-');
 title('BTD gain over GPS vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
 figure(2);
 hold on
-plot(1 - varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
-plot(1 - varFactors, meanUtilDP - meanUtilGPS, 'ro-');
-plot(1 - varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
-plot(1 - varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
+plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
+plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
+plot(varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
+plot(varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
 title('Utility gain over GPS vs. variance factor');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/util-gain-vs-var-%s.fig', datestring));
@@ -264,21 +264,21 @@ end
 
 figure(3)
 hold on
-plot(1 - varFactors, meanBtdGPS1, 'gd-');
-plot(1 - varFactors, meanBtdSCPF1, 'b+-');
-plot(1 - varFactors, meanBtdDP1, 'ro-');
-plot(1 - varFactors, meanBtdDPoptimal1, 'ch-');
-plot(1 - varFactors, meanBtdMWBR1, 'kx-');
+plot(varFactors, meanBtdGPS1, 'gd-');
+plot(varFactors, meanBtdSCPF1, 'b+-');
+plot(varFactors, meanBtdDP1, 'ro-');
+plot(varFactors, meanBtdDPoptimal1, 'ch-');
+plot(varFactors, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 2');
 legend('GPS', 'SCPF', 'DIFFPRICE-surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
 hold on
-plot(1 - varFactors, btdGainVecSCPF1, 'b+-');
-plot(1 - varFactors, btdGainVecDP1, 'ro-');
-plot(1 - varFactors, btdGainVecDPoptimal1, 'ch-');
-plot(1 - varFactors, btdGainVecMWBR1, 'kx-');
+plot(varFactors, btdGainVecSCPF1, 'b+-');
+plot(varFactors, btdGainVecDP1, 'ro-');
+plot(varFactors, btdGainVecDPoptimal1, 'ch-');
+plot(varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 2');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice2-%s.fig', datestring));
@@ -323,21 +323,21 @@ end
 
 figure(5)
 hold on
-plot(1 - varFactors, meanBtdGPS1, 'gd-');
-plot(1 - varFactors, meanBtdSCPF1, 'b+-');
-plot(1 - varFactors, meanBtdDP1, 'ro-');
-plot(1 - varFactors, meanBtdDPoptimal1, 'ch-');
-plot(1 - varFactors, meanBtdMWBR1, 'kx-');
+plot(varFactors, meanBtdGPS1, 'gd-');
+plot(varFactors, meanBtdSCPF1, 'b+-');
+plot(varFactors, meanBtdDP1, 'ro-');
+plot(varFactors, meanBtdDPoptimal1, 'ch-');
+plot(varFactors, meanBtdMWBR1, 'kx-');
 title('Average btd vs. variance factor of slice 1');
 legend('GPS', 'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
 hold on
-plot(1 - varFactors, btdGainVecSCPF1, 'b+-');
-plot(1 - varFactors, btdGainVecDP1, 'ro-');
-plot(1 - varFactors, btdGainVecDPoptimal1, 'ch-');
-plot(1 - varFactors, btdGainVecMWBR1, 'kx-');
+plot(varFactors, btdGainVecSCPF1, 'b+-');
+plot(varFactors, btdGainVecDP1, 'ro-');
+plot(varFactors, btdGainVecDPoptimal1, 'ch-');
+plot(varFactors, btdGainVecMWBR1, 'kx-');
 title('BTD gain over GPS vs. variance factor on slice 1');
 legend('SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal', 'MAXWEIGHT-best response');
 savefig(sprintf('figs/btd-gain-vs-var-slice1-%s.fig', datestring));

@@ -7,13 +7,13 @@ nSlice = 3;
 simulationTime = 1000;
 perBSLoad = 6;
 shareVec = [1 1 1];
-relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
-% shareVec = [14/9 13/18 13/18];
-% relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-%                   perBSLoad * [2/3 1/6 1/6];
-%                   3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+% relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
+shareVec = [14/9 13/18 13/18];
+relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [2/3 1/6 1/6];
+                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
@@ -69,7 +69,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.25 * capacity / (varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
+    minRateReq = 0.25 * capacity / (3 * varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0);
     

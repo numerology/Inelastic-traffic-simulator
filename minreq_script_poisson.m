@@ -6,14 +6,14 @@ nSlice = 3;
 
 simulationTime = 5000;
 perBSLoad = 6;
-shareVec = [1 1 1];
-relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
-% shareVec = [14/9 13/18 13/18];
-% relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-%                   perBSLoad * [2/3 1/6 1/6];
-%                   3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+% shareVec = [1 1 1];
+% relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
+shareVec = [14/9 13/18 13/18];
+relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [2/3 1/6 1/6];
+                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
@@ -118,8 +118,9 @@ for i = 1:length(varFactors)
             perUserMinRateReq(opVec == v) = minRateReq(v);
         end
         
-        [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-            bsAssociation{t}, perUserMinRateReq);
+%         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+%             bsAssociation{t}, perUserMinRateReq);
+        [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
         ratesGPS{i, t} = r;
         outageGPS(t) = any(r < unique(minRateReq));
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...

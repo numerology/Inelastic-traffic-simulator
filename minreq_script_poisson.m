@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 5000;
+simulationTime = 1000;
 perBSLoad = 6;
 shareVec = [1 1 1];
 relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
@@ -25,7 +25,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:5;
+varFactors = 1:4;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
 btdGainVecDPWF = zeros(1, length(varFactors));
@@ -67,7 +67,7 @@ meanUtilSCPF = zeros(1, length(varFactors));
 %% Run simulations
 for i = 1:length(varFactors)
     varFactor = varFactors(i);
-    rhoVec = relativeRhoVec / varFactor;
+    rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
@@ -80,7 +80,7 @@ for i = 1:length(varFactors)
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
     parfor t = 1:simulationTime
-        loadDist = varFactor * poissrnd(rhoVec);
+        loadDist = poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);
         opVec = zeros(1, nUsers);

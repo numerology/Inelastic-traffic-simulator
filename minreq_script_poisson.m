@@ -6,14 +6,14 @@ nSlice = 3;
 
 simulationTime = 5000;
 perBSLoad = 6;
-% shareVec = [1 1 1];
-% relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
-%                   perBSLoad * [1/3 1/3 1/3];
-%                   perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
-shareVec = [14/9 13/18 13/18];
-relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
-                  perBSLoad * [2/3 1/6 1/6];
-                  3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
+shareVec = [1 1 1];
+relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3];
+                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
+% shareVec = [14/9 13/18 13/18];
+% relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+%                   perBSLoad * [2/3 1/6 1/6];
+%                   3 * perBSLoad * [2/9 7/18 7/18]]'; % mean load distribution, V x B
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
@@ -225,6 +225,7 @@ bmWoGPS = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'DIFFPRICE-
     'MAXWEIGHT-best response'};
 
 figure(7)
+grid on
 hold on
 plot(varFactors, pOutageSCPF, 'b+-');
 plot(varFactors, pOutageDP, 'ro-');
@@ -237,6 +238,7 @@ legend(benchmarks);
 savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
 
 figure(1);
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF, 'b+-');
 plot(varFactors, btdGainVecDP, 'ro-');
@@ -248,6 +250,7 @@ legend(bmWoGPS);
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
 figure(2);
+grid on
 hold on
 plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
 plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
@@ -303,6 +306,7 @@ for i = 1:length(varFactors)
 end
 
 figure(3)
+grid on
 hold on
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdDP1, 'ro-');
@@ -315,6 +319,7 @@ legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecDP1, 'ro-');
@@ -369,6 +374,7 @@ for i = 1:length(varFactors)
 end
 
 figure(5)
+grid on
 hold on
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdDP1, 'ro-');
@@ -381,6 +387,7 @@ legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecDP1, 'ro-');

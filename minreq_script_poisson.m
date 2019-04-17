@@ -17,7 +17,6 @@ relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.25 * capacity / (3 * perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -70,6 +69,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
+    minRateReq = 0.25 * capacity / (varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0);
     

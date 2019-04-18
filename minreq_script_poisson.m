@@ -24,7 +24,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:4;
+varFactors = 1:0.5:3;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
 btdGainVecDPWF = zeros(1, length(varFactors));
@@ -69,7 +69,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.25 * capacity / (3 * varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
+    minRateReq = 0.25 * capacity / (1 * varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0);
     

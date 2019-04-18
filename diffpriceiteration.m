@@ -13,6 +13,7 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 %   waterfilling: logical, 1 when want to user waterfilling to allocate
 %   bids, otherwise surplus bids will be allocated equally.
 
+nUsers = length(cBid);
 nSlices = size(shareDist, 1);
 nBasestations = size(shareDist, 2);
 nUsersOfV = sum(opBelongs == v);
@@ -35,6 +36,7 @@ for slice = 1:nSlices
 end
 lobVec = zeros(1, nBasestations);
 minBidReq = zeros(1, nBasestations); % minimal bid at each BSs to meet minRate.
+minBidReqPerUser = zeros(1, nUsers);
 for b = 1:nBasestations
     nob = sum(opBelongs == v & bs == b);
     % incrementally test 3 cases to figure out how much bid is needed.
@@ -62,6 +64,10 @@ end
 % Set a lowerbound to prevent this.
 minBidReq(minBidReq < 1e-4) = 1e-4;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
+for b = 1:nBasestations
+    minBidReqPerUser(opBelongs == v & bs == b) = minBidReq(b) ...
+        / sum(opBelongs == v & bs == b);
+end
 
 % distribute lob to each user.
 % assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
@@ -73,17 +79,19 @@ if (waterfilling)
     surplus = shareVec(v) - sum(minBidReq);
     if (surplus >= 0)
         % Can fulfill all the min rate req.
-        addition = waterfill(minBidReq, surplus, sliceUserDist); % TODO: weights may vary?
-        loVec = minBidReq + addition;
+        idx = (minBidReqPerUser > 0);
+        filteredAddition = waterfill(minBidReqPerUser(idx), surplus, ...
+            ones(size(minBidReqPerUser(idx))));
+        addition = zeros(1, nUsers);
+        addition(idx) = filteredAddition;
+        loVec = minBidReqPerUser + addition;
     else
         % Cannot fulfill the minimal rate req.
         % Assign bid propto minBidReq
-        loVec = shareVec(v) .* minBidReq ./ sum(minBidReq);
+        loVec = shareVec(v) .* minBidReqPerUser ./ sum(minBidReqPerUser);
     end
     nextBid = cBid;
-    for b = 1:nBasestations
-        nextBid(opBelongs == v & bs == b) = loVec(b) / sliceUserDist(b);
-    end
+    nextBid(opBelongs == v) = loVec(opBelongs == v);
     assert(all(nextBid > 0), 'Unexpected negative bid.');
 else
     surplusShare = shareVec(v) - sum(minBidReq);

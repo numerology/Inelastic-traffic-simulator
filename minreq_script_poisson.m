@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 nSlice = 3;
 
-simulationTime = 5000;
+simulationTime = 1000;
 perBSLoad = 6;
 % shareVec = [1 1 1];
 % relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
@@ -21,7 +21,6 @@ relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.4 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -29,7 +28,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:5;
+varFactors = 1:0.5:3;
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
 btdGainVecDPWF = zeros(1, length(varFactors));
@@ -71,9 +70,10 @@ meanUtilSCPF = zeros(1, length(varFactors));
 %% Run simulations
 for i = 1:length(varFactors)
     varFactor = varFactors(i);
-    rhoVec = relativeRhoVec / varFactor;
+    rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
+    minRateReq = 0.4 * capacity / (varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0);
     
@@ -84,7 +84,7 @@ for i = 1:length(varFactors)
     outageDPoptimal = zeros(1, simulationTime);
     outageMWBR = zeros(1, simulationTime);
     parfor t = 1:simulationTime
-        loadDist = varFactor * poissrnd(rhoVec);
+        loadDist = poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
         bsVec = zeros(1, nUsers);
         opVec = zeros(1, nUsers);
@@ -124,6 +124,7 @@ for i = 1:length(varFactors)
         
         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t}, perUserMinRateReq);
+%        [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
         ratesGPS{i, t} = r;
         outageGPS(t) = any(r < unique(minRateReq));
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...
@@ -228,6 +229,7 @@ bmWoGPS = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-waterfill', 'DIFFPRICE-
     'MAXWEIGHT-best response'};
 
 figure(7)
+grid on
 hold on
 plot(varFactors, pOutageSCPF, 'b+-');
 plot(varFactors, pOutageDP, 'ro-');
@@ -241,6 +243,7 @@ legend(benchmarks);
 savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
 
 figure(1);
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF, 'b+-');
 plot(varFactors, btdGainVecDP, 'ro-');
@@ -253,6 +256,7 @@ legend(bmWoGPS);
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
 figure(2);
+grid on
 hold on
 plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
 plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
@@ -309,6 +313,7 @@ for i = 1:length(varFactors)
 end
 
 figure(3)
+grid on
 hold on
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdDP1, 'ro-');
@@ -322,6 +327,7 @@ legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
 figure(4)
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecDP1, 'ro-');
@@ -377,6 +383,7 @@ for i = 1:length(varFactors)
 end
 
 figure(5)
+grid on
 hold on
 plot(varFactors, meanBtdSCPF1, 'b+-');
 plot(varFactors, meanBtdDP1, 'ro-');
@@ -390,6 +397,7 @@ legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
 figure(6)
+grid on
 hold on
 plot(varFactors, btdGainVecSCPF1, 'b+-');
 plot(varFactors, btdGainVecDP1, 'ro-');

@@ -69,7 +69,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.25 * capacity / (1 * varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
+    minRateReq = 0.25 * capacity / (2 * varFactor * perBSLoad) * ones(1, nSlice); % min rate requirement
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0);
     

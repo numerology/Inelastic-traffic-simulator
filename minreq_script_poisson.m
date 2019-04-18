@@ -6,10 +6,14 @@ nSlice = 3;
 
 simulationTime = 5000;
 perBSLoad = 6;
+% shareVec = [1 1 1];
+% relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3];
+%                   perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
 shareVec = [1 1 1];
-relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3];
-                  perBSLoad * [1/3 1/3 1/3]]'; % mean load distribution, V x B
+relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
+                  perBSLoad * [1/6 2/3 1/6];
+                  perBSLoad * [1/6 1/6 2/3]]'; % mean load distribution, V x B             
 % shareVec = [14/9 13/18 13/18];
 % relativeRhoVec = [perBSLoad * [2/3 1/6 1/6];
 %                   perBSLoad * [2/3 1/6 1/6];
@@ -17,7 +21,7 @@ relativeRhoVec = [perBSLoad * [1/3 1/3 1/3];
 
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minRateReq = 0.25 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
+minRateReq = 0.4 * capacity / (perBSLoad) * ones(1, nSlice); % min rate requirement
 minSharePerBS = 0.05;
 outageTol = 0.2;
 netSettings = [];
@@ -231,7 +235,8 @@ plot(varFactors, pOutageDPWF, 'bx:');
 plot(varFactors, pOutageDPoptimal, 'ch-');
 plot(varFactors, pOutageMWBR, 'kx-');
 plot(varFactors, pOutageGPS, 'gd-');
-title('P(outage) vs. variance factor');
+title('P(outage) vs. mean load factor');
+xlabel('mean load factor');
 legend(benchmarks);
 savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
 
@@ -242,7 +247,8 @@ plot(varFactors, btdGainVecDP, 'ro-');
 plot(varFactors, btdGainVecDPWF, 'bx:');
 plot(varFactors, btdGainVecDPoptimal, 'ch-');
 plot(varFactors, btdGainVecMWBR, 'kx-');
-title('BTD gain over GPS vs. variance factor');
+title('BTD gain over GPS vs. mean load factor');
+xlabel('mean load factor');
 legend(bmWoGPS);
 savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
 
@@ -253,7 +259,8 @@ plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
 plot(varFactors, meanUtilDPWF - meanUtilGPS, 'bx:');
 plot(varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
 plot(varFactors, meanUtilMWBR - meanUtilGPS, 'kx-');
-title('Utility gain over GPS vs. variance factor');
+title('Utility gain over GPS vs. mean load factor');
+xlabel('mean load factor');
 legend(bmWoGPS);
 savefig(sprintf('figs/util-gain-vs-var-%s.fig', datestring));
 
@@ -309,7 +316,8 @@ plot(varFactors, meanBtdDPWF1, 'bx:');
 plot(varFactors, meanBtdDPoptimal1, 'ch-');
 plot(varFactors, meanBtdMWBR1, 'kx-');
 plot(varFactors, meanBtdGPS1, 'gd-');
-title('Average btd vs. variance factor of slice 2');
+title('Average btd vs. mean load factor of slice 2');
+xlabel('mean load factor');
 legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
 
@@ -320,7 +328,8 @@ plot(varFactors, btdGainVecDP1, 'ro-');
 plot(varFactors, btdGainVecDPWF1, 'bx:');
 plot(varFactors, btdGainVecDPoptimal1, 'ch-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
-title('BTD gain over GPS vs. variance factor on slice 2');
+title('BTD gain over GPS vs. mean load factor of slice 2');
+xlabel('mean load factor');
 legend(bmWoGPS);
 savefig(sprintf('figs/btd-gain-vs-var-slice2-%s.fig', datestring));
 
@@ -375,7 +384,8 @@ plot(varFactors, meanBtdDPWF1, 'bx:');
 plot(varFactors, meanBtdDPoptimal1, 'ch-');
 plot(varFactors, meanBtdMWBR1, 'kx-');
 plot(varFactors, meanBtdGPS1, 'gd-');
-title('Average btd vs. variance factor of slice 1');
+title('Average btd vs. mean load factor of slice 1');
+xlabel('mean load factor');
 legend(benchmarks);
 savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
 
@@ -386,6 +396,7 @@ plot(varFactors, btdGainVecDP1, 'ro-');
 plot(varFactors, btdGainVecDPWF1, 'bx:');
 plot(varFactors, btdGainVecDPoptimal1, 'ch-');
 plot(varFactors, btdGainVecMWBR1, 'kx-');
-title('BTD gain over GPS vs. variance factor on slice 1');
+title('BTD gain over GPS vs. mean load factor of slice 1');
+xlabel('mean load factor');
 legend(bmWoGPS);
 savefig(sprintf('figs/btd-gain-vs-var-slice1-%s.fig', datestring));

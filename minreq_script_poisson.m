@@ -122,9 +122,9 @@ for i = 1:length(varFactors)
             perUserMinRateReq(opVec == v) = minRateReq(v);
         end
         
-        [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
-            bsAssociation{t}, perUserMinRateReq);
-%        [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
+%         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
+%             bsAssociation{t}, perUserMinRateReq);
+        [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
         ratesGPS{i, t} = r;
         outageGPS(t) = any(r < unique(minRateReq));
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...

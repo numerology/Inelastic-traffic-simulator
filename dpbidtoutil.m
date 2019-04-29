@@ -1,5 +1,5 @@
 function [util] = dpbidtoutil(cBid, bs, opBelongs, capacityPerUser, ...
-    shareVec, shareDist, minRateReq)
+    shareVec, shareDist, minRateReq, sliceCats)
 % dpbidtoutil Given current bid per user, return the social welfare.
 %
 % Params:
@@ -9,6 +9,8 @@ function [util] = dpbidtoutil(cBid, bs, opBelongs, capacityPerUser, ...
 % opBelongs: operator association vector, 1 x nUsers
 % capacityPerUser: user perceived capacities, 1 x nUsers
 % minRateReq: users' minimal rate requirement, 1 x nUsers
+% sliceCats: category of slices' services, 1 for elastic user and 2 for
+% inelastic user, 1 x nSlices.
 
 nUsers = length(bs);
 nSlices = length(shareVec);
@@ -65,9 +67,11 @@ for v = 1:nSlices
     if (any(ratesPerUser(opBelongs == v) < minRateReq(opBelongs == v)))
         util = util - 1e5;
     else
-        util = util + shareVec(v) / sum(opBelongs == v) ...
-            * sum(log(ratesPerUser(opBelongs == v) ...
-            - minRateReq(opBelongs == v)));
+        if (sliceCats(v) == 1)
+            util = util + shareVec(v) / sum(opBelongs == v) ...
+                * sum(log(ratesPerUser(opBelongs == v) ...
+                - minRateReq(opBelongs == v)));
+        end
     end
 end
 

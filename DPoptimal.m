@@ -1,5 +1,5 @@
 function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
-    capacityPerUser, bs)
+    capacityPerUser, bs, minReq, sliceCats)
 % DPoptimal Social optimal bidding/rate allocation under DIFFPRICE resource
 % sharing criterion.
 % Params:
@@ -8,8 +8,8 @@ function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
 %   capacityPerUser: capacity perceived per user
 %   bs: base station association vector, bs(u) is the BS serving user u.
 %   minReq: 1 x V, minimal rate required by slices
-%   waterfilling: logical, whether to use waterfilling or equal allocating
-%   surplus.
+%   sliceCats: 1 x V, indicating whether a slice is an elastic slice or
+%   not.
 % Return:
 %   userRates: perceived rate of each user.
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
@@ -33,8 +33,8 @@ for v = 1:nSlices
 end
 initialBid = 1e-5 * ones(nUsers, 1);
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
-    shareVec, shareDist), initialBid, constMat, constVec, [], [], 1e-5 * ones(nUsers, 1), ...
-    ones(nUsers, 1), [], options);
+    shareVec, shareDist, minReq, sliceCats), initialBid, constMat, ...
+    constVec, [], [], 1e-5 * ones(nUsers, 1), ones(nUsers, 1), [], options);
 
 cBid = optimBid';
 

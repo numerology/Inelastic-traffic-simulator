@@ -1,5 +1,5 @@
 function [util] = dpbidtoutil(cBid, bs, opBelongs, capacityPerUser, ...
-    shareVec, shareDist)
+    shareVec, shareDist, minRateReq)
 % dpbidtoutil Given current bid per user, return the social welfare.
 %
 % Params:
@@ -8,6 +8,7 @@ function [util] = dpbidtoutil(cBid, bs, opBelongs, capacityPerUser, ...
 % bs: base station association vector, 1 x nUsers
 % opBelongs: operator association vector, 1 x nUsers
 % capacityPerUser: user perceived capacities, 1 x nUsers
+% minRateReq: users' minimal rate requirement, 1 x nUsers
 
 nUsers = length(bs);
 nSlices = length(shareVec);
@@ -49,12 +50,25 @@ end
 
 assert(all(ratesPerUser > 0), 'negative user rates');
 
+% Here to account for minimal rate requirement, one has two options:
+% 1. set that in the constraint set and guarantee that the initial point is
+% feasible. For example, begin with equal surplus practical approach.
+% 2. Penalize a huge amount of utility for the case with user violating the minimal
+% rate requirement, for example, -1e5.
+% Here for simplicity we use 2.
+
 util = 0;
 for v = 1:nSlices
     if (sum(opBelongs == v) == 0)
         continue
     end
-    util = util + shareVec(v) / sum(opBelongs == v) * sum(log(ratesPerUser(opBelongs == v)));
+    if (any(ratesPerUser(opBelongs == v) < minRateReq(opBelongs == v)))
+        util = util - 1e5;
+    else
+        util = util + shareVec(v) / sum(opBelongs == v) ...
+            * sum(log(ratesPerUser(opBelongs == v) ...
+            - minRateReq(opBelongs == v)));
+    end
 end
 
 end

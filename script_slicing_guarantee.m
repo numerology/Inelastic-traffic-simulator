@@ -1,10 +1,9 @@
 clc, close all, clear all
 nSlice = 4;
-parpool('local', 40);
-warning('off','all');
-nSlice = 3;
+%parpool('local', 4);
+%warning('off','all');
 
-simulationTime = 4;
+simulationTime = 12;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.
@@ -28,7 +27,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:0.5:3;
+varFactors = 1:2;
 
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
@@ -61,10 +60,11 @@ meanUtilDPoptimal = zeros(1, length(varFactors));
 meanUtilSCPF = zeros(1, length(varFactors));
 
 for i = 1:length(varFactors)
+    varFactor = varFactors(i);
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.4 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
+    minRateReq = 0.03 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
     minRateReq(3:4) = 0;
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0, 0);
@@ -169,14 +169,30 @@ for i = 1:length(varFactors)
         for v = 1:nSlice
             perUserMinRateReq(opVec == v) = minRateReq(v);
         end
-        utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, ...
-            opBelongs{i, t}, sliceCats, perUserMinRateReq);
-        utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, ...
-            opBelongs{i, t}, sliceCats, perUserMinRateReq);
-        utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t}, ...
-            sliceCats, perUserMinRateReq);
-        utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, ...
-            opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        if (outageGPS(t))
+            utilGPS(t) = nan;
+        else
+            utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, ...
+                opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        end
+        if (outageSCPF(t))
+            utilSCPF(t) = nan;
+        else
+            utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, ...
+                opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        end
+        if (outageDP(t))
+            utilDP(t) = nan;
+        else
+            utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t}, ...
+                sliceCats, perUserMinRateReq);
+        end
+        if (outageDPoptimal(t))
+            utilDPoptimal(t) = nan;
+        else
+            utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, ...
+                opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        end
     end
     
     meanUtilGPS(i) = nanmean(utilGPS);
@@ -184,7 +200,156 @@ for i = 1:length(varFactors)
     meanUtilDPoptimal(i) = nanmean(utilDPoptimal);
     meanUtilSCPF(i) = nanmean(utilSCPF);
     
-    utilityGainVecSCPF(i) = nanmean(utilGPS) / nanmean(utilSCPF); 
-    utilityGainVecDP(i) = nanmean(utilGPS) / nanmean(utilDP);
-    utilityGainVecDPoptimal(i) = nanmean(utilGPS) / nanmean(utilDPoptimal);
 end
+
+%% Plot something
+datestring = datestr(now, 30);
+
+benchmarks = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal',  'GPS'};
+bmWoGPS = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal'};
+
+figure(7)
+grid on
+hold on
+plot(varFactors, pOutageSCPF, 'b+-');
+plot(varFactors, pOutageDP, 'ro-');
+plot(varFactors, pOutageDPoptimal, 'ch-');
+plot(varFactors, pOutageGPS, 'gd-');
+title('P(outage) vs. mean load factor');
+xlabel('mean load factor');
+legend(benchmarks);
+savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
+
+figure(1);
+grid on
+hold on
+plot(varFactors, btdGainVecSCPF, 'b+-');
+plot(varFactors, btdGainVecDP, 'ro-');
+plot(varFactors, btdGainVecDPoptimal, 'ch-');
+title('BTD gain over GPS vs. mean load factor');
+xlabel('mean load factor');
+legend(bmWoGPS);
+savefig(sprintf('figs/btd-gain-vs-var-%s.fig', datestring));
+
+figure(2);
+grid on
+hold on
+plot(varFactors, meanUtilSCPF - meanUtilGPS, 'b+-');
+plot(varFactors, meanUtilDP - meanUtilGPS, 'ro-');
+plot(varFactors, meanUtilDPoptimal - meanUtilGPS, 'ch-');
+title('Utility gain over GPS vs. mean load factor');
+xlabel('mean load factor');
+legend(bmWoGPS);
+savefig(sprintf('figs/util-gain-vs-var-%s.fig', datestring));
+
+% Get some idea on slice idx
+idx = 2;
+
+btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
+btdGainVecDP1 = zeros(1, length(varFactors));
+btdGainVecDPoptimal1 = zeros(1, length(varFactors));
+
+meanBtdGPS1 = zeros(1, length(varFactors));
+meanBtdDP1 = zeros(1, length(varFactors));
+meanBtdDPoptimal1 = zeros(1, length(varFactors));
+meanBtdSCPF1 = zeros(1, length(varFactors));
+
+for i = 1:length(varFactors)
+    sliceIdx = (horzcat(opBelongs{i, :}) == idx);
+    flatRateGPS1 = horzcat(ratesGPS{i, :});
+    flatRateGPS1 = flatRateGPS1(sliceIdx);
+    flatRateDP1 = horzcat(ratesDP{i, :});
+    flatRateDP1 = flatRateDP1(sliceIdx);
+    flatRateDPoptimal1 = horzcat(ratesDPoptimal{i, :});
+    flatRateDPoptimal1 = flatRateDPoptimal1(sliceIdx);
+    flatRateSCPF1 = horzcat(ratesSCPF{i, :});
+    flatRateSCPF1 = flatRateSCPF1(sliceIdx);
+    
+    meanBtdGPS1(i) = mean(1./flatRateGPS1);
+    meanBtdDP1(i) = mean(1./flatRateDP1); 
+    meanBtdDPoptimal1(i) = mean(1./flatRateDPoptimal1);
+    meanBtdSCPF1(i) = mean(1./flatRateSCPF1);
+    
+    btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
+    btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
+    btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
+
+end
+
+figure(3)
+grid on
+hold on
+plot(varFactors, meanBtdSCPF1, 'b+-');
+plot(varFactors, meanBtdDP1, 'ro-');
+plot(varFactors, meanBtdDPoptimal1, 'ch-');
+plot(varFactors, meanBtdGPS1, 'gd-');
+title('Average btd vs. mean load factor of slice 2');
+xlabel('mean load factor');
+legend(benchmarks);
+savefig(sprintf('figs/btd-vs-var-slice2-%s.fig', datestring));
+
+figure(4)
+grid on
+hold on
+plot(varFactors, btdGainVecSCPF1, 'b+-');
+plot(varFactors, btdGainVecDP1, 'ro-');
+plot(varFactors, btdGainVecDPoptimal1, 'ch-');
+title('BTD gain over GPS vs. mean load factor of slice 2');
+xlabel('mean load factor');
+legend(bmWoGPS);
+savefig(sprintf('figs/btd-gain-vs-var-slice2-%s.fig', datestring));
+
+idx = 3;
+btdGainVecSCPF1 = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
+btdGainVecDP1 = zeros(1, length(varFactors));
+btdGainVecDPoptimal1 = zeros(1, length(varFactors));
+
+meanBtdGPS1 = zeros(1, length(varFactors));
+meanBtdDP1 = zeros(1, length(varFactors));
+meanBtdDPoptimal1 = zeros(1, length(varFactors));
+meanBtdSCPF1 = zeros(1, length(varFactors));
+
+for i = 1:length(varFactors)
+    sliceIdx = (horzcat(opBelongs{i, :}) == idx);
+    flatRateGPS1 = horzcat(ratesGPS{i, :});
+    flatRateGPS1 = flatRateGPS1(sliceIdx);
+    flatRateDP1 = horzcat(ratesDP{i, :});
+    flatRateDP1 = flatRateDP1(sliceIdx);
+    flatRateDPoptimal1 = horzcat(ratesDPoptimal{i, :});
+    flatRateDPoptimal1 = flatRateDPoptimal1(sliceIdx);
+    flatRateSCPF1 = horzcat(ratesSCPF{i, :});
+    flatRateSCPF1 = flatRateSCPF1(sliceIdx);
+    
+    meanBtdGPS1(i) = mean(1./flatRateGPS1);
+    meanBtdDP1(i) = mean(1./flatRateDP1);
+    meanBtdDPoptimal1(i) = mean(1./flatRateDPoptimal1);
+    meanBtdSCPF1(i) = mean(1./flatRateSCPF1);
+    
+    btdGainVecSCPF1(i) = mean(1./flatRateGPS1) / mean(1./flatRateSCPF1); 
+    btdGainVecDP1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDP1);
+    btdGainVecDPoptimal1(i) = mean(1./flatRateGPS1) / mean(1./flatRateDPoptimal1);
+
+end
+
+figure(5)
+grid on
+hold on
+plot(varFactors, meanBtdSCPF1, 'b+-');
+plot(varFactors, meanBtdDP1, 'ro-');
+plot(varFactors, meanBtdDPoptimal1, 'ch-');
+plot(varFactors, meanBtdGPS1, 'gd-');
+title('Average btd vs. mean load factor of slice 3');
+xlabel('mean load factor');
+legend(benchmarks);
+savefig(sprintf('figs/btd-vs-var-slice1-%s.fig', datestring));
+
+figure(6)
+grid on
+hold on
+plot(varFactors, btdGainVecSCPF1, 'b+-');
+plot(varFactors, btdGainVecDP1, 'ro-');
+plot(varFactors, btdGainVecDPoptimal1, 'ch-');
+title('BTD gain over GPS vs. mean load factor of slice 3');
+xlabel('mean load factor');
+legend(bmWoGPS);
+savefig(sprintf('figs/btd-gain-vs-var-slice1-%s.fig', datestring));

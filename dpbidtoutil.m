@@ -57,22 +57,17 @@ assert(all(ratesPerUser > 0), 'negative user rates');
 % feasible. For example, begin with equal surplus practical approach.
 % 2. Penalize a huge amount of utility for the case with user violating the minimal
 % rate requirement, for example, -1e5.
-% Here for simplicity we use 2.
+% Here for simplicity we use 1, because 2 is too slow.
 
 util = 0;
 for v = 1:nSlices
     if (sum(opBelongs == v) == 0)
         continue
     end
-    if (any(ratesPerUser(opBelongs == v) < minRateReq(opBelongs == v)))
-        util = util - 1e5;
-    else
-        if (sliceCats(v) == 1)
-            util = util + shareVec(v) / sum(opBelongs == v) ...
-                * sum(log(ratesPerUser(opBelongs == v) ...
-                - minRateReq(opBelongs == v)));
-        end
+    if (sliceCats(v) == 1)
+        util = util + shareVec(v) / sum(opBelongs == v) ...
+            * sum(log(ratesPerUser(opBelongs == v) ...
+            - minRateReq(opBelongs == v)));
     end
 end
-
 end

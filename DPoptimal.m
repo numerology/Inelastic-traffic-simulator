@@ -24,7 +24,7 @@ shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
 
 % Optimize bid based on bidtoutility
-options = optimoptions('fmincon','Display','off','Algorithm','sqp');
+options = optimoptions('fmincon','Display','off','Algorithm','interior-point');
 % bidding constraint
 constMat = zeros(nSlices, nUsers);
 constVec = shareVec';
@@ -34,7 +34,9 @@ end
 initialBid = 1e-5 * ones(nUsers, 1);
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
     shareVec, shareDist, minReq, sliceCats), initialBid, constMat, ...
-    constVec, [], [], 1e-5 * ones(nUsers, 1), ones(nUsers, 1), [], options);
+    constVec, [], [], 1e-5 * ones(nUsers, 1), ones(nUsers, 1), ...
+    @(x) minrateconstraint(netSettings, opSettings, x, bs, ...
+    capacityPerUser, minReq), options);
 
 cBid = optimBid';
 
@@ -69,4 +71,46 @@ end
 userRates = userFraction .* capacityPerUser;
 btd=1 ./ userRates;
 
+%---------- Begin nested function --------------------
+    function [C, Ceq] = minrateconstraint(netSettings, opSettings, ...
+            cBid, bs_, ...
+            capacityPerUser, minReq)
+    nUsers_ = netSettings.users;
+    nSlices_ = size(opSettings.s_o, 2);
+    nBasestations_ = netSettings.bsNS;
+    shareVec_ = opSettings.s_o;
+    opBelongs_ = opSettings.ops_belongs;
+    shareDist_ = opSettings.shareDist;
+    userFraction_ = zeros(1, nUsers_);
+    Ceq = 0;
+    for b_ = 1:nBasestations_
+        lb_ = sum(cBid(bs_ == b_));
+        if (lb_ <= 1)
+            userFraction_(bs_ == b_) = cBid(bs_ == b_) ./ lb_;
+        else
+            for v_ = 1:nSlices_
+                lvb_ = sum(cBid(bs_ == b_ & opBelongs_ == v_));
+                if (lvb_ <= shareDist_(v_, b_))
+                    userFraction_(bs_ == b_ & opBelongs_ == v_) = cBid(bs_ == b_ & opBelongs_ == v_);
+                else
+                    totalSurplus_ = 1;
+                    totalWeight_ = 0;
+                    for cSlice_ = 1:nSlices_
+                        totalWeight_ = totalWeight_ + max(0, sum(cBid(opBelongs_ == cSlice_ ...
+                            & bs_ == b_)) - shareDist_(cSlice_, b_));
+                        totalSurplus_ = totalSurplus_ - min(shareDist_(cSlice_, b_), ...
+                            sum(cBid(opBelongs_ == cSlice_ & bs_ == b_)));
+                    end
+                    fvb_ = shareDist_(v_, b_) + totalSurplus_ / totalWeight_ * (lvb_ ...
+                        - shareDist_(v_, b_));
+                    userFraction_(bs_ == b_ & opBelongs_ == v_) = cBid(bs_ == b_ & ...
+                        opBelongs_ == v_) .* fvb_ ./ lvb_;
+                end
+            end
+        end
+    end
+    userRates_ = userFraction_ .* capacityPerUser;
+    C = userRates_ - minReq;
+    end
+%---------- End nested function --------------------
 end

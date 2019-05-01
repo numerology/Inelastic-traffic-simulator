@@ -11,7 +11,7 @@ simulationTime = 300;
 % elasticity is specified as 1-fairness, i.e., log utility. 
 % We simulate the scenario where Slices 1 and 2 are congested at BSs 1 and
 % 2, where elastic users are roughly uniform.
-perBSLoad = 0.5;
+perBSLoad = 1;
 shareVec = [1 1 1 1];
 sliceCats = [0 0 1 1];
 relativeRhoVec = perBSLoad * [[2 2 6 6];

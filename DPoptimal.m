@@ -28,10 +28,13 @@ options = optimoptions('fmincon','Display','off','Algorithm','interior-point');
 % bidding constraint
 constMat = zeros(nSlices, nUsers);
 constVec = shareVec';
+initialBid = 1e-5 * ones(nUsers, 1);
+
 for v = 1:nSlices
     constMat(v, :) = (opBelongs == v)';
+    initialBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
 end
-initialBid = 1e-5 * ones(nUsers, 1);
+
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
     shareVec, shareDist, minReq, sliceCats), initialBid, constMat, ...
     constVec, [], [], 1e-5 * ones(nUsers, 1), ones(nUsers, 1), ...
@@ -82,7 +85,7 @@ btd=1 ./ userRates;
     opBelongs_ = opSettings.ops_belongs;
     shareDist_ = opSettings.shareDist;
     userFraction_ = zeros(1, nUsers_);
-    Ceq = 0;
+    Ceq = [];
     for b_ = 1:nBasestations_
         lb_ = sum(cBid(bs_ == b_));
         if (lb_ <= 1)
@@ -110,7 +113,7 @@ btd=1 ./ userRates;
         end
     end
     userRates_ = userFraction_ .* capacityPerUser;
-    C = userRates_ - minReq;
+    C = minReq - userRates_;
     end
 %---------- End nested function --------------------
 end

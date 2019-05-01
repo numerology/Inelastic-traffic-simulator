@@ -1,9 +1,9 @@
 clc, close all, clear all
 nSlice = 4;
-%parpool('local', 4);
-%warning('off','all');
+parpool('local', 40);
+warning('off','all');
 
-simulationTime = 12;
+simulationTime = 300;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.
@@ -11,7 +11,7 @@ simulationTime = 12;
 % elasticity is specified as 1-fairness, i.e., log utility. 
 % We simulate the scenario where Slices 1 and 2 are congested at BSs 1 and
 % 2, where elastic users are roughly uniform.
-perBSLoad = 6;
+perBSLoad = 0.5;
 shareVec = [1 1 1 1];
 sliceCats = [0 0 1 1];
 relativeRhoVec = perBSLoad * [[2 2 6 6];
@@ -27,7 +27,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:2;
+varFactors = 1:5;
 
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
@@ -64,7 +64,7 @@ for i = 1:length(varFactors)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.03 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
+    minRateReq = 0.025 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
     minRateReq(3:4) = 0;
     shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
         minSharePerBS, varFactor, 0, 0);
@@ -74,9 +74,12 @@ for i = 1:length(varFactors)
     outageDP = zeros(1, simulationTime);
     outageDPoptimal = zeros(1, simulationTime);
     
+    totalNumUsers = 0;
+    
     parfor t = 1:simulationTime
         loadDist = poissrnd(rhoVec);
         nUsers = sum(sum(loadDist));
+        totalNumUsers = totalNumUsers + nUsers;
         bsVec = zeros(1, nUsers);
         opVec = zeros(1, nUsers);
         capVec = capacity * ones(1, nUsers);
@@ -116,32 +119,32 @@ for i = 1:length(varFactors)
         [r, f, b] = SCPF(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t});
         ratesSCPF{i, t} = r;
-        outageSCPF(t) = any(r < perUserMinRateReq);
+        outageSCPF(t) = sum(r < perUserMinRateReq);
         
         [r, f, b] = DIFFPRICE(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t}, minRateReq, 0);
         ratesDP{i, t} = r;
-        outageDP(t) = any(r < perUserMinRateReq);
+        outageDP(t) = sum(r < perUserMinRateReq);
         
         [r, f, b] = DPoptimal(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t}, perUserMinRateReq, sliceCats);
         ratesDPoptimal{i, t} = r;
-        outageDPoptimal(t) = any(r < perUserMinRateReq);
+        outageDPoptimal(t) = sum(r < perUserMinRateReq);
         
         % GPS, needs to first adjust the share dimensioning.
         tmpOpSettings.shareDist = sharedimension(minRateReq, rhoVec, ...
             shareVec, outageTol, minSharePerBS, varFactor, 0, 1);
         [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
         ratesGPS{i, t} = r;
-        outageGPS(t) = any(r < perUserMinRateReq);
+        outageGPS(t) = sum(r < perUserMinRateReq);
         
         fprintf('finish at time %d\n', t);
     end
     
-    pOutageDP(i) = sum(outageDP) / simulationTime;
-    pOutageDPoptimal(i) = sum(outageDPoptimal) / simulationTime;
-    pOutageGPS(i) = sum(outageGPS) / simulationTime;
-    pOutageSCPF(i) = sum(outageSCPF) / simulationTime;
+    pOutageDP(i) = sum(outageDP) / totalNumUsers;
+    pOutageDPoptimal(i) = sum(outageDPoptimal) / totalNumUsers;
+    pOutageGPS(i) = sum(outageGPS) / totalNumUsers;
+    pOutageSCPF(i) = sum(outageSCPF) / totalNumUsers;
     
     flatRateGPS = horzcat(ratesGPS{i, :});
     flatRateDP = horzcat(ratesDP{i, :});
@@ -162,37 +165,64 @@ for i = 1:length(varFactors)
     utilDP = zeros(1, simulationTime);
     utilDPoptimal = zeros(1, simulationTime);
     
-    parfor t = 1:simulationTime % stats
+    for t = 1:simulationTime % stats
+        % For each time instant, only account for the set of users receiving at
+        % least min rate req under all benchmarks.
         nUsers = length(capacities{t});
         opVec = opBelongs{i, t};
         perUserMinRateReq = zeros(1, nUsers);
         for v = 1:nSlice
             perUserMinRateReq(opVec == v) = minRateReq(v);
         end
-        if (outageGPS(t))
-            utilGPS(t) = nan;
-        else
-            utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, ...
-                opBelongs{i, t}, sliceCats, perUserMinRateReq);
-        end
-        if (outageSCPF(t))
-            utilSCPF(t) = nan;
-        else
-            utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, ...
-                opBelongs{i, t}, sliceCats, perUserMinRateReq);
-        end
-        if (outageDP(t))
-            utilDP(t) = nan;
-        else
-            utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t}, ...
-                sliceCats, perUserMinRateReq);
-        end
-        if (outageDPoptimal(t))
-            utilDPoptimal(t) = nan;
-        else
-            utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, ...
-                opBelongs{i, t}, sliceCats, perUserMinRateReq);
-        end
+        
+        goodUsers = (ratesGPS{i, t} > perUserMinRateReq & ratesSCPF{i, t} ...
+            > perUserMinRateReq & ratesDP{i, t} > perUserMinRateReq ...
+            & ratesDPoptimal{i, t} > perUserMinRateReq);
+        
+        tmpRatesGPS = nan(size(ratesGPS{i, t}));
+        tmpRatesGPS(goodUsers) = ratesGPS{i, t}(goodUsers);
+        utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
+            opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        
+        tmpRatesSCPF = nan(size(ratesSCPF{i, t}));
+        tmpRatesSCPF(goodUsers) = ratesSCPF{i, t}(goodUsers);
+        utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
+            opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        
+        tmpRatesDP = nan(size(ratesDP{i, t}));
+        tmpRatesDP(goodUsers) = ratesDP{i, t}(goodUsers);
+        utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
+            opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        
+        tmpRatesDPoptimal = nan(size(ratesDPoptimal{i, t}));
+        tmpRatesDPoptimal(goodUsers) = ratesDPoptimal{i, t}(goodUsers);
+        utilDPoptimal(t) = ratetoutil(tmpRatesDPoptimal, shareVec, ...
+            opBelongs{i, t}, sliceCats, perUserMinRateReq);
+        
+%         if (outageGPS(t))
+%             utilGPS(t) = nan;
+%         else
+%             utilGPS(t) = ratetoutil(ratesGPS{i, t}, shareVec, ...
+%                 opBelongs{i, t}, sliceCats, perUserMinRateReq);
+%         end
+%         if (outageSCPF(t))
+%             utilSCPF(t) = nan;
+%         else
+%             utilSCPF(t) = ratetoutil(ratesSCPF{i, t}, shareVec, ...
+%                 opBelongs{i, t}, sliceCats, perUserMinRateReq);
+%         end
+%         if (outageDP(t))
+%             utilDP(t) = nan;
+%         else
+%             utilDP(t) = ratetoutil(ratesDP{i, t}, shareVec, opBelongs{i, t}, ...
+%                 sliceCats, perUserMinRateReq);
+%         end
+%         if (outageDPoptimal(t))
+%             utilDPoptimal(t) = nan;
+%         else
+%             utilDPoptimal(t) = ratetoutil(ratesDPoptimal{i, t}, shareVec, ...
+%                 opBelongs{i, t}, sliceCats, perUserMinRateReq);
+%         end
     end
     
     meanUtilGPS(i) = nanmean(utilGPS);

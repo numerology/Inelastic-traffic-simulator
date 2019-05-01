@@ -6,6 +6,7 @@ function [shareDist] = sharedimension(minRateReq, meanLoadDist, shareVec, ...
 % minRateReq: 1 x V
 % meanLoadDist: V x B
 % shareVec: 1 x V
+% eps: outage tolerance
 % minShare: minimal share allocated to a slice at each resource.
 % binomial: logical, 1 when dimension according to binomial distribution, 0
 % when poisson dist.

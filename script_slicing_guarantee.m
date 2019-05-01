@@ -3,7 +3,7 @@ nSlice = 4;
 parpool('local', 40);
 warning('off','all');
 
-simulationTime = 300;
+simulationTime = 500;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.
@@ -27,7 +27,7 @@ netSettings.bsNS = nBaseStations;
 opSettings = [];
 opSettings.s_o = shareVec;
 
-varFactors = 1:0.25:2.5;
+varFactors = 1:0.2:2.6;
 
 btdGainVecSCPF = zeros(1, length(varFactors)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(varFactors));
@@ -237,6 +237,19 @@ datestring = datestr(now, 30);
 
 benchmarks = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal',  'GPS'};
 bmWoGPS = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal'};
+
+figure(8)
+grid on
+hold on
+plot(meanUtilSCPF, pOutageSCPF, 'b+-');
+plot(meanUtilDP, pOutageDP, 'ro-');
+plot(meanUtilDPoptimal, pOutageDPoptimal, 'ch-');
+plot(meanUtilGPS, pOutageGPS, 'gd-');
+title('P(outage) vs. utility trade off');
+xlabel('utility');
+ylabel('P(outage)')
+legend(benchmarks);
+savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
 
 figure(7)
 grid on

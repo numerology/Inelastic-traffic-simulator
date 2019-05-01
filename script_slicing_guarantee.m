@@ -249,7 +249,7 @@ title('P(outage) vs. utility trade off');
 xlabel('utility');
 ylabel('P(outage)')
 legend(benchmarks);
-savefig(sprintf('figs/poutage-vs-var-%s.fig', datestring));
+savefig(sprintf('figs/util-outage-tradeoff-%s.fig', datestring));
 
 figure(7)
 grid on

@@ -40,24 +40,20 @@ for v = 1:V
 end
 
 if (GPS)
-%     for b = 1:B
-%         assert(sum(minimalShare(:, b)) + V * minShare <= 1, ...
-%             'Base station is overbooked.');
-%         spareShare(b) = 1 - sum(minimalShare(:, b)) - V * minShare;
-%         % currently, allocate spare share prop to minimal allocation.
-%         for v = 1:V
-%             if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
-%                 shareDist(v, b) = spareShare(b) / V + minShare;
-%             else
-%                 shareDist(v, b) = minimalShare(v, b) + minShare + spareShare(b) ...
-%                     * minimalShare(v, b) / sum(minimalShare(:, b));
-%             end
-%         end
-%     end
-    shareDist = [0.1 0.4 0.4 0.1;
-                 0.1 0.4 0.4 0.1;
-                 0.4 0.1 0.1 0.4;
-                 0.4 0.1 0.1 0.4;];
+    for b = 1:B
+        assert(sum(minimalShare(:, b)) + V * minShare <= 1, ...
+            'Base station is overbooked.');
+        spareShare(b) = 1 - sum(minimalShare(:, b)) - V * minShare;
+        % currently, allocate spare share prop to minimal allocation.
+        for v = 1:V
+            if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
+                shareDist(v, b) = spareShare(b) / V + minShare;
+            else
+                shareDist(v, b) = minimalShare(v, b) + minShare + spareShare(b) ...
+                    * minimalShare(v, b) / sum(minimalShare(:, b));
+            end
+        end
+    end
 else
     % if not GPS, only allocate the min share needed. 
     for b = 1:B

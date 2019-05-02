@@ -49,8 +49,8 @@ if (GPS)
             if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
                 shareDist(v, b) = spareShare(b) / V + minShare;
             else
-                shareDist(v, b) = minimalShare(v, b) + minShare + spareShare(b) ...
-                    * minimalShare(v, b) / sum(minimalShare(:, b));
+                shareDist(v, b) = minimalShare(v, b) + minShare + ...
+                    spareShare(b) / V;
             end
         end
     end
@@ -61,7 +61,7 @@ else
             'Base station is overbooked.');
         for v = 1:V
             if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
-                shareDist(v, b) = spareShare(b) / V + minShare;
+                shareDist(v, b) = minShare;
             else
                 shareDist(v, b) = minimalShare(v, b);
             end

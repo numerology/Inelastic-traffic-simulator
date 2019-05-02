@@ -242,13 +242,13 @@ bmWoGPS = {'SCPF', 'DIFFPRICE-equal surplus', 'DIFFPRICE-optimal'};
 figure(8)
 grid on
 hold on
-plot(meanUtilSCPF, pOutageSCPF, 'b+-');
-plot(meanUtilDP, pOutageDP, 'ro-');
-plot(meanUtilDPoptimal, pOutageDPoptimal, 'ch-');
-plot(meanUtilGPS, pOutageGPS, 'gd-');
+plot(meanUtilSCPF, 1 - pOutageSCPF, 'b+-');
+plot(meanUtilDP, 1 - pOutageDP, 'ro-');
+plot(meanUtilDPoptimal, 1 - pOutageDPoptimal, 'ch-');
+plot(meanUtilGPS, 1 - pOutageGPS, 'gd-');
 title('P(outage) vs. utility trade off');
 xlabel('utility');
-ylabel('P(outage)')
+ylabel('1 - P(outage)')
 legend(benchmarks);
 savefig(sprintf('figs/util-outage-tradeoff-%s.fig', datestring));
 

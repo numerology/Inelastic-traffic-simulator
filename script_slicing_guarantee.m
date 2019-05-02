@@ -134,7 +134,7 @@ for i = 1:length(varFactors)
         % GPS, needs to first adjust the share dimensioning.
         tmpOpSettings.shareDist = sharedimension(minRateReq, rhoVec, ...
             shareVec, outageTol, minSharePerBS, varFactor, 0, 1);
-        [r, f, b] = GPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
+        [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, bsAssociation{t});
         ratesGPS{i, t} = r;
         outageGPS(t) = sum(r < perUserMinRateReq);
         

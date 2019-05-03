@@ -97,7 +97,74 @@ else
     surplusShare = shareVec(v) - sum(minBidReq);
     nextBid = cBid;
     if (surplusShare < 0 || any(minBidReq < 0))
-        nextBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
+        % Cannot satisfy all minimal requirement
+        % Knock out users according to MaxSubSet criterion.
+        % Until sob can meet the min rate requirements.
+        % nextBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
+        minBidReqPerUser = nan(1, nUsers);
+        for b = 1:nBasestations
+            if (aob(b) / (capacity / minRate - 1) <= 1 - aob(b))
+                minBidReqPerUser(opBelongs == v & bs == b) = ...
+                    aob(b) / (capacity / minRate - 1);
+            elseif (minRate / capacity <= shareDist(v, b))
+                minBidReqPerUser(opBelongs == v & bs == b) = ...
+                    minRate / capacity;
+            else
+                totalSurplus = 1 - shareDist(v, b);
+                totalWeight = 0;
+                for cSlice = 1:nSlices
+                    if (cSlice == v)
+                        continue
+                    end
+                    totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
+                        & bs == b)) - shareDist(cSlice, b));
+                    totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
+                        sum(cBid(opBelongs == cSlice & bs == b)));
+                end
+                minBidReqPerUser(opBelongs == v & bs == b) ...
+                    = shareDist(v, b) + totalWeight / (totalSurplus / ...
+                    (minRate / capacity - shareDist(v, b)) - 1);
+            end
+        end
+        cTotalShareNeeded = 0;
+        admissionControl = zeros(1, nUsers);
+        while(cTotalShareNeeded <= shareVec)
+            [minBid, minIdx] = min(minBidReqPerUser);
+            admissionControl(minIdx) = 1;
+            nextBid(minIdx) = minBid;
+            cTotalShareNeeded = cTotalShareNeeded + minBid;
+            % update minbid needed
+            cBaseStation = bs(minIdx);
+            nob = sum(opBelongs == v & bs == cBaseStation ...
+                & admissionControl) + 1; % need to count for itself. 
+            
+            if (aob(cBaseStation) / (capacity / minRate / nob - 1) ...
+                    <= 1 - aob(cBaseStation))
+                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
+                   = aob(cBaseStation) / (capacity / minRate / nob - 1);
+            elseif (nob * minRate / capacity <= shareDist(v, cBaseStation))
+                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
+                    = nob * minRate / capacity;
+            else
+                totalSurplus = 1 - shareDist(v, cBaseStation);
+                totalWeight = 0;
+                for cSlice = 1:nSlices
+                    if (cSlice == v)
+                        continue
+                    end
+                    totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
+                        & bs == cBaseStation)) - shareDist(cSlice, cBaseStation));
+                    totalSurplus = totalSurplus - min(shareDist(cSlice, cBaseStation), ...
+                        sum(cBid(opBelongs == cSlice & bs == cBaseStation)));
+                end
+                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
+                    = shareDist(v, cBaseStation) + totalWeight / (totalSurplus / ...
+                    (nob * minRate / capacity - shareDist(v, cBaseStation)) - 1);
+            end
+        end
+        
+        nextBid(opBelongs == v & ~admissionControl) = 1e-5; % give an epsilon bid.
+        
     else
         for b = 1:nBasestations
             nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...

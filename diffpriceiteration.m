@@ -129,7 +129,7 @@ else
         cTotalShareNeeded = 0;
         admissionControl = zeros(1, nUsers);
         while(cTotalShareNeeded <= shareVec)
-            minBidReqPerUser(admissionControl) = inf;
+            minBidReqPerUser(admissionControl > 0) = inf;
             [minBid, minIdx] = min(minBidReqPerUser);
             admissionControl(minIdx) = 1;
             nextBid(minIdx) = minBid;

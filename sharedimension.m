@@ -1,73 +1,64 @@
-function [shareDist] = sharedimension(minRateReq, meanLoadDist, shareVec, ...
-    eps, minShare, prob, binomial, GPS)
+function [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, ...
+     meanLoadDist, eps, minShare, prob, binomial, sliceCats)
 % sharedimension Find a share allocation for each slice such that the
 % minimal rate requirement is satisfied with probability > 1-eps.
+% Also, for the extra part of the 
 % Params:
 % minRateReq: 1 x V
+% meanRateReq: 1 x V
 % meanLoadDist: V x B
 % shareVec: 1 x V
 % eps: outage tolerance
 % minShare: minimal share allocated to a slice at each resource.
 % binomial: logical, 1 when dimension according to binomial distribution, 0
 % when poisson dist.
-% GPS: logical, 1 when performing share dimensioning for GPS, i.e., will
-% adopt the convention that s^e = 0.
+% sliceCats: 1 x V, slice type, 0 for inelastic, 1 for elastic.
+
 % Return:
 % shareDist: V x B
+% gpsShareDist: V x B
+% shareVec: 1 x V
 
-V = length(shareVec);
+V = length(minRateReq);
+shareVec = zeros(1, V);
 B = size(meanLoadDist, 2);
 minimalShare = zeros(size(meanLoadDist));
-spareShare = zeros(B, 1);
+gpsShareDist = zeros(size(meanLoadDist));
 shareDist = zeros(size(meanLoadDist));
 for v = 1:V
     for b = 1:B
-        if (binomial)
-            minimalShare(v, b) = binoinv(1 - eps, meanLoadDist(v, b), prob) ...
-                * minRateReq(v);
+        if (sliceCats(v) == 0)
+            if (binomial)
+                minimalShare(v, b) = binoinv(1 - eps, meanLoadDist(v, b), prob) ...
+                    * minRateReq(v);
+            else
+                minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
+                    * minRateReq(v);
+            end
         else
-            minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
-                * minRateReq(v);
+            minimalShare(v, b) = minShare;
         end
-
         
     end
 end
-% check 
+
+for b = 1:B
+    assert(sum(minimalShare(:, b)) <= 1, ...
+            'Base station is overbooked.');
+    for v = 1:V
+        if (sliceCats(v) == 0)
+            gpsShareDist(v, b) = minimalShare(v, b);
+            shareDist(v, b) = minimalShare(v, b);
+        else
+            gpsShareDist(v, b) = (1 - sum(minimalShare(sliceCats == 0, b))) ...
+                * meanLoadDist(v, b) / sum(meanLoadDist(sliceCats == 1, b));
+            shareDist(v, b) = minimalShare(v, b);
+        end
+    end
+end
+
+assert(all(all(gpsShareDist > 0)), 'Non positive share allocated.');
 for v = 1:V
-    assert(sum(minimalShare(v, :)) <= shareVec(v), ...
-        'Not enough share for slices.');
+    shareVec(v) = sum(gpsShareDist(v, :));
 end
-
-if (GPS)
-    for b = 1:B
-        assert(sum(minimalShare(:, b)) + V * minShare <= 1, ...
-            'Base station is overbooked.');
-        spareShare(b) = 1 - sum(minimalShare(:, b)) - V * minShare;
-        % currently, allocate spare share prop to minimal allocation.
-        for v = 1:V
-            if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
-                shareDist(v, b) = spareShare(b) / V + minShare;
-            else
-                shareDist(v, b) = minimalShare(v, b) + minShare + ...
-                    spareShare(b) / V;
-            end
-        end
-    end
-else
-    % if not GPS, only allocate the min share needed. 
-    for b = 1:B
-        assert(sum(minimalShare(:, b)) + V * minShare <= 1, ...
-            'Base station is overbooked.');
-        for v = 1:V
-            if (sum(minimalShare(:, b)) == 0) % if no minimal share is needed, equal allocation.
-                shareDist(v, b) = minShare;
-            else
-                shareDist(v, b) = minimalShare(v, b);
-            end
-        end
-    end
-end
-
-
 end

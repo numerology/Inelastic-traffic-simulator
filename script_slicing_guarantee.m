@@ -1,9 +1,9 @@
 clc, close all, clear all
 nSlice = 4;
-%parpool('local', 40);
+parpool('local', 40);
 warning('off','all');
 
-simulationTime = 4;
+simulationTime = 2000;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.
@@ -12,7 +12,7 @@ simulationTime = 4;
 % We simulate the scenario where Slices 1 and 2 are congested at BSs 1 and
 % 2, where elastic users are roughly uniform.
 perBSLoad = 1;
-shareVec = [1 1 1 1];
+% shareVec = [1 1 1 1];
 sliceCats = [0 0 1 1];
 relativeRhoVec = perBSLoad * [[2 2 6 6];
                               [10 10 6 6];
@@ -25,7 +25,6 @@ outageTol = 0.05;
 netSettings = [];
 netSettings.bsNS = nBaseStations;
 opSettings = [];
-opSettings.s_o = shareVec;
 
 varFactors = 1:0.2:2.6;
 
@@ -66,8 +65,8 @@ for i = 1:length(varFactors)
     capacities = cell(1, simulationTime);
     minRateReq = 0.025 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
     minRateReq(3:4) = 0;
-    shareDist = sharedimension(minRateReq, rhoVec, shareVec, outageTol, ...
-        minSharePerBS, varFactor, 0, 0);
+    [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, rhoVec, outageTol, ...
+        minSharePerBS, varFactor, 0, sliceCats);
     
     outageSCPF = zeros(1, simulationTime); 
     outageGPS = zeros(1, simulationTime);
@@ -102,6 +101,7 @@ for i = 1:length(varFactors)
             continue;
         end
         tmpOpSettings = opSettings;
+        tmpOpSettings.s_o = shareVec;
         tmpOpSettings.ops_belongs = opBelongs{i, t};
         tmpOpSettings.shareDist = shareDist;
         weightPerUser = zeros(1, tmpNetSettings.users);
@@ -132,8 +132,7 @@ for i = 1:length(varFactors)
         outageDPoptimal(t) = sum(r < perUserMinRateReq);
         
         % GPS, needs to first adjust the share dimensioning.
-        tmpOpSettings.shareDist = sharedimension(minRateReq, rhoVec, ...
-            shareVec, outageTol, minSharePerBS, varFactor, 0, 1);
+        tmpOpSettings.shareDist = gpsShareDist;
         [r, f, b] = flexibleGPS(tmpNetSettings, tmpOpSettings, capacities{t}, ...
             bsAssociation{t}, ones(1, nUsers)); % dummy minreq.
         ratesGPS{i, t} = r;

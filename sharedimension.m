@@ -35,6 +35,7 @@ for v = 1:V
                 minimalShare(v, b) = poissinv(1 - eps, meanLoadDist(v, b)) ...
                     * minRateReq(v);
             end
+            minimalShare(v, b) = max(minShare, minimalShare(v, b));
         else
             minimalShare(v, b) = minShare;
         end
@@ -50,8 +51,13 @@ for b = 1:B
             gpsShareDist(v, b) = minimalShare(v, b);
             shareDist(v, b) = minimalShare(v, b);
         else
-            gpsShareDist(v, b) = (1 - sum(minimalShare(sliceCats == 0, b))) ...
-                * meanLoadDist(v, b) / sum(meanLoadDist(sliceCats == 1, b));
+            if (sum(meanLoadDist(sliceCats == 1, b)) == 0)
+                gpsShareDist(v, b) = (1 - sum(minimalShare(sliceCats ...
+                    == 0, b))) / sum(sliceCats);
+            else
+                gpsShareDist(v, b) = (1 - sum(minimalShare(sliceCats == 0, b))) ...
+                    * meanLoadDist(v, b) / sum(meanLoadDist(sliceCats == 1, b));
+            end
             shareDist(v, b) = minimalShare(v, b);
         end
     end

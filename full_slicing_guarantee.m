@@ -32,13 +32,13 @@ sliceCats = [0 0 1 1];
 loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.001 * 1 / (sat) * ones(1, nSlices);
+minRateReq = 0.2 * 1 / (sat) * ones(1, nSlices);
 minRateReq(3:4) = 0;
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats);
     
 weightPerUser = zeros(1, NetSettings.users);
-for v = 1:nSlice
+for v = 1:nSlices
     weightPerUser(OpSettings.ops_belongs == v) = shareVec(v) ...
         ./ sum(OpSettings.ops_belongs == v);
 end
@@ -47,9 +47,14 @@ OpSettings.w_i = weightPerUser;
 OpSettings.shareDist = loadDist;
 OpSettings.s_o = shareVec;
 
+perUserMinRateReq = ones(1, NetSettings.users);
+for v  = 1:nSlices
+    perUserMinRateReq(OpSettings.ops_belongs == v) = minRateReq(v);
+end
+
 %% Compute fractions
 %ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
-for t=1:simulationTime
+parfor t=1:simulationTime
     [r, f, b] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', minRateReq, 0);
     rates_DP(:, t)=r;
@@ -64,11 +69,47 @@ for t=1:simulationTime
     rates_SCPF(:, t)=r;
     fractions_SCPF(:, t)=f;
     btd_SCPF(:, t)=b;
-    tmpOpSettings = OpSettings
+    tmpOpSettings = OpSettings;
     tmpOpSettings.shareDist = gpsShareDist;
     [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
-        bs(:,t)', ones(1, nUsers)); % dummy minreq.
+        bs(:,t)', ones(1, NetSettings.users)); % dummy minreq.
     rates_GPS(:, t) = r;
     fractions_GPS(:, t)=f;
     btd_GPS(:, t)=b;
+    fprintf('finish at time %d\n', t);
 end
+
+%% Plot some metrics
+datestring = datestr(now, 30);
+
+benchmarks = {'DIFFPRICE-equal surplus', 'GPS', 'SCPF', 'DIFFPRICE-optimal'};
+bmWoGPS = {'DIFFPRICE-equal surplus', 'SCPF', 'DIFFPRICE-optimal'};
+
+i1=2;
+i2=30;
+i3=134;
+figure(1);
+subplot(3,1,1)
+plot(btd_DP(i1,:),'-.b')
+hold on
+plot(btd_GPS(i1,:),'--r')
+plot(btd_SCPF(i1,:),'-g')
+plot(btd_DPoptimal(i1,:),':k')
+
+subplot(3,1,2)
+plot(btd_DP(i2,:),'-.b')
+hold on
+plot(btd_GPS(i2,:),'--r')
+plot(btd_SCPF(i2,:),'-g')
+plot(btd_DPoptimal(i2,:),':k')
+subplot(3,1,3)
+
+plot(btd_DP(i3,:),'-.b')
+hold on
+plot(btd_GPS(i3,:),'--r')
+plot(btd_SCPF(i3,:),'-g')
+plot(btd_DPoptimal(i3,:),':k')
+legend(benchmarks);
+savefig(sprintf('figs/btd-trajectory-%s.fig', datestring));
+
+%% 

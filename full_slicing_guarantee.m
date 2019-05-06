@@ -1,12 +1,12 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-%parpool('local', 40);
+parpool('local', 40);
 warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 sat = 3; % U/B (use only integers...)
-simulationTime = 10; % seconds
+simulationTime = 1000; % seconds
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;

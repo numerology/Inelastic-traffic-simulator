@@ -13,6 +13,8 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 %   waterfilling: logical, 1 when want to user waterfilling to allocate
 %   bids, otherwise surplus bids will be allocated equally.
 
+% (TODO: extend this to per user minimal rate requirement)
+
 nUsers = length(cBid);
 nSlices = size(shareDist, 1);
 nBasestations = size(shareDist, 2);
@@ -101,28 +103,33 @@ else
         % Until sob can meet the min rate requirements.
         % nextBid(opBelongs == v) = shareVec(v) / sum(opBelongs == v);
         minBidReqPerUser = nan(1, nUsers);
+        fractionClaimedPerBS = zeros(1, nBasestations);
         for b = 1:nBasestations
-            if (aob(b) / (capacity / minRate - 1) <= 1 - aob(b))
-                minBidReqPerUser(opBelongs == v & bs == b) = ...
-                    aob(b) / (capacity / minRate - 1);
-            elseif (minRate / capacity <= shareDist(v, b))
-                minBidReqPerUser(opBelongs == v & bs == b) = ...
-                    minRate / capacity;
-            else
-                totalSurplus = 1 - shareDist(v, b);
-                totalWeight = 0;
-                for cSlice = 1:nSlices
-                    if (cSlice == v)
-                        continue
-                    end
-                    totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
-                        & bs == b)) - shareDist(cSlice, b));
-                    totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
-                        sum(cBid(opBelongs == cSlice & bs == b)));
+            userSet = find(opBelongs == v & bs == b);
+            totalSurplus = 1 - shareDist(v, b);
+            totalWeight = 0;
+            for cSlice = 1:nSlices
+                if (cSlice == v)
+                    continue
                 end
-                minBidReqPerUser(opBelongs == v & bs == b) ...
-                    = shareDist(v, b) + totalWeight / (totalSurplus / ...
-                    (minRate / capacity - shareDist(v, b)) - 1);
+                totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
+                    & bs == b)) - shareDist(cSlice, b));
+                totalSurplus = totalSurplus - min(shareDist(cSlice, b), ...
+                    sum(cBid(opBelongs == cSlice & bs == b)));
+            end
+            for u = userSet
+                if (aob(b) / (1 / (fractionClaimedPerBS(b) + minRate ...
+                        / capacityPerUser(u)) - 1) <= 1 - aob(b))
+                    minBidReqPerUser(u) = aob(b) / (1 / (fractionClaimedPerBS(b) + minRate ...
+                        / capacityPerUser(u)) - 1);
+                elseif ((fractionClaimedPerBS(b) + minRate ...
+                        / capacityPerUser(u)) <= shareDist(v, b))
+                    minBidReqPerUser(u) = fractionClaimedPerBS(b) ...
+                        + minRate / capacityPerUser(u);
+                else
+                    minBidReqPerUser(u) = shareDist(v, b) + totalWeight / (totalSurplus / ...
+                        (fractionClaimedPerBS(b) + minRate / capacityPerUser(u) - shareDist(v, b)) - 1);
+                end
             end
         end
         cTotalShareNeeded = 0;
@@ -135,31 +142,25 @@ else
             cTotalShareNeeded = cTotalShareNeeded + minBid;
             % update minbid needed
             cBaseStation = bs(minIdx);
-            nob = sum(opBelongs == v & bs == cBaseStation ...
-                & admissionControl) + 1; % need to count for itself. 
-            
-            if (aob(cBaseStation) / (capacity / minRate / nob - 1) ...
-                    <= 1 - aob(cBaseStation))
-                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
-                   = aob(cBaseStation) / (capacity / minRate / nob - 1);
-            elseif (nob * minRate / capacity <= shareDist(v, cBaseStation))
-                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
-                    = nob * minRate / capacity;
-            else
-                totalSurplus = 1 - shareDist(v, cBaseStation);
-                totalWeight = 0;
-                for cSlice = 1:nSlices
-                    if (cSlice == v)
-                        continue
-                    end
-                    totalWeight = totalWeight + max(0, sum(cBid(opBelongs == cSlice ...
-                        & bs == cBaseStation)) - shareDist(cSlice, cBaseStation));
-                    totalSurplus = totalSurplus - min(shareDist(cSlice, cBaseStation), ...
-                        sum(cBid(opBelongs == cSlice & bs == cBaseStation)));
+            fractionClaimedPerBS(cBaseStation) = fractionClaimedPerBS(cBaseStation) ...
+                + minRate(minIdx) / capacityPerUser(minIdx);
+            userSet = find(opBelongs == v & bs == cBaseStation);
+            for u = userSet
+                if (aob(cBaseStation) / (1 / (fractionClaimedPerBS(cBaseStation) + minRate ...
+                        / capacityPerUser(u)) - 1) <= 1 - aob(cBaseStation))
+                    minBidReqPerUser(u) = aob(cBaseStation) / (1 ...
+                        / (fractionClaimedPerBS(cBaseStation) + minRate ...
+                        / capacityPerUser(u)) - 1);
+                elseif ((fractionClaimedPerBS(cBaseStation) + minRate ...
+                        / capacityPerUser(u)) <= shareDist(v, cBaseStation))
+                    minBidReqPerUser(u) = fractionClaimedPerBS(cBaseStation) ...
+                        + minRate / capacityPerUser(u);
+                else
+                    minBidReqPerUser(u) = shareDist(v, cBaseStation) ...
+                        + totalWeight / (totalSurplus / ...
+                        (fractionClaimedPerBS(cBaseStation) + minRate ...
+                        / capacityPerUser(u) - shareDist(v, cBaseStation)) - 1);
                 end
-                minBidReqPerUser(opBelongs == v & bs == cBaseStation) ...
-                    = shareDist(v, cBaseStation) + totalWeight / (totalSurplus / ...
-                    (nob * minRate / capacity - shareDist(v, cBaseStation)) - 1);
             end
         end
         

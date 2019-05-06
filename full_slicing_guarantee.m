@@ -1,12 +1,12 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-parpool('local', 40);
+%parpool('local', 40);
 warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 sat = 3; % U/B (use only integers...)
-simulationTime = 1000; % seconds
+simulationTime = 10; % seconds
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
@@ -93,6 +93,7 @@ parfor t=1:simulationTime
     fprintf('finish at time %d\n', t);
 end
 
+%%
 fprintf('DP: P(outage) = %d\n', outageDP / totalNumUsers);
 fprintf('DP optimal: P(outage) = %d\n', outageDPoptimal / totalNumUsers);
 fprintf('SCPF: P(outage) = %d\n', outageSCPF / totalNumUsers);
@@ -111,27 +112,27 @@ for t = 1:simulationTime % stats
     nUsers = NetSettings.users;
     opVec = OpSettings.ops_belongs;
 
-    goodUsers = (ratesGPS(:, t) > perUserMinRateReq & ratesSCPF(:, t) ...
-        > perUserMinRateReq & ratesDP(:, t) > perUserMinRateReq ...
-        & ratesDPoptimal(:, t) > perUserMinRateReq);
+    goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
+        > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq ...
+        & rates_DPoptimal(:, t)' > perUserMinRateReq);
 
-    tmpRatesGPS = nan(size(ratesGPS(:, t)));
-    tmpRatesGPS(goodUsers) = ratesGPS(goodUsers, t);
+    tmpRatesGPS = nan(size(rates_GPS(:, t)'));
+    tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
     utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
         opVec, sliceCats, perUserMinRateReq);
 
-    tmpRatesSCPF = nan(size(ratesSCPF(:, t)));
-    tmpRatesSCPF(goodUsers) = ratesSCPF(goodUsers, t);
+    tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
+    tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
     utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
         opVec, sliceCats, perUserMinRateReq);
 
-    tmpRatesDP = nan(size(ratesDP(:, t)));
-    tmpRatesDP(goodUsers) = ratesDP(goodUsers, t);
+    tmpRatesDP = nan(size(rates_DP(:, t)'));
+    tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
     utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
         opVec, sliceCats, perUserMinRateReq);
 
-    tmpRatesDPoptimal = nan(size(ratesDPoptimal(:, t)));
-    tmpRatesDPoptimal(goodUsers) = ratesDPoptimal(goodUsers, t);
+    tmpRatesDPoptimal = nan(size(rates_DPoptimal(:, t)'));
+    tmpRatesDPoptimal(goodUsers) = rates_DPoptimal(goodUsers, t);
     utilDPoptimal(t) = ratetoutil(tmpRatesDPoptimal, shareVec, ...
         opVec, sliceCats, perUserMinRateReq);
 end

@@ -9,7 +9,7 @@ function [ capacities ] = LinkEstimation(NetSettings, trace, bsPositions, multFa
 TXp=41;ThermalNoisePlusInterfig=-104;
 capacities = zeros(NetSettings.users, NetSettings.bsNS, ...
     NetSettings.simulation_time);
-ppm = ParforProgMon('Link estimating : ', NetSettings.simulation_time);
+% ppm = ParforProgMon('Link estimating : ', NetSettings.simulation_time);
 parfor t = 1:NetSettings.simulation_time
     %if rem(t,200)==0; disp(t);end
     distA=zeros(size(unique(bsPositions(:,3)),2),1);
@@ -65,7 +65,7 @@ parfor t = 1:NetSettings.simulation_time
         end
     end
     capacities(:,:,t) = tmpCapacities;
-    ppm.increment();
+    % ppm.increment();
 end
 capacities(capacities==0)=-Inf;
 end

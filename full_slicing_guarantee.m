@@ -1,7 +1,7 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-%parpool('local', 40);
+parpool('local', 40);
 warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
@@ -29,13 +29,13 @@ sliceCats = [0 0 1 1];
 
 %% Adjust share distribution for new proposed scheme according to the load distribution
 % the sum of share across BSs <= share * |B| per slice.
-loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
+[loadDist, bsMask] = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
 % use a similar heuristic to allocate shares
 
 minRateReq = 0.2 * 1 / (sat) * ones(1, nSlices);
 minRateReq(3:4) = 0;
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
-        minSharePerBS, 1, 0, sliceCats);
+        minSharePerBS, 1, 0, sliceCats, bsMask);
     
 weightPerUser = zeros(1, NetSettings.users);
 for v = 1:nSlices

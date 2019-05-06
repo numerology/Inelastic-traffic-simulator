@@ -17,8 +17,6 @@ nUsers = length(cBid);
 nSlices = size(shareDist, 1);
 nBasestations = size(shareDist, 2);
 nUsersOfV = sum(opBelongs == v);
-capacity = unique(capacityPerUser);
-assert(length(capacity) == 1, 'Only allow uniform capacity');
 
 if (nUsersOfV == 0) % in case there is no user on slice v.
     nextBid = cBid;
@@ -38,12 +36,13 @@ lobVec = zeros(1, nBasestations);
 minBidReq = zeros(1, nBasestations); % minimal bid at each BSs to meet minRate.
 minBidReqPerUser = zeros(1, nUsers);
 for b = 1:nBasestations
+    totalFractionReq = sum(minRate ./ capacityPerUser(opBelongs == v & bs == b));
     nob = sum(opBelongs == v & bs == b);
     % incrementally test 3 cases to figure out how much bid is needed.
-    if (aob(b) / (capacity / minRate / nob - 1) <= 1 - aob(b))
-        minBidReq(b) = aob(b) / (capacity / minRate / nob - 1);
-    elseif (nob * minRate / capacity <= shareDist(v, b))
-        minBidReq(b) = nob * minRate / capacity;
+    if (aob(b) / (1 / totalFractionReq - 1) <= 1 - aob(b))
+        minBidReq(b) = aob(b) / (1 / totalFractionReq - 1);
+    elseif (totalFractionReq <= shareDist(v, b))
+        minBidReq(b) = totalFractionReq;
     else
         totalSurplus = 1 - shareDist(v, b);
         totalWeight = 0;
@@ -57,7 +56,7 @@ for b = 1:nBasestations
                 sum(cBid(opBelongs == cSlice & bs == b)));
         end
         minBidReq(b) = shareDist(v, b) + totalWeight / (totalSurplus / ...
-            (nob * minRate / capacity - shareDist(v, b)) - 1);
+            (totalFractionReq - shareDist(v, b)) - 1);
     end
 end
 % If there is no other slices, possible to have minBidReq == 0.

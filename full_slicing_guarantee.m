@@ -54,21 +54,33 @@ end
 
 %% Compute fractions
 %ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
+totalNumUsers = 0;
+outageDP = 0;
+outageDPoptimal = 0;
+outageSCPF = 0;
+outageGPS = 0;
 parfor t=1:simulationTime
+    totalNumUsers = totalNumUsers + NetSettings.users;
     [r, f, b] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', minRateReq, 0);
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
+    outageDP = outageDP + sum(r < perUserMinRateReq);
+    
     [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', perUserMinRateReq, sliceCats);
     rates_DPoptimal(:, t)=r;
     fractions_DPoptimal(:, t)=f;
     btd_DPoptimal(:, t)=b;
+    outageDPoptimal = outageDPoptimal + sum(r < perUserMinRateReq);
+    
     [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
     rates_SCPF(:, t)=r;
     fractions_SCPF(:, t)=f;
     btd_SCPF(:, t)=b;
+    outageSCPF = outageSCPF + sum(r < perUserMinRateReq);
+    
     tmpOpSettings = OpSettings;
     tmpOpSettings.shareDist = gpsShareDist;
     [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
@@ -76,8 +88,57 @@ parfor t=1:simulationTime
     rates_GPS(:, t) = r;
     fractions_GPS(:, t)=f;
     btd_GPS(:, t)=b;
+    outageGPS = outageGPS + sum(r < perUserMinRateReq);
+    
     fprintf('finish at time %d\n', t);
 end
+
+fprintf('DP: P(outage) = %d\n', outageDP / totalNumUsers);
+fprintf('DP optimal: P(outage) = %d\n', outageDPoptimal / totalNumUsers);
+fprintf('SCPF: P(outage) = %d\n', outageSCPF / totalNumUsers);
+fprintf('GPS: P(outage) = %d\n', outageGPS / totalNumUsers);
+
+disp('----------------------------------------------------');
+fprintf('DP: BTD = %d\n', nanmean(nanmean(btd_DP)));
+fprintf('DPoptimal: BTD = %d\n', nanmean(nanmean(btd_DPoptimal)));
+fprintf('SCPF: BTD = %d\n', nanmean(nanmean(btd_SCPF)));
+fprintf('GPS: BTD = %d\n', nanmean(nanmean(btd_GPS)));
+
+disp('----------------------------------------------------');
+for t = 1:simulationTime % stats
+    % For each time instant, only account for the set of users receiving at
+    % least min rate req under all benchmarks.
+    nUsers = NetSettings.users;
+    opVec = OpSettings.ops_belongs;
+
+    goodUsers = (ratesGPS(:, t) > perUserMinRateReq & ratesSCPF(:, t) ...
+        > perUserMinRateReq & ratesDP(:, t) > perUserMinRateReq ...
+        & ratesDPoptimal(:, t) > perUserMinRateReq);
+
+    tmpRatesGPS = nan(size(ratesGPS(:, t)));
+    tmpRatesGPS(goodUsers) = ratesGPS(goodUsers, t);
+    utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
+        opVec, sliceCats, perUserMinRateReq);
+
+    tmpRatesSCPF = nan(size(ratesSCPF(:, t)));
+    tmpRatesSCPF(goodUsers) = ratesSCPF(goodUsers, t);
+    utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
+        opVec, sliceCats, perUserMinRateReq);
+
+    tmpRatesDP = nan(size(ratesDP(:, t)));
+    tmpRatesDP(goodUsers) = ratesDP(goodUsers, t);
+    utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
+        opVec, sliceCats, perUserMinRateReq);
+
+    tmpRatesDPoptimal = nan(size(ratesDPoptimal(:, t)));
+    tmpRatesDPoptimal(goodUsers) = ratesDPoptimal(goodUsers, t);
+    utilDPoptimal(t) = ratetoutil(tmpRatesDPoptimal, shareVec, ...
+        opVec, sliceCats, perUserMinRateReq);
+end
+fprintf('DP: util = %d\n', nanmean(utilDP));
+fprintf('DPoptimal: util = %d\n', nanmean(utilDPoptimal));
+fprintf('SCPF: util = %d\n', nanmean(utilSCPF));
+fprintf('GPS: util = %d\n', nanmean(utilGPS));
 
 %% Plot some metrics
 datestring = datestr(now, 30);

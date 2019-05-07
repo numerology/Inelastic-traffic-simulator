@@ -1,7 +1,7 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-%parpool('local', 40);
+parpool('local', 40);
 warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
@@ -13,7 +13,7 @@ bsN = 19;
 sectors = 3;
 interdistance = 1000;
 outageTol = 0.05;
-minSharePerBS = 0.01;
+minSharePerBS = 0.001;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'};
@@ -29,13 +29,17 @@ sliceCats = [0 0 1 1];
 
 %% Adjust share distribution for new proposed scheme according to the load distribution
 % the sum of share across BSs <= share * |B| per slice.
-loadDist = getloaddistribution(OpSettings, NetSettings, bs, simulationTime);
+[loadDist, bsMask] = getloaddistribution(OpSettings, NetSettings, bs, ...
+    simulationTime);
+meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser, ...
+    simulationTime);
 % use a similar heuristic to allocate shares
 
 minRateReq = 0.002 * 1 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 0;
+minRateReq(3:4) = 3 * minRateReq(3:4);
+
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
-        minSharePerBS, 1, 0, sliceCats);
+        minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
     
 weightPerUser = zeros(1, NetSettings.users);
 for v = 1:nSlices
@@ -44,12 +48,14 @@ for v = 1:nSlices
 end
 OpSettings.w_i = weightPerUser;
 
-OpSettings.shareDist = loadDist;
+OpSettings.shareDist = shareDist;
 OpSettings.s_o = shareVec;
 
-perUserMinRateReq = ones(1, NetSettings.users);
+perUserMinRateReq = zeros(1, NetSettings.users);
 for v  = 1:nSlices
-    perUserMinRateReq(OpSettings.ops_belongs == v) = minRateReq(v);
+    if (sliceCats(v) == 0)
+        perUserMinRateReq(OpSettings.ops_belongs == v) = minRateReq(v);
+    end
 end
 
 %% Compute fractions
@@ -94,6 +100,7 @@ parfor t=1:simulationTime
 end
 
 %%
+disp('----------------------------------------------------');
 fprintf('DP: P(outage) = %d\n', outageDP / totalNumUsers);
 fprintf('DP optimal: P(outage) = %d\n', outageDPoptimal / totalNumUsers);
 fprintf('SCPF: P(outage) = %d\n', outageSCPF / totalNumUsers);

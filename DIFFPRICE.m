@@ -40,7 +40,9 @@ while(norm(prevBid - cBid) > eps)
         nextBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
             opBelongs, bs, capacityPerUser, minReq(v), waterfilling);
     end
-    assert(all(nextBid > 0), 'Unexpected negative bids.')
+    if(~all(nextBid > 0))
+        assert(all(nextBid > 0), 'Unexpected negative bids.')
+    end
     cBid = nextBid;
     cnt = cnt + 1;
     if (cnt == 40)

@@ -15,6 +15,7 @@ function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
 %   btd: perceived user BTDs.
 
+minReq(sliceCats > 0) = 0;
 nUsers = netSettings.users;
 nSlices = size(opSettings.s_o, 2);
 nBasestations = netSettings.bsNS;

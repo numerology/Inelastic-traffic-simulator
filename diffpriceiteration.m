@@ -39,7 +39,6 @@ minBidReq = zeros(1, nBasestations); % minimal bid at each BSs to meet minRate.
 minBidReqPerUser = zeros(1, nUsers);
 for b = 1:nBasestations
     totalFractionReq = sum(minRate ./ capacityPerUser(opBelongs == v & bs == b));
-    nob = sum(opBelongs == v & bs == b);
     % incrementally test 3 cases to figure out how much bid is needed.
     if (aob(b) / (1 / totalFractionReq - 1) <= 1 - aob(b))
         minBidReq(b) = aob(b) / (1 / totalFractionReq - 1);
@@ -172,9 +171,14 @@ else
         for b = 1:nBasestations
             nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
                 & bs == b);
+            % should be inversely prop to capacity
+            nextBid(opBelongs == v & bs == b) = minBidReq(b) .* ...
+                (1 ./ capacityPerUser(opBelongs == v & bs == b)) ...
+                ./ sum(1 ./ capacityPerUser(opBelongs == v & bs == b));
         end
         nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
-            / sum(opBelongs == v);
+            .* (1 ./ capacityPerUser(opBelongs == v)) ...
+            ./ sum(1 ./ capacityPerUser(opBelongs == v));
     end   
 end
 

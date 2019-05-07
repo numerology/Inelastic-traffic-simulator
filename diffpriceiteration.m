@@ -34,7 +34,7 @@ for slice = 1:nSlices
         aob(b) = aob(b) + sum(cBid(opBelongs == slice & bs == b));
     end
 end
-lobVec = zeros(1, nBasestations);
+
 minBidReq = zeros(1, nBasestations); % minimal bid at each BSs to meet minRate.
 minBidReqPerUser = zeros(1, nUsers);
 for b = 1:nBasestations
@@ -63,7 +63,7 @@ for b = 1:nBasestations
 end
 % If there is no other slices, possible to have minBidReq == 0.
 % Set a lowerbound to prevent this.
-minBidReq(minBidReq < 1e-4) = 1e-4;
+minBidReq(minBidReq < 1e-4) = 1e-5;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
 for b = 1:nBasestations
     minBidReqPerUser(opBelongs == v & bs == b) = minBidReq(b) ...
@@ -132,10 +132,10 @@ else
                 end
             end
         end
+        minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5; % prevent 0 bid.
         cTotalShareNeeded = 0;
         admissionControl = zeros(1, nUsers);
-        while(cTotalShareNeeded <= shareVec)
-            minBidReqPerUser(admissionControl > 0) = inf;
+        while(cTotalShareNeeded + min(minBidReqPerUser) <= shareVec(v))
             [minBid, minIdx] = min(minBidReqPerUser);
             admissionControl(minIdx) = 1;
             nextBid(minIdx) = minBid;
@@ -143,7 +143,7 @@ else
             % update minbid needed
             cBaseStation = bs(minIdx);
             fractionClaimedPerBS(cBaseStation) = fractionClaimedPerBS(cBaseStation) ...
-                + minRate(minIdx) / capacityPerUser(minIdx);
+                + minRate / capacityPerUser(minIdx);
             userSet = find(opBelongs == v & bs == cBaseStation);
             for u = userSet
                 if (aob(cBaseStation) / (1 / (fractionClaimedPerBS(cBaseStation) + minRate ...
@@ -162,9 +162,11 @@ else
                         / capacityPerUser(u) - shareDist(v, cBaseStation)) - 1);
                 end
             end
+            minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5;
+            minBidReqPerUser(admissionControl > 0) = inf;
         end
         
-        nextBid(opBelongs == v & ~admissionControl) = 1e-5; % give an epsilon bid.
+        nextBid(opBelongs == v & ~admissionControl) = 1e-7; % give an epsilon bid.
         
     else
         for b = 1:nBasestations

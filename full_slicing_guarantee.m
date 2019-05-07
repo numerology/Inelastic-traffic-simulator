@@ -2,7 +2,7 @@
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
 parpool('local', 40);
-warning('off','all');
+warning('on','all');
 %% Set up
 nSlices = 4; % num of slices
 sat = 3; % U/B (use only integers...)
@@ -35,7 +35,7 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.05 * 1 / (sat) * ones(1, nSlices);
+minRateReq = 0.4 * 1 / (sat) * ones(1, nSlices);
 minRateReq(3:4) = 3 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
@@ -57,6 +57,7 @@ for v  = 1:nSlices
         perUserMinRateReq(OpSettings.ops_belongs == v) = minRateReq(v);
     end
 end
+minRateReq(sliceCats > 0) = 0;
 
 %% Compute fractions
 %ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
@@ -72,20 +73,20 @@ parfor t=1:simulationTime
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
-    outageDP = outageDP + sum(r < perUserMinRateReq);
+    outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-6));
     
     [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', perUserMinRateReq, sliceCats);
     rates_DPoptimal(:, t)=r;
     fractions_DPoptimal(:, t)=f;
     btd_DPoptimal(:, t)=b;
-    outageDPoptimal = outageDPoptimal + sum(r < perUserMinRateReq);
+    outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq - 1e-6));
     
     [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
     rates_SCPF(:, t)=r;
     fractions_SCPF(:, t)=f;
     btd_SCPF(:, t)=b;
-    outageSCPF = outageSCPF + sum(r < perUserMinRateReq);
+    outageSCPF = outageSCPF + sum(r < (perUserMinRateReq - 1e-6));
     
     tmpOpSettings = OpSettings;
     tmpOpSettings.shareDist = gpsShareDist;
@@ -94,7 +95,7 @@ parfor t=1:simulationTime
     rates_GPS(:, t) = r;
     fractions_GPS(:, t)=f;
     btd_GPS(:, t)=b;
-    outageGPS = outageGPS + sum(r < perUserMinRateReq);
+    outageGPS = outageGPS + sum(r < (perUserMinRateReq - 1e-6));
     
     fprintf('finish at time %d\n', t);
 end

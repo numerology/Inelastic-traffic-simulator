@@ -15,12 +15,18 @@ function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
 %   btd: perceived user BTDs.
 
-minReq(sliceCats > 0) = 0;
 nUsers = netSettings.users;
-nSlices = size(opSettings.s_o, 2);
+nSlices = size(opSettings.s_o, 2);    
 nBasestations = netSettings.bsNS;
 shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
+
+for v = 1:nSlices
+    if(sliceCats(v) == 1)
+        minReq(opBelongs == v) = 0;
+    end   
+end
+
 shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
 
@@ -38,7 +44,7 @@ end
 
 optimBid = fmincon(@(x) -dpbidtoutil(x', bs, opBelongs, capacityPerUser, ...
     shareVec, shareDist, minReq, sliceCats), initialBid, constMat, ...
-    constVec, [], [], 1e-5 * ones(nUsers, 1), ones(nUsers, 1), ...
+    constVec, [], [], 1e-5 * ones(nUsers, 1), nBasestations * ones(nUsers, 1), ...
     @(x) minrateconstraint(netSettings, opSettings, x, bs, ...
     capacityPerUser, minReq), options);
 
@@ -114,7 +120,7 @@ btd=1 ./ userRates;
         end
     end
     userRates_ = userFraction_ .* capacityPerUser;
-    C = minReq - userRates_;
+    C = (minReq - userRates_)';
     end
 %---------- End nested function --------------------
 end

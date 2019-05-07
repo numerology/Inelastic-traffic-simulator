@@ -68,6 +68,9 @@ for v = 1:nSlices
         util = util + shareVec(v) / sum(opBelongs == v) ...
             * sum(log(ratesPerUser(opBelongs == v) ...
             - minRateReq(opBelongs == v)));
+    else
+        util = util - 100 * sum(ratesPerUser(opBelongs == v) ...
+            < minRateReq(opBelongs == v));
     end
 end
 end

@@ -1,20 +1,20 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-%parpool('local', 40);
+parpool('local', 40);
 warning('on','all');
 %% Set up
 nSlices = 4; % num of slices
 
-sat = 7; % U/B (use only integers...)
-simulationTime = 1000; % seconds
+sat = 4; % U/B (use only integers...)
+simulationTime = 2000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
 sectors = 3;
-interdistance = 1000;
-outageTol = 0.01;
+interdistance = 100;
+outageTol = 0.05;
 minSharePerBS = 0.001;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.7 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 50 * minRateReq(3:4);
+minRateReq = 1 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 3 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);

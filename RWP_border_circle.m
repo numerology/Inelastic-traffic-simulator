@@ -31,7 +31,7 @@ for u=1:users
         end
         xF=r*[cos(thO)];yF=r*[sin(thO)];
         % pick speed
-        sp=Mspeed+1*rand()-0.5;
+        sp=(rand() + 0.2) * Mspeed;
         % calculate distance in meters
         d=sqrt((xF-xI)^2+(yF-yI)^2);
         % differentials per 1 millisec

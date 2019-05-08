@@ -62,7 +62,7 @@ for b = 1:nBasestations
 end
 % If there is no other slices, possible to have minBidReq == 0.
 % Set a lowerbound to prevent this.
-minBidReq(minBidReq < 1e-4) = 1e-5;
+minBidReq(minBidReq < 1e-8) = 1e-8;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
 for b = 1:nBasestations
     minBidReqPerUser(opBelongs == v & bs == b) = minBidReq(b) ...
@@ -97,6 +97,7 @@ else
     surplusShare = shareVec(v) - sum(minBidReq);
     nextBid = cBid;
     if (surplusShare < 0 || any(minBidReq < 0))
+        disp('Admission control applied.');
         % Cannot satisfy all minimal requirement
         % Knock out users according to MaxSubSet criterion.
         % Until sob can meet the min rate requirements.
@@ -131,7 +132,8 @@ else
                 end
             end
         end
-        minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5; % prevent 0 bid.
+        minBidReqPerUser(minBidReqPerUser < 1e-8) = 1e-8; % prevent 0 bid.
+        minBidReqPerUser(opBelongs ~= v) = inf;
         cTotalShareNeeded = 0;
         admissionControl = zeros(1, nUsers);
         while(cTotalShareNeeded + min(minBidReqPerUser) <= shareVec(v))
@@ -161,21 +163,20 @@ else
                         / capacityPerUser(u) - shareDist(v, cBaseStation)) - 1);
                 end
             end
-            minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5;
+            minBidReqPerUser(minBidReqPerUser < 1e-8) = 1e-8;
             minBidReqPerUser(admissionControl > 0) = inf;
         end
         
-        nextBid(opBelongs == v & ~admissionControl) = 1e-7; % give an epsilon bid.
+        nextBid(opBelongs == v & ~admissionControl) = 1e-8; % give an epsilon bid.
         
     else
         for b = 1:nBasestations
-            nextBid(opBelongs == v & bs == b) = minBidReq(b) / sum(opBelongs == v ...
-                & bs == b);
-            % should be inversely prop to capacity
+           % should be inversely prop to capacity
             nextBid(opBelongs == v & bs == b) = minBidReq(b) .* ...
                 (1 ./ capacityPerUser(opBelongs == v & bs == b)) ...
                 ./ sum(1 ./ capacityPerUser(opBelongs == v & bs == b));
         end
+        
         nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
             .* (1 ./ capacityPerUser(opBelongs == v)) ...
             ./ sum(1 ./ capacityPerUser(opBelongs == v));

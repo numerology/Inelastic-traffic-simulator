@@ -23,18 +23,19 @@ disp('Starting mobility...')
 UE_height=1.5;rad=500; % m
 Mspeed=1.5; %m/s
 
-% [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
-%                              UE_height,rad,Mspeed, 1, OpSettings);
-% trace(OpSettings.ops_belongs <= 1,:,1) = uX(OpSettings.ops_belongs <= 1, :);
-% trace(OpSettings.ops_belongs <= 1,:,2) = uY(OpSettings.ops_belongs <= 1, :);
+[uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
+                             UE_height,rad,Mspeed, 1, OpSettings);
+trace(OpSettings.ops_belongs <= 2,:,1) = uX(OpSettings.ops_belongs <= 2, :);
+trace(OpSettings.ops_belongs <= 2,:,2) = uY(OpSettings.ops_belongs <= 2, :);
                         
 S = load('./SLAW model/Heterogeneity/H6_seed15');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 nHetTraceUser = size(hetTrace, 1)
 
-for o = 1:operators
-    trace(OpSettings.ops_belongs == o, :, :) = hetTrace(OpSettings.ops_belongs ...
-        == o, :, :);
+for o = 3:4
+    trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
+        = hetTrace(OpSettings.ops_belongs ...
+        == o, 1:NetSettings.simulation_time, :);
 end
 
 disp('done mobility.')

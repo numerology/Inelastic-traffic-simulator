@@ -1,12 +1,14 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-parpool('local', 40);
+%parpool('local', 40);
 warning('on','all');
 %% Set up
 nSlices = 4; % num of slices
+
 sat = 7; % U/B (use only integers...)
 simulationTime = 1000; % seconds
+
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
@@ -35,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.4 * 1 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 5 * minRateReq(3:4);
+minRateReq = 0.7 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 50 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
@@ -73,20 +75,20 @@ parfor t=1:simulationTime
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
-    outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-6));
+    outageDP = outageDP + sum(r < (perUserMinRateReq));
     
     [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', perUserMinRateReq, sliceCats);
     rates_DPoptimal(:, t)=r;
     fractions_DPoptimal(:, t)=f;
     btd_DPoptimal(:, t)=b;
-    outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq - 1e-6));
+    outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq));
     
     [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
     rates_SCPF(:, t)=r;
     fractions_SCPF(:, t)=f;
     btd_SCPF(:, t)=b;
-    outageSCPF = outageSCPF + sum(r < (perUserMinRateReq - 1e-6));
+    outageSCPF = outageSCPF + sum(r < (perUserMinRateReq));
     
     tmpOpSettings = OpSettings;
     tmpOpSettings.shareDist = gpsShareDist;
@@ -95,7 +97,7 @@ parfor t=1:simulationTime
     rates_GPS(:, t) = r;
     fractions_GPS(:, t)=f;
     btd_GPS(:, t)=b;
-    outageGPS = outageGPS + sum(r < (perUserMinRateReq - 1e-6));
+    outageGPS = outageGPS + sum(r < (perUserMinRateReq));
     
     fprintf('finish at time %d\n', t);
 end

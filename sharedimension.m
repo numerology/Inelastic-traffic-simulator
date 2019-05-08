@@ -17,20 +17,23 @@ function [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, ...
 % sliceCats: 1 x V, slice type, 0 for inelastic, 1 for elastic.
 % bsMask: 1 x B, 0 means the corresponding BS will be excluded from
 % computation.
-% capacityDist: V x B, mean capacity seen by slice v's user at BS b
+% capacityDist: V x B, mean capacity seen by slice v's user at BS b, by default
+% uniform unit capacity is assumed
 
 % Return:
 % shareDist: V x B
 % gpsShareDist: V x B
 % shareVec: 1 x V
 
+V = length(minRateReq);
+B = size(meanLoadDist, 2);
+
 if (nargin == 7)
     bsMask = ones(1, size(meanLoadDist, 2));
+    capacityDist = ones(V, B);
 end
 
-V = length(minRateReq);
 shareVec = zeros(1, V);
-B = size(meanLoadDist, 2);
 minimalShare = zeros(size(meanLoadDist));
 gpsShareDist = zeros(size(meanLoadDist));
 shareDist = zeros(size(meanLoadDist));

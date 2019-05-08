@@ -7,7 +7,7 @@ function [userRates, userFraction, btd] = DPoptimal(netSettings, opSettings, ...
 %   OpSettings: operator profile
 %   capacityPerUser: capacity perceived per user
 %   bs: base station association vector, bs(u) is the BS serving user u.
-%   minReq: 1 x V, minimal rate required by slices
+%   minReq: 1 x nUsers, minimal rate required by slices
 %   sliceCats: 1 x V, indicating whether a slice is an elastic slice or
 %   not.
 % Return:

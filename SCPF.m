@@ -1,4 +1,4 @@
-function [rates,fractions,btd]=SCPF(NetSettings, OpSettings,c_u,bs)
+function [rates,fractions,btd]=SCPF(NetSettings, OpSettings, c_u, bs)
 for u=1:NetSettings.users
     fractions(u)=OpSettings.w_i(u)./sum(OpSettings.w_i(bs(:)==bs(u)));
 end

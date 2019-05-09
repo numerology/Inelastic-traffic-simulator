@@ -73,7 +73,8 @@ for b = 1:nBasestations
                 fvb = (shareDist(v, b) + totalSurplus * (lvb - shareDist(v, b)) / totalWeight);
                 userFraction(bs == b & opBelongs == v) = fvb ...
                     .* (cBid(bs == b & opBelongs == v)) ...
-                    ./ sum(cBid(bs == b & opBelongs == v));
+                    ./ lvb;
+                    %./ sum(cBid(bs == b & opBelongs == v));
             end
         end
     end

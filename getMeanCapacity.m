@@ -12,8 +12,11 @@ opBelongs = repmat(opSettings.ops_belongs', [1 simulationTime]);
 
 for v = 1:V
     for b = 1:B
-        meanCapacityDist(v, b) = mean(capacityPerUser(opBelongs == v ...
-            & bs == b));        
+        meanCapacityDist(v, b) = nanmean(capacityPerUser(opBelongs == v ...
+            & bs == b));
+        if(isnan(meanCapacityDist(v, b)))
+            meanCapacityDist(v, b) = 1; % dummy.
+        end
     end
 end
 

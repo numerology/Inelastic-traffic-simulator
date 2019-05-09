@@ -62,7 +62,7 @@ for b = 1:nBasestations
 end
 % If there is no other slices, possible to have minBidReq == 0.
 % Set a lowerbound to prevent this.
-minBidReq(minBidReq < 1e-8) = 1e-8;
+minBidReq(minBidReq < 1e-5) = 1e-5;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
 for b = 1:nBasestations
     minBidReqPerUser(opBelongs == v & bs == b) = minBidReq(b) ...
@@ -132,7 +132,7 @@ else
                 end
             end
         end
-        minBidReqPerUser(minBidReqPerUser < 1e-8) = 1e-8; % prevent 0 bid.
+        minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5; % prevent 0 bid.
         minBidReqPerUser(opBelongs ~= v) = inf;
         cTotalShareNeeded = 0;
         admissionControl = zeros(1, nUsers);
@@ -163,11 +163,11 @@ else
                         / capacityPerUser(u) - shareDist(v, cBaseStation)) - 1);
                 end
             end
-            minBidReqPerUser(minBidReqPerUser < 1e-8) = 1e-8;
+            minBidReqPerUser(minBidReqPerUser < 1e-5) = 1e-5;
             minBidReqPerUser(admissionControl > 0) = inf;
         end
         
-        nextBid(opBelongs == v & ~admissionControl) = 1e-8; % give an epsilon bid.
+        nextBid(opBelongs == v & ~admissionControl) = 1e-5; % give an epsilon bid.
         
     else
         for b = 1:nBasestations

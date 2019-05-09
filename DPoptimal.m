@@ -114,7 +114,8 @@ btd=1 ./ userRates;
                     fvb_ = shareDist_(v_, b_) + totalSurplus_ / totalWeight_ * (lvb_ ...
                         - shareDist_(v_, b_));
                     userFraction_(bs_ == b_ & opBelongs_ == v_) = cBid(bs_ == b_ & ...
-                        opBelongs_ == v_) .* fvb_ ./ lvb_;
+                        opBelongs_ == v_) .* fvb_ ./ sum(cBid(bs_ == b_ & ...
+                        opBelongs_ == v_)); % opBelongs_ == v_) .* fvb_ ./ lvb_;
                 end
             end
         end

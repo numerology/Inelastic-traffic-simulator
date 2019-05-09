@@ -44,7 +44,8 @@ parfor t = 1:NetSettings.simulation_time
         %% Noise
         alp=db2pow(ThermalNoisePlusInterfig);
         %% Fading
-        sh_fad=db2pow(normrnd(0,multFading));
+        % sh_fad=db2pow(normrnd(0,multFading));
+        sh_fad = 1; % cancel fast fading for now.
         %% Channel Gain
         g=db2pow(pathlossV+bsNS+17-3);
         g=reshape(g',[NetSettings.bsNS 1]);

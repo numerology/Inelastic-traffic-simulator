@@ -32,7 +32,7 @@ Mspeed = 5; %m/s
 trace(OpSettings.ops_belongs >= 3,:,1) = uX(OpSettings.ops_belongs >= 3, :);
 trace(OpSettings.ops_belongs >= 3,:,2) = uY(OpSettings.ops_belongs >= 3, :);
                         
-S = load('./SLAW model/Heterogeneity/H6_seed15');
+S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 
 nHetTraceUser = size(hetTrace, 1)

@@ -7,14 +7,14 @@ warning('on','all');
 nSlices = 4; % num of slices
 
 sat = 1; % U/B (use only integers...)
-simulationTime = 2000; % seconds
+simulationTime = 1000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
 sectors = 3;
 interdistance = 15;
-outageTol = 0.05;
+outageTol = 0.01;
 minSharePerBS = 0.001;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.5 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 3 * minRateReq(3:4);
+minRateReq = 1 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 5 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);

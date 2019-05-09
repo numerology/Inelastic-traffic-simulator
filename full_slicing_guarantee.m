@@ -2,12 +2,12 @@
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
 parpool('local', 40);
-warning('on','all');
+warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 
-sat = 1; % U/B (use only integers...)
-simulationTime = 2000; % seconds
+sat = 3; % U/B (use only integers...)
+simulationTime = 1000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;

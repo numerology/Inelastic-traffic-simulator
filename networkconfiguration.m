@@ -20,17 +20,21 @@ OpSettings.alphas=alphas;
 [ bsPositions ] = Scenario_Generation(NetSettings);
 %% Mobility
 disp('Starting mobility...')
-UE_height=1.5;rad=500; % m
+UE_height=1.5;rad=100; % m
 Mspeed = 5; %m/s
 
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                              UE_height,rad,Mspeed, 1, OpSettings);
+
+% trace(:, :, 1) = uX(:, :);
+% trace(:, :, 2) = uY(:, :);
+         
 trace(OpSettings.ops_belongs >= 3,:,1) = uX(OpSettings.ops_belongs >= 3, :);
 trace(OpSettings.ops_belongs >= 3,:,2) = uY(OpSettings.ops_belongs >= 3, :);
                         
-S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
+S = load('./SLAW model/Heterogeneity/H6_seed15');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
-trace(:, :, :) = hetTrace(:, 1:NetSettings.simulation_time, :);
+%trace(:, :, :) = hetTrace(:, 1:NetSettings.simulation_time, :);
 
 nHetTraceUser = size(hetTrace, 1)
 

@@ -6,8 +6,8 @@ warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 
-sat = 20; % U/B (use only integers...)
-simulationTime = 1000; % seconds
+sat = 3; % U/B (use only integers...)
+simulationTime = 2000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.4 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 5 * minRateReq(3:4);
+minRateReq = 0.01 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 3 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
@@ -68,14 +68,18 @@ outageDP = 0;
 outageDPoptimal = 0;
 outageSCPF = 0;
 outageGPS = 0;
+nRoundsVec = zeros(1, simulationTime);
+violationVec = zeros(1, simulationTime);
 parfor t=1:simulationTime
     totalNumUsers = totalNumUsers + NetSettings.users;
-    [r, f, b] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
+    [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', minRateReq, 0);
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
     outageDP = outageDP + sum(r < (perUserMinRateReq));
+    nRoundsVec(t) = nRounds;
+    violationVec(t) = isViolation;
     
     [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
         bs(:,t)', perUserMinRateReq, sliceCats);
@@ -101,6 +105,20 @@ parfor t=1:simulationTime
     
     fprintf('finish at time %d\n', t);
 end
+
+%% Plot cdf of convergence
+datestring = datestr(now, 30);
+
+figure(2)
+hold on; grid on
+cdf1 = cdfplot(nRoundsVec(violationVec == 0));
+cdf2 = cdfplot(nRoundsVec(violationVec == 1));
+set(cdf1, 'marker', '+');
+set(cdf2, 'marker', 'o');
+legend('When module < 1', 'When module > 1');
+xlabel('number of rounds');
+ylabel('CDF');
+savefig(sprintf('figs/cdf-convergence-%s.fig', datestring));
 
 %%
 disp('----------------------------------------------------');
@@ -152,7 +170,6 @@ fprintf('SCPF: util = %d\n', nanmean(utilSCPF));
 fprintf('GPS: util = %d\n', nanmean(utilGPS));
 
 %% Plot some metrics
-datestring = datestr(now, 30);
 
 benchmarks = {'DIFFPRICE-equal surplus', 'GPS', 'SCPF', 'DIFFPRICE-optimal'};
 bmWoGPS = {'DIFFPRICE-equal surplus', 'SCPF', 'DIFFPRICE-optimal'};

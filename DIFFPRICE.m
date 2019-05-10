@@ -1,4 +1,4 @@
-function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
+function [userRates, userFraction, btd, nRounds, isViolation] = DIFFPRICE(netSettings, opSettings, ...
     capacityPerUser, bs, minReq, waterfilling)
 % Share constrained sharing with guarantee
 % Resources are provisioned according to DIFFPRICE.
@@ -15,6 +15,8 @@ function [userRates, userFraction, btd] = DIFFPRICE(netSettings, opSettings, ...
 %   userRates: perceived rate of each user.
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
 %   btd: perceived user BTDs.
+%   nRounds: number of rounds needed to converge.
+%   isViolation: 1 if the module is > 1, 0 otherwise.
 
 nUsers = netSettings.users;
 nSlices = size(opSettings.s_o, 2);
@@ -49,6 +51,27 @@ while(norm(prevBid - cBid) > eps)
         disp('break to prevent looping forever, convergence might not achieved.');
     end
 end
+
+nRounds = cnt;
+% check whether is a violation
+rmax = 0;
+phimax = 0;
+for v = 1:nSlices
+    for b = 1:nBasestations
+        rmax = max(rmax, sum(minReq(v) ./ capacityPerUser(opBelongs == v ...
+            & bs == b)) * sum(opBelongs...
+            == v & bs == b));
+        phimax = max(phimax, sum(opBelongs == v & bs == b) / sum(opBelongs == v));
+    end
+end
+
+% compute effective B
+effB = 0;
+for v = 1:nSlices
+    effB = max(effB, length(unique(bs(opBelongs == v))));
+end
+module = nSlices * (rmax / (1 - rmax)) * (1 + effB * phimax);
+isViolation = module > 1 || module < -1;
 
 % Provision resources
 for b = 1:nBasestations

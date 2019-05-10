@@ -21,12 +21,6 @@ nBasestations = netSettings.bsNS;
 shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 
-for v = 1:nSlices
-    if(sliceCats(v) == 1)
-        minReq(opBelongs == v) = 0;
-    end   
-end
-
 shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
 

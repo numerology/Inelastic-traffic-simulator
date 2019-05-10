@@ -1,5 +1,5 @@
 function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-    opBelongs, bs, capacityPerUser, minRate, waterfilling)
+    opBelongs, bs, capacityPerUser, minRate, waterfilling, sliceType)
 % diffpriceiteration Generate the bid per user when it is slice v's turn to
 % bid.
 % Params:
@@ -12,8 +12,7 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 %   minRate: minimal rate requirement, scalar
 %   waterfilling: logical, 1 when want to user waterfilling to allocate
 %   bids, otherwise surplus bids will be allocated equally.
-
-% (TODO: extend this to per user minimal rate requirement)
+%   sliceType: 0 for inelastic, 1 for non-inelastic.
 
 nUsers = length(cBid);
 nSlices = size(shareDist, 1);
@@ -62,12 +61,8 @@ for b = 1:nBasestations
 end
 % If there is no other slices, possible to have minBidReq == 0.
 % Set a lowerbound to prevent this.
-minBidReq(minBidReq < 1e-5) = 1e-5;
+minBidReq(minBidReq < 1e-8) = 1e-8;
 assert(all(minBidReq > 0), 'Unexpected negative minBidReq.');
-for b = 1:nBasestations
-    minBidReqPerUser(opBelongs == v & bs == b) = minBidReq(b) ...
-        / sum(opBelongs == v & bs == b);
-end
 
 % distribute lob to each user.
 % assert(shareVec(v) >= sum(minBidReq), 'Insufficient share to support minRate');
@@ -167,7 +162,7 @@ else
             minBidReqPerUser(admissionControl > 0) = inf;
         end
         
-        nextBid(opBelongs == v & ~admissionControl) = 1e-5; % give an epsilon bid.
+        nextBid(opBelongs == v & ~admissionControl) = 1e-8; % give an epsilon bid.
         
     else
         for b = 1:nBasestations
@@ -176,10 +171,10 @@ else
                 (1 ./ capacityPerUser(opBelongs == v & bs == b)) ...
                 ./ sum(1 ./ capacityPerUser(opBelongs == v & bs == b));
         end
-        
-        nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
-            .* (1 ./ capacityPerUser(opBelongs == v)) ...
-            ./ sum(1 ./ capacityPerUser(opBelongs == v));
+        if (sliceType == 1)
+            nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
+                /sum(opBelongs == v);
+        end
     end   
 end
 

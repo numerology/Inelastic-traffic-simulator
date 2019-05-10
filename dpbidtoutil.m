@@ -50,7 +50,7 @@ for b = 1:nBasestations
     end
 end
 
-assert(all(ratesPerUser > 0), 'negative user rates');
+assert(all(ratesPerUser >= 0), 'negative user rates');
 
 % Here to account for minimal rate requirement, one has two options:
 % 1. set that in the constraint set and guarantee that the initial point is
@@ -66,8 +66,10 @@ for v = 1:nSlices
     end
     if (sliceCats(v) == 1)
         util = util + shareVec(v) / sum(opBelongs == v) ...
-            * sum(log(ratesPerUser(opBelongs == v) ...
-            - minRateReq(opBelongs == v)));
+            * nansum(log(ratesPerUser(opBelongs == v & ratesPerUser > minRateReq) ...
+            - minRateReq(opBelongs == v & ratesPerUser > minRateReq)));
+        util = util - 100 * sum(ratesPerUser(opBelongs == v) ...
+            < minRateReq(opBelongs == v));
     else
         util = util - 100 * sum(ratesPerUser(opBelongs == v) ...
             < minRateReq(opBelongs == v));

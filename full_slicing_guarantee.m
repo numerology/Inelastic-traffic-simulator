@@ -6,14 +6,14 @@ warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 
-sat = 3; % U/B (use only integers...)
+sat = 1; % U/B (use only integers...)
 simulationTime = 2000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
 sectors = 3;
-interdistance = 15;
+interdistance = 20;
 outageTol = 0.01;
 minSharePerBS = 0.001;
 % User mobility patterns:
@@ -27,7 +27,7 @@ sliceCats = [0 0 1 1];
     networkconfiguration(simulationTime, ...
     warmup, bsN, sectors,...
     interdistance, model,...
-    shareVec, phiLevels, sat, nSlices, alphas);
+    shareVec, phiLevels, sat, nSlices, alphas, 2);
 
 %% Adjust share distribution for new proposed scheme according to the load distribution
 % the sum of share across BSs <= share * |B| per slice.
@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.01 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 3 * minRateReq(3:4);
+minRateReq = 1 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 5 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
@@ -60,6 +60,7 @@ for v  = 1:nSlices
     end
 end
 minRateReq(sliceCats > 0) = 0;
+sliceCats = [1 1 1 1];
 
 %% Compute fractions
 %ppm = ParforProgMon('Simulating resource sharing : ', NetSettings.simulation_time);
@@ -73,11 +74,11 @@ violationVec = zeros(1, simulationTime);
 parfor t=1:simulationTime
     totalNumUsers = totalNumUsers + NetSettings.users;
     [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
-        bs(:,t)', minRateReq, 0);
+        bs(:,t)', minRateReq, 0, sliceCats);
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
-    outageDP = outageDP + sum(r < (perUserMinRateReq));
+    outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-5));
     nRoundsVec(t) = nRounds;
     violationVec(t) = isViolation;
     

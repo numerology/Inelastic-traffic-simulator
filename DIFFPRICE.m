@@ -1,5 +1,5 @@
 function [userRates, userFraction, btd, nRounds, isViolation] = DIFFPRICE(netSettings, opSettings, ...
-    capacityPerUser, bs, minReq, waterfilling)
+    capacityPerUser, bs, minReq, waterfilling, sliceCats)
 % Share constrained sharing with guarantee
 % Resources are provisioned according to DIFFPRICE.
 % 
@@ -11,6 +11,7 @@ function [userRates, userFraction, btd, nRounds, isViolation] = DIFFPRICE(netSet
 %   minReq: 1 x V, minimal rate required by slices
 %   waterfilling: logical, whether to use waterfilling or equal allocating
 %   surplus.
+%   sliceCats: 1 x V, slice types, 1 for non-inelastic, 0 for inelastic.
 % Return:
 %   userRates: perceived rate of each user.
 %   userFraction: the fraction of time (of associated bs) allocated to each user.
@@ -40,7 +41,8 @@ while(norm(prevBid - cBid) > eps)
     prevBid = cBid;
     for v = 1:nSlices
         nextBid = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-            opBelongs, bs, capacityPerUser, minReq(v), waterfilling);
+            opBelongs, bs, capacityPerUser, minReq(v), waterfilling, ...
+            sliceCats(v));
     end
     if(~all(nextBid > 0))
         assert(all(nextBid > 0), 'Unexpected negative bids.')

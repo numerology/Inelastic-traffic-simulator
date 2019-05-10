@@ -26,22 +26,22 @@ Mspeed = 0.1; %m/s
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                              UE_height,rad,Mspeed, 1, OpSettings);
 
-trace(:, :, 1) = uX(:, :);
-trace(:, :, 2) = uY(:, :);
+% trace(:, :, 1) = uX(:, :);
+% trace(:, :, 2) = uY(:, :);
          
-% trace(OpSettings.ops_belongs >= 3,:,1) = uX(OpSettings.ops_belongs >= 3, :);
-% trace(OpSettings.ops_belongs >= 3,:,2) = uY(OpSettings.ops_belongs >= 3, :);
+trace(OpSettings.ops_belongs >= 3,:,1) = uX(OpSettings.ops_belongs >= 3, :);
+trace(OpSettings.ops_belongs >= 3,:,2) = uY(OpSettings.ops_belongs >= 3, :);
                         
-% S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
-% hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
-% 
-% nHetTraceUser = size(hetTrace, 1)
-% 
-% for o = 1:2
-%     trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
-%         = hetTrace(OpSettings.ops_belongs ...
-%         == o, 1:NetSettings.simulation_time, :);
-% end
+S = load('./SLAW model/Heterogeneity/H6_seed15');
+hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
+
+nHetTraceUser = size(hetTrace, 1)
+
+for o = 1:2
+    trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
+        = hetTrace(OpSettings.ops_belongs ...
+        == o, 1:NetSettings.simulation_time, :);
+end
 
 disp('done mobility.')
 

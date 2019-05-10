@@ -7,7 +7,7 @@ warning('off','all');
 nSlices = 4; % num of slices
 
 sat = 1; % U/B (use only integers...)
-simulationTime = 2000; % seconds
+simulationTime = 1000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
@@ -37,7 +37,7 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 0.2 / (sat) * ones(1, nSlices);
+minRateReq = 0.4 / (sat) * ones(1, nSlices);
 minRateReq(3:4) = 5 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...

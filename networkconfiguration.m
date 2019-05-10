@@ -21,7 +21,7 @@ OpSettings.alphas=alphas;
 %% Mobility
 disp('Starting mobility...')
 UE_height=1.5;rad=100; % m
-Mspeed = 1; %m/s
+Mspeed = 0.1; %m/s
 
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                              UE_height,rad,Mspeed, 1, OpSettings);

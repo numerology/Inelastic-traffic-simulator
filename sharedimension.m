@@ -61,8 +61,8 @@ for v = 1:V
 end
 
 for b = 1:B
-    assert(sum(minimalShare(:, b)) <= 1, ...
-            'Base station is overbooked.');
+    %assert(sum(minimalShare(:, b)) <= 1, ...
+    %       'Base station is overbooked.');
     if (~bsMask)
         continue;
     end

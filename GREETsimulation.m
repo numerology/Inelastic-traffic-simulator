@@ -30,10 +30,10 @@ minSharePerBS = 0.001;
 % User mobility patterns:
 % RWP for roughly uniform spatial loads.
 model = {'RWP'};
-shareVec = 1/4 * ones(1, 4); % this only means user numbers are the same.
 
 for i = 1:length(satVector)
     sat = satVector(i); % U/B (use only integers...)
+    shareVec = 1/4 * ones(1, 4); % this only means user numbers are the same.
     sliceCats = [0 0 1 1];
     
     % Generate network profile.
@@ -42,6 +42,7 @@ for i = 1:length(satVector)
     else
         adjustedProfile = 5;
     end
+    
     [NetSettings, OpSettings, capacityPerUser, bs, userPos, bsPos] = ...
         networkconfiguration(simulationTime, ...
         warmup, bsN, sectors,...
@@ -87,20 +88,20 @@ for i = 1:length(satVector)
     outageDP = 0;
     outageSCPF = 0;
     outageGPS = 0;
-    
+    % initialization
+    rates_DP = zeros(NetSettings.users, simulationTime);
+    rates_SCPF = zeros(NetSettings.users, simulationTime);
+    rates_GPS = zeros(NetSettings.users, simulationTime);
     parfor t=1:simulationTime
         totalNumUsers = totalNumUsers + NetSettings.users;
         [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
             bs(:,t)', minRateReq, 0, sliceCats);
         rates_DP(:, t)=r;
-        fractions_DP(:, t)=f;
-        btd_DP(:, t)=b;
         outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-5));
 
         [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
         rates_SCPF(:, t)=r;
-        fractions_SCPF(:, t)=f;
-        btd_SCPF(:, t)=b;
+        
         outageSCPF = outageSCPF + sum(r < (perUserMinRateReq));
 
         tmpOpSettings = OpSettings;
@@ -108,8 +109,6 @@ for i = 1:length(satVector)
         [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
             bs(:,t)', ones(1, NetSettings.users)); % dummy minreq.
         rates_GPS(:, t) = r;
-        fractions_GPS(:, t)=f;
-        btd_GPS(:, t)=b;
         outageGPS = outageGPS + sum(r < (perUserMinRateReq));
 
         fprintf('finish at time %d\n', t);

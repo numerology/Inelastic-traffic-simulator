@@ -40,7 +40,7 @@ for i = 1:length(satVector)
     if profile <= 5
         adjustedProfile = profile;
     else
-        adjustedProfile = 5;
+        adjustedProfile = 2;
     end
     
     [NetSettings, OpSettings, capacityPerUser, bs, userPos, bsPos] = ...
@@ -59,13 +59,33 @@ for i = 1:length(satVector)
 
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
             minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
-
+    
     weightPerUser = zeros(1, NetSettings.users);
-    for v = 1:nSlices
-        weightPerUser(OpSettings.ops_belongs == v) = shareVec(v) ...
-            ./ sum(OpSettings.ops_belongs == v);
+    if (profile ~= 5)
+        for v = 1:nSlices
+            weightPerUser(OpSettings.ops_belongs == v) = shareVec(v) ...
+                ./ sum(OpSettings.ops_belongs == v);
+        end
+        OpSettings.w_i = weightPerUser;
+    else
+        phi = ones(1, NetSettings.users);
+        for v = 1:nSlices
+            userSet = find(OpSettings.ops_belongs == v);
+            nUserCurSlice = sum(OpSettings.ops_belongs == v);
+            cnt = 1;
+            % half of the users are given twice weight
+            for u = userSet
+                phi(u) = 2;
+                if(cnt > nUserCurSlice / 2)
+                    break
+                end
+            end
+            weightPerUser(OpSettings.ops_belongs == v) = shareVec(v) ...
+                .* phi(OpSettings.ops_belongs == v) ./ ...
+                sum(phi(OpSettings.ops_belongs == v));
+        end
+        OpSettings.w_i = weightPerUser;
     end
-    OpSettings.w_i = weightPerUser;
 
     OpSettings.shareDist = shareDist;
     OpSettings.s_o = shareVec;
@@ -95,7 +115,7 @@ for i = 1:length(satVector)
     parfor t=1:simulationTime
         totalNumUsers = totalNumUsers + NetSettings.users;
         [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
-            bs(:,t)', minRateReq, 0, sliceCats);
+            bs(:,t)', minRateReq, 0, sliceCats, weightPerUser);
         rates_DP(:, t)=r;
         outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-5));
 
@@ -127,22 +147,20 @@ for i = 1:length(satVector)
         tmpRatesGPS = nan(size(rates_GPS(:, t)'));
         tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
         utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser);
 
         tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
         tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
         utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser);
 
         tmpRatesDP = nan(size(rates_DP(:, t)'));
         tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
         utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser);
     end
     
     utilityGain(i) = nanmean(utilDP) - nanmean(utilGPS);
-
-
 end
 
 end

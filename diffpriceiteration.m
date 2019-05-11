@@ -1,5 +1,5 @@
 function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
-    opBelongs, bs, capacityPerUser, minRate, waterfilling, sliceType)
+    opBelongs, bs, capacityPerUser, minRate, waterfilling, sliceType, phi)
 % diffpriceiteration Generate the bid per user when it is slice v's turn to
 % bid.
 % Params:
@@ -13,6 +13,7 @@ function [nextBid] = diffpriceiteration(cBid, v, shareDist, shareVec, ...
 %   waterfilling: logical, 1 when want to user waterfilling to allocate
 %   bids, otherwise surplus bids will be allocated equally.
 %   sliceType: 0 for inelastic, 1 for non-inelastic.
+%   phi: weight for users
 
 nUsers = length(cBid);
 nSlices = size(shareDist, 1);
@@ -172,8 +173,9 @@ else
                 ./ sum(1 ./ capacityPerUser(opBelongs == v & bs == b));
         end
         if (sliceType == 1)
+            % Allocate surplus prop to phi
             nextBid(opBelongs == v) = nextBid(opBelongs == v) + surplusShare ...
-                /sum(opBelongs == v);
+                .* phi(opBelongs == v) ./ sum(phi(opBelongs == v));
         end
     end   
 end

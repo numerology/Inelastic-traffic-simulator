@@ -3,13 +3,13 @@ clc, close all, clear all
 parpool('local', 40);
 warning('off','all');
 
-satVec = [1 3 5 7 10];
+satVec = [1 2 3 4 5 6 7 8 9 10];
 simulationTime = 1000;
 
 poutageGain = zeros(6, length(satVec));
 utilGain = zeros(6, length(satVec));
 
-for netProfile = 1:5
+for netProfile = 1:6
     fprintf('beginning configuration no. %d\n', netProfile);
     [poutageGain(netProfile, :), utilGain(netProfile, :)] = ...
         GREETsimulation(satVec, simulationTime, netProfile);

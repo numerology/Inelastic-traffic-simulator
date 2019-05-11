@@ -6,8 +6,8 @@ warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 
-sat = 1; % U/B (use only integers...)
-simulationTime = 2000; % seconds
+sat = 20; % U/B (use only integers...)
+simulationTime = 1000; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;

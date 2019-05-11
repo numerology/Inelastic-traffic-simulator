@@ -24,7 +24,9 @@ plot(satVec, poutageGain(2, :), 'r+-');
 plot(satVec, poutageGain(3, :), 'kd-');
 plot(satVec, poutageGain(4, :), 'gh-');
 plot(satVec, poutageGain(5, :), 'c*-');
-legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5');
+plot(satVec, poutageGain(5, :), 'mp:');
+legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
+    'Scenario 6');
 xlabel('number of users per resource');
 ylabel('P(outage) gain over SCPF');
 savefig(sprintf('figs/GREET-poutage-multicases-%s.fig', datestring))
@@ -36,7 +38,9 @@ plot(satVec, utilGain(2, :), 'r+-');
 plot(satVec, utilGain(3, :), 'kd-');
 plot(satVec, utilGain(4, :), 'gh-');
 plot(satVec, utilGain(5, :), 'c*-');
-legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5');
+plot(satVec, utilGain(5, :), 'mp:');
+legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
+    'Scenario 6');
 xlabel('number of users per resource');
 ylabel('utility gain over GPS');
 savefig(sprintf('figs/GREET-util-multicases-%s.fig', datestring))

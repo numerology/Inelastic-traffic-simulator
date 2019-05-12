@@ -30,8 +30,14 @@ Mspeed = 10; %m/s
 S = load('./SLAW model/Heterogeneity/H6_seed11');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 
-S2 = load('./SLAW model/Heterogeneity/alpha2nUser1710');
+S2 = load('./SLAW model/Heterogeneity/H6_seed12');
 hetTrace2 = circlewrap(S2.trace(1:users, :, 1:2), rad);
+
+S3 = load('./SLAW model/Heterogeneity/H6_seed13');
+hetTrace3 = circlewrap(S3.trace(1:users, :, 1:2), rad);
+
+S4 = load('./SLAW model/Heterogeneity/H6_seed14');
+hetTrace4 = circlewrap(S4.trace(1:users, :, 1:2), rad);
 
 nHetTraceUser = size(hetTrace, 1)
 
@@ -51,29 +57,26 @@ switch mobilityConfiguration
     case 3 % All SLAW, with the same hotspots
         trace(:, :, :) = hetTrace(:, 1:NetSettings.simulation_time, :);
     case 4 % All SLAW, with different hotspots
-        for o = 1:2
-            trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
-                = hetTrace(OpSettings.ops_belongs ...
-                == o, 1:NetSettings.simulation_time, :);
-        end
-        for o = 3:4
-            trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
-                = hetTrace2(OpSettings.ops_belongs ...
-                == o, 1:NetSettings.simulation_time, :);
-        end
+        trace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
         
     case 5 % super heteroneous case, all SLAW with different hotspots, but also 
-           % inelastic users are of different phi within a single slice
-        for o = 1:2
-            trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
-                = hetTrace(OpSettings.ops_belongs ...
-                == o, 1:NetSettings.simulation_time, :);
-        end
-        for o = 3:4
-            trace(OpSettings.ops_belongs == o, 1:NetSettings.simulation_time, :) ... 
-                = hetTrace2(OpSettings.ops_belongs ...
-                == o, 1:NetSettings.simulation_time, :);
-        end
+           % inelastic users are of different phi within a single slice. 
+           % its mobility pattern is the same as Scenario 4.
+        trace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
+        trace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :) ... 
+            = hetTrace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
 end
 
          

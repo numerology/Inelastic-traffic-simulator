@@ -20,6 +20,10 @@ function [userRates, userFraction, btd, nRounds, isViolation] = DIFFPRICE(netSet
 %   nRounds: number of rounds needed to converge.
 %   isViolation: 1 if the module is > 1, 0 otherwise.
 
+if (nargin == 7)
+    phi = ones(1, netSettings.users);
+end
+
 nUsers = netSettings.users;
 nSlices = size(opSettings.s_o, 2);
 nBasestations = netSettings.bsNS;
@@ -27,7 +31,7 @@ shareVec = opSettings.s_o;
 opBelongs = opSettings.ops_belongs;
 shareDist = opSettings.shareDist;
 userFraction = zeros(1, nUsers);
-eps = 1e-6; % threshold for convergence. 
+eps = 1e-30; % threshold for convergence. 
 
 % Initialize by equal weight. Log utility is not defined at zero.
 cBid = zeros(1, nUsers);

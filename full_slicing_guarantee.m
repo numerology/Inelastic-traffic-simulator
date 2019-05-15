@@ -1,18 +1,18 @@
 % Script for SCG simulation
 % with more realistic mobility model in addition to poisson.
 clc, close all, clear all
-parpool('local', 40);
+%parpool('local', 40);
 warning('off','all');
 %% Set up
 nSlices = 4; % num of slices
 
 sat = 3; % U/B (use only integers...)
-simulationTime = 1000; % seconds
+simulationTime = 20; % seconds
 
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
-sectors = 3;
+sectors = 5;
 interdistance = 20;
 outageTol = 0.01;
 minSharePerBS = 0.001;
@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 2 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 7 * minRateReq(3:4);
+minRateReq = 1 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 3 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
@@ -78,7 +78,7 @@ parfor t=1:simulationTime
     rates_DP(:, t)=r;
     fractions_DP(:, t)=f;
     btd_DP(:, t)=b;
-    outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-5));
+    outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-3));
     nRoundsVec(t) = nRounds;
     violationVec(t) = isViolation;
     
@@ -87,22 +87,22 @@ parfor t=1:simulationTime
     rates_DPoptimal(:, t)=r;
     fractions_DPoptimal(:, t)=f;
     btd_DPoptimal(:, t)=b;
-    outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq));
+    outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq - 1e-3));
     
     [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
     rates_SCPF(:, t)=r;
     fractions_SCPF(:, t)=f;
     btd_SCPF(:, t)=b;
-    outageSCPF = outageSCPF + sum(r < (perUserMinRateReq));
+    outageSCPF = outageSCPF + sum(r < (perUserMinRateReq - 1e-3));
     
     tmpOpSettings = OpSettings;
     tmpOpSettings.shareDist = gpsShareDist;
     [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
-        bs(:,t)', ones(1, NetSettings.users)); % dummy minreq.
+        bs(:,t)', perUserMinRateReq);
     rates_GPS(:, t) = r;
     fractions_GPS(:, t)=f;
     btd_GPS(:, t)=b;
-    outageGPS = outageGPS + sum(r < (perUserMinRateReq));
+    outageGPS = outageGPS + sum(r < (perUserMinRateReq - 1e-3));
     
     fprintf('finish at time %d\n', t);
 end

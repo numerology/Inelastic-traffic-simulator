@@ -25,8 +25,9 @@ for t = 1:simulationTime
         end
     end
 end
+loadDist = loadDist / simulationTime;
 for b = 1:nBS
-    loadDist(:, b) = loadDist(:, b) / sum(loadDist(:, b));
+    %loadDist(:, b) = loadDist(:, b) / sum(loadDist(:, b));
     mask(b) = (sum(loadDist(:, b)) > 0);
 end
 loadDist(isnan(loadDist)) = 0;

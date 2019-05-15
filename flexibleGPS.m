@@ -24,9 +24,10 @@ for b = 1:nBasestations
     for v = 1:nSlices
         nLocalUsers = sum(opBelongs == v & bs == b);
         minRequiredFraction = sum(minRateReq(opBelongs == v & bs == b) ...
-            ./capacityPerUser(opBelongs == v & bs == b));
+            ./ capacityPerUser(opBelongs == v & bs == b));
         minRequiredBid = minRequiredFraction * sumWeight;
         if (minRequiredBid > shareDist(v, b))
+            disp('GPS cannot fulfill.')
             % Allocate bid propto minRateReq
             userFraction(opBelongs == v & bs == b) = shareDist(v, b) / sumWeight .* ...
                 minRateReq(opBelongs == v & bs == b) ./ capacityPerUser(opBelongs == v & bs == b) ...

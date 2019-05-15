@@ -10,10 +10,11 @@ if(nargin == 5)
 end
 
 util = 0;
-nSlices = length(shareVec);
 nUsers = length(opBelongs);
 for u = 1:nUsers
-    util = util + max(shareVec * phi(u) / sum(opBelongs == opBelongs(u)) ...
-        * log(rates(u) - minRateReq(u)), eps);
+    if (sliceCats(opBelongs(u)) == 1)
+        util = util + max(shareVec(opBelongs(u)) * phi(u) / sum(phi(opBelongs == opBelongs(u))) ...
+            * log(rates(u) - minRateReq(u)), eps);
+    end
 end
 end

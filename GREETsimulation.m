@@ -179,29 +179,42 @@ for i = 1:length(satVector)
             goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
                 > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq ...
                 & rates_DPoptimal(:, t)' > perUserMinRateReq);
+            
+            tmpRatesGPS = nan(size(rates_GPS(:, t)'));
+            tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
+            utilGPS(t) = ratetoutil_old(tmpRatesGPS, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
+
+            tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
+            tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
+            utilSCPF(t) = ratetoutil_old(tmpRatesSCPF, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
+
+            tmpRatesDP = nan(size(rates_DP(:, t)'));
+            tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
+            utilDP(t) = ratetoutil_old(tmpRatesDP, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
+            
+            tmpRatesDPoptimal = nan(size(rates_DPoptimal(:, t)'));
+            tmpRatesDPoptimal(goodUsers) = rates_DPoptimal(goodUsers, t);
+            utilDPoptimal(t) = ratetoutil_old(tmpRatesDPoptimal, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
         else
             goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
                 > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq);
-        end
-        tmpRatesGPS = nan(size(rates_GPS(:, t)'));
-        tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
-        utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+            tmpRatesGPS = nan(size(rates_GPS(:, t)'));
+            tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
+            utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
 
-        tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
-        tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
-        utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+            tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
+            tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
+            utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
 
-        tmpRatesDP = nan(size(rates_DP(:, t)'));
-        tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
-        utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
-        
-        if (mode == 1)
-            tmpRatesDPoptimal = nan(size(rates_DPoptimal(:, t)'));
-            tmpRatesDPoptimal(goodUsers) = rates_DPoptimal(goodUsers, t);
-            utilDPoptimal(t) = ratetoutil(tmpRatesDPoptimal, shareVec, ...
+            tmpRatesDP = nan(size(rates_DP(:, t)'));
+            tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
+            utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
                 opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
         end
     end

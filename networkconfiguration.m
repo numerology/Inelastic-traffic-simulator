@@ -27,7 +27,7 @@ Mspeed = 10; %m/s
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                              UE_height,rad,Mspeed, 1, OpSettings);
                          
-S = load('./SLAW model/Heterogeneity/H6_seed11');
+S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 
 S2 = load('./SLAW model/Heterogeneity/H6_seed12');

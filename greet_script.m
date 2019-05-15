@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 
 satVec = 1:10;
-simulationTime = 1000;
+simulationTime = 4;
 
 poutageGain = zeros(6, length(satVec));
 utilGain = zeros(6, length(satVec));
@@ -12,7 +12,7 @@ utilGain = zeros(6, length(satVec));
 for netProfile = 1:6
     fprintf('beginning configuration no. %d\n', netProfile);
     [poutageGain(netProfile, :), utilGain(netProfile, :)] = ...
-        GREETsimulation(satVec, simulationTime, netProfile);
+        GREETsimulation(satVec, simulationTime, netProfile, 2);
 end
 
 %% Plot

@@ -11,4 +11,4 @@
 #SBATCH --mail-type=all
 
 module load matlab
-matlab -nodesktop -nodisplay -nosplash < greet_script.m
+matlab -nodesktop -nodisplay -nosplash < tradeoff_script.m

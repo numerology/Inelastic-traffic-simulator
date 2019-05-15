@@ -6,7 +6,7 @@ function [util] = ratetoutil(rates, shareVec, opBelongs, sliceCats, ...
 % Per user utility is truncated from above at eps < 0.
 if(nargin == 5)
     phi = ones(size(opBelongs)); % uniform phi by default.
-    eps = -100; % uniform eps by default.
+    eps = -500; % uniform eps by default.
 end
 
 util = 0;

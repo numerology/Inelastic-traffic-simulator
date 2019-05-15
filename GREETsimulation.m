@@ -1,5 +1,5 @@
 function [poutageGain, utilityGain] = GREETsimulation(satVector, ...
-    simulationTime, profile)
+    simulationTime, profile, mode)
 %GREETsimulation simulate the gain over GPS in utility and gain over SCPF
 %in P(outage) under various load, provided the network configuration
 %pattern
@@ -15,16 +15,34 @@ function [poutageGain, utilityGain] = GREETsimulation(satVector, ...
 %   5: all slices are SLAW, with different hotspots, also, Slice 1 and 2
 %   have different phi's within each slice
 %   6: change Slice 1 (or 1 and 2) in setting 2 to purely inelastic slice
+%   mode: 1 for simulation for the P(outage) - utility trade-off figure, 2
+%   for simulation for the multi-scenario figure.
+%   Returns:
+%   Dependes on the mode, when mode = 1:
+%   poutageGain: 4 x length(satVector), poutage achieved by 4 benchmarks
+%   under different load
+%   utilityGain: 4 x length(satVector), utility achieved by 4 benchmarks
+%   under different load.
+%   When mode = 2:
+%   poutageGain: 1 x length(satVector), poutage under SCPF - poutage under 
+%   DP-practical.
+%   utilityGain: 1 x length(satVector), utility under DP-practical -
+%   utility under GPS.
 
-poutageGain = zeros(1, length(satVector)); % over SCPF
-utilityGain = zeros(1, length(satVector)); % over GPS
+if (mode == 1)
+    poutageGain = zeros(4, length(satVector)); 
+    utilityGain = zeros(4, length(satVector)); 
+else
+    poutageGain = zeros(1, length(satVector)); % over SCPF
+    utilityGain = zeros(1, length(satVector)); % over GPS
+end
 
 nSlices = 4; % num of slices
 phiLevels = 1;alphas = [1, 1, 1, 1]; % legacy parameters
 warmup = 0;
 bsN = 19;
 sectors = 3;
-interdistance = 15;
+interdistance = 20;
 outageTol = 0.01;
 minSharePerBS = 0.001;
 % User mobility patterns:
@@ -54,7 +72,7 @@ for i = 1:length(satVector)
         simulationTime);
     meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser, ...
         simulationTime);
-        minRateReq = 1 / (sat) * ones(1, nSlices);
+        minRateReq = 0.7 / (sat) * ones(1, nSlices);
     minRateReq(3:4) = 5 * minRateReq(3:4);
 
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
@@ -108,12 +126,20 @@ for i = 1:length(satVector)
     outageDP = 0;
     outageSCPF = 0;
     outageGPS = 0;
+    outageDPoptimal = 0;
     % initialization
     rates_DP = zeros(NetSettings.users, simulationTime);
+    rates_DPoptimal = zeros(NetSettings.users, simulationTime);
     rates_SCPF = zeros(NetSettings.users, simulationTime);
     rates_GPS = zeros(NetSettings.users, simulationTime);
     parfor t=1:simulationTime
         totalNumUsers = totalNumUsers + NetSettings.users;
+        if (mode == 1)
+            [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
+                bs(:,t)', perUserMinRateReq, sliceCats);
+            rates_DPoptimal(:, t)=r;
+            outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq - 1e-3));
+        end
         [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
             bs(:,t)', minRateReq, 0, sliceCats, weightPerUser);
         rates_DP(:, t)=r;
@@ -127,40 +153,66 @@ for i = 1:length(satVector)
         tmpOpSettings = OpSettings;
         tmpOpSettings.shareDist = gpsShareDist;
         [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
-            bs(:,t)', ones(1, NetSettings.users)); % dummy minreq.
+            bs(:,t)', perUserMinRateReq); % dummy minreq.
         rates_GPS(:, t) = r;
         outageGPS = outageGPS + sum(r < (perUserMinRateReq));
 
         fprintf('finish at time %d\n', t);
     end
-    poutageGain(i) = (outageSCPF - outageDP) / totalNumUsers;
+    if (mode == 1)
+        poutageGain(1, i) = outageDP / totalNumUsers;
+        poutageGain(2, i) = outageDPoptimal / totalNumUsers;
+        poutageGain(3, i) = outageSCPF / totalNumUsers;
+        poutageGain(4, i) = outageGPS / totalNumUsers;
+    else
+        poutageGain(i) = (outageSCPF - outageDP) / totalNumUsers;
+    end
+    
     
     % compute utility
     for t = 1:simulationTime % stats
         % For each time instant, only account for the set of users receiving at
         % least min rate req under all benchmarks.
         opVec = OpSettings.ops_belongs;
-
-        goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
-            > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq);
-
+        
+        if (mode == 1)
+            goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
+                > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq ...
+                & rates_DPoptimal(:, t)' > perUserMinRateReq);
+        else
+            goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
+                > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq);
+        end
         tmpRatesGPS = nan(size(rates_GPS(:, t)'));
         tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
         utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
 
         tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
         tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
         utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
 
         tmpRatesDP = nan(size(rates_DP(:, t)'));
         tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
         utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
-            opVec, sliceCats, perUserMinRateReq, weightPerUser);
+            opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+        
+        if (mode == 1)
+            tmpRatesDPoptimal = nan(size(rates_DPoptimal(:, t)'));
+            tmpRatesDPoptimal(goodUsers) = rates_DPoptimal(goodUsers, t);
+            utilDPoptimal(t) = ratetoutil(tmpRatesDPoptimal, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+        end
     end
-    
-    utilityGain(i) = nanmean(utilDP) - nanmean(utilGPS);
+    if (mode == 1)
+        utilityGain(1, i) = nanmean(utilDP);
+        utilityGain(2, i) = nanmean(utilDPoptimal);
+        utilityGain(3, i) = nanmean(utilSCPF);
+        utilityGain(4, i) = nanmean(utilGPS);
+    else
+        utilityGain(i) = nanmean(utilDP) - nanmean(utilGPS);
+    end
 end
 
 end

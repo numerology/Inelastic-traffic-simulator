@@ -37,8 +37,8 @@ meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser,
     simulationTime);
 % use a similar heuristic to allocate shares
 
-minRateReq = 1 / (sat) * ones(1, nSlices);
-minRateReq(3:4) = 3 * minRateReq(3:4);
+minRateReq = 0.7 / (sat) * ones(1, nSlices);
+minRateReq(3:4) = 5 * minRateReq(3:4);
 
 [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
         minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);

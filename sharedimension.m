@@ -98,7 +98,7 @@ while(totalElasticNeed > 1e-6)
     [minRemainder, minIdx] = min(remainderPerBS);
     for b = 1:B
         maxDeduct = totalElasticNeed / sum(bsMask & (~isnan(remainderPerBS)));
-        if (bsMask)
+        if (bsMask(b) > 1e-6)
             remainderPerBS(b) = remainderPerBS(b) - min(minRemainder, maxDeduct);
             totalElasticNeed = totalElasticNeed - min(minRemainder, maxDeduct);
             if (remainderPerBS(b) < 1e-6)

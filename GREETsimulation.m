@@ -72,7 +72,7 @@ for i = 1:length(satVector)
         simulationTime);
     meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser, ...
         simulationTime);
-        minRateReq = 0.7 / (sat) * ones(1, nSlices);
+        minRateReq = 1 / (sat) * ones(1, nSlices);
     minRateReq(3:4) = 5 * minRateReq(3:4);
 
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...

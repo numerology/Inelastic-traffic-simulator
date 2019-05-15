@@ -4,7 +4,7 @@ parpool('local', 40);
 warning('off','all');
 
 satVec = 1:10;
-simulationTime = 4;
+simulationTime = 1000;
 
 poutageGain = zeros(6, length(satVec));
 utilGain = zeros(6, length(satVec));

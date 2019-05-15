@@ -1,22 +1,19 @@
 function [util] = ratetoutil(rates, shareVec, opBelongs, sliceCats, ...
-    minRateReq, phi)
+    minRateReq, phi, eps)
 % rateutil Compute utility function based on rate allocation, and share
 % distribution across users.
 % Also need to take into account the nan rate allocation.
+% Per user utility is truncated from above at eps < 0.
 if(nargin == 5)
     phi = ones(size(opBelongs)); % uniform phi by default.
+    eps = -100; % uniform eps by default.
 end
 
 util = 0;
-nSlice = length(shareVec);
-for slice = 1:nSlice
-    if (sum(opBelongs == slice) == 0)
-        continue
-    end
-    if (sliceCats(slice))
-        util = util + shareVec(slice) * nansum(phi(opBelongs == slice) ./ ...
-            sum(phi(opBelongs == slice)) .* ...
-            log(rates(opBelongs == slice) - minRateReq(opBelongs == slice)));
-    end
+nSlices = length(shareVec);
+nUsers = length(opBelongs);
+for u = 1:nUsers
+    util = util + max(shareVec * phi(u) / sum(opBelongs == opBelongs(u)) ...
+        * log(rates(u) - minRateReq(u)), eps);
 end
 end

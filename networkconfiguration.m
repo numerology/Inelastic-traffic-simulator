@@ -30,16 +30,16 @@ Mspeed = 10; %m/s
 S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 
-S2 = load('./SLAW model/Heterogeneity/H6_seed12');
-%S2 = S;
+%S2 = load('./SLAW model/Heterogeneity/H6_seed12');
+S2 = S;
 hetTrace2 = circlewrap(S2.trace(1:users, :, 1:2), rad);
 
-S3 = load('./SLAW model/Heterogeneity/H6_seed13');
-%S3 = S;
+%S3 = load('./SLAW model/Heterogeneity/H6_seed13');
+S3 = S;
 hetTrace3 = circlewrap(S3.trace(1:users, :, 1:2), rad);
 
-S4 = load('./SLAW model/Heterogeneity/H6_seed14');
-%S4 = S;
+%S4 = load('./SLAW model/Heterogeneity/H6_seed14');
+S4 = S;
 hetTrace4 = circlewrap(S4.trace(1:users, :, 1:2), rad);
 
 nHetTraceUser = size(hetTrace, 1)

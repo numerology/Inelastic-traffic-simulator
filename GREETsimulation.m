@@ -50,7 +50,11 @@ minSharePerBS = 0.001;
 model = {'RWP'};
 
 for i = 1:length(satVector)
-    sat = satVector(i); % U/B (use only integers...)
+    if (mode == 1)
+        sat = 5;
+    else
+        sat = satVector(i); % U/B (use only integers...)
+    end
     shareVec = 1/4 * ones(1, 4); % this only means user numbers are the same.
     sliceCats = [0 0 1 1];
     
@@ -72,9 +76,14 @@ for i = 1:length(satVector)
         simulationTime);
     meanCapacityDist = getMeanCapacity(OpSettings, NetSettings, bs, capacityPerUser, ...
         simulationTime);
-        minRateReq = 1 / (sat) * ones(1, nSlices);
-    minRateReq(3:4) = 5 * minRateReq(3:4);
-
+    minRateReq = 1 / (sat) * ones(1, nSlices);
+    
+    if (mode == 1)
+        minRateReq(3:4) = satVector(i) * minRateReq(3:4);
+    else
+        minRateReq(3:4) = 5 * minRateReq(3:4);
+    end
+    
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
             minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
     

@@ -3,8 +3,8 @@ clc, close all, clear all
 parpool('local', 40);
 warning('off','all');
 
-satVec = [1 3 5 7 10 13 15]; % subject to what type of SLAW model to use
-simulationTime = 3000;
+satVec = 1:8; % subject to what type of SLAW model to use
+simulationTime = 2000;
 
 [poutage, utility] = GREETsimulation(satVec, simulationTime, 2, 1);
 

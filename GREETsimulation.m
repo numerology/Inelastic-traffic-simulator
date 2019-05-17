@@ -101,6 +101,7 @@ for i = 1:length(meanFactorVec)
                 if(cnt > nUserCurSlice / 2)
                     break
                 end
+                cnt = cnt + 1;
             end
             weightPerUser(OpSettings.ops_belongs == v) = shareVec(v) ...
                 .* phi(OpSettings.ops_belongs == v) ./ ...

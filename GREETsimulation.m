@@ -1,4 +1,5 @@
-function [poutageGain, utilityGain] = GREETsimulation(meanFactorVec, ...
+function [poutageGain, utilityGain, poutageErrors, utilityErrors, ...
+    elasticShareVec] = GREETsimulation(meanFactorVec, ...
     simulationTime, profile, mode)
 %GREETsimulation simulate the gain over GPS in utility and gain over SCPF
 %in P(outage) under various load, provided the network configuration
@@ -18,17 +19,24 @@ function [poutageGain, utilityGain] = GREETsimulation(meanFactorVec, ...
 %   mode: 1 for simulation for the P(outage) - utility trade-off figure, 2
 %   for simulation for the multi-scenario figure.
 %   Returns:
-%   Dependes on the mode, when mode = 1:
+%   
+%   elaticShareVec: 1 x length(meanFactorVec), corresponding share of
+%   elastic slices.
+%   Then dependes on the mode, when mode = 1:
 %   poutageGain: 4 x length(satVector), poutage achieved by 4 benchmarks
 %   under different load
 %   utilityGain: 4 x length(satVector), utility achieved by 4 benchmarks
 %   under different load.
+%   errors: 4 x length(meanFactorVec), 1.96 std confidence interval (95%
+%   confidence).
 %   When mode = 2:
 %   poutageGain: 1 x length(satVector), poutage under SCPF - poutage under 
 %   DP-practical.
 %   utilityGain: 1 x length(satVector), utility under DP-practical -
 %   utility under GPS.
-
+elasticShareVec = zeros(1, length(meanFactorVec));
+poutageErrors = zeros(1, length(meanFactorVec));
+utilityErrors = zeros(1, length(meanFactorVec));
 if (mode == 1)
     poutageGain = zeros(4, length(meanFactorVec)); 
     utilityGain = zeros(4, length(meanFactorVec)); 
@@ -51,6 +59,8 @@ model = {'RWP'};
 
 for i = 1:length(meanFactorVec)
     sat = 5;
+    
+    fprintf('Begin ratio %d \n', meanFactorVec(i));
     
     shareVec = 1/4 * ones(1, 4); % this only means user numbers are the same.
     sliceCats = [0 0 1 1];
@@ -81,6 +91,7 @@ for i = 1:length(meanFactorVec)
     
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
             minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
+    elasticShareVec(i) = sum(sliceCats .* shareVec);
     
     weightPerUser = zeros(1, NetSettings.users);
     if (profile ~= 5)
@@ -128,10 +139,10 @@ for i = 1:length(meanFactorVec)
     end
     
     totalNumUsers = 0;
-    outageDP = 0;
-    outageSCPF = 0;
-    outageGPS = 0;
-    outageDPoptimal = 0;
+    outageDP = zeros(1, simulationTime);
+    outageSCPF = zeros(1, simulationTime);
+    outageGPS = zeros(1, simulationTime);
+    outageDPoptimal = zeros(1, simulationTime);
     % initialization
     rates_DP = zeros(NetSettings.users, simulationTime);
     rates_DPoptimal = zeros(NetSettings.users, simulationTime);
@@ -143,37 +154,39 @@ for i = 1:length(meanFactorVec)
             [r, f, b] = DPoptimal(NetSettings, OpSettings, capacityPerUser(:,t)', ...
                 bs(:,t)', perUserMinRateReq, sliceCats);
             rates_DPoptimal(:, t)=r;
-            outageDPoptimal = outageDPoptimal + sum(r < (perUserMinRateReq - 1e-3));
+            outageDPoptimal(t) = sum(r < (perUserMinRateReq - 1e-3)) / NetSettings.users;
         end
         [r, f, b, nRounds, isViolation] = DIFFPRICE(NetSettings, OpSettings, capacityPerUser(:,t)', ...
             bs(:,t)', minRateReq, 0, sliceCats, weightPerUser);
         rates_DP(:, t)=r;
-        outageDP = outageDP + sum(r < (perUserMinRateReq - 1e-5));
+        outageDP(t) = sum(r < (perUserMinRateReq - 1e-5)) / NetSettings.users;
 
         [r, f, b] = SCPF(NetSettings, OpSettings, capacityPerUser(:,t)', bs(:,t)');
         rates_SCPF(:, t)=r;
-        
-        outageSCPF = outageSCPF + sum(r < (perUserMinRateReq));
+        outageSCPF(t) = sum(r < (perUserMinRateReq)) / NetSettings.users;
 
         tmpOpSettings = OpSettings;
         tmpOpSettings.shareDist = gpsShareDist;
         [r, f, b] = flexibleGPS(NetSettings, tmpOpSettings, capacityPerUser(:,t)', ...
             bs(:,t)', perUserMinRateReq); % dummy minreq.
         rates_GPS(:, t) = r;
-        outageGPS = outageGPS + sum(r < (perUserMinRateReq));
+        outageGPS(t) = sum(r < (perUserMinRateReq)) / NetSettings.users;
 
         fprintf('finish at time %d\n', t);
     end
     if (mode == 1)
-        poutageGain(1, i) = outageDP / totalNumUsers;
-        poutageGain(2, i) = outageDPoptimal / totalNumUsers;
-        poutageGain(3, i) = outageSCPF / totalNumUsers;
-        poutageGain(4, i) = outageGPS / totalNumUsers;
+        poutageGain(1, i) = mean(outageDP);
+        poutageGain(2, i) = mean(outageDPoptimal);
+        poutageGain(3, i) = mean(outageSCPF);
+        poutageGain(4, i) = mean(outageGPS);
     else
         if (outageSCPF == 0)
             poutageGain(i) = 1;
+            poutageErrors(i) = 0;
         else
-            poutageGain(i) = outageSCPF / outageDP;
+            poutageGain(i) = mean(outageSCPF) / mean(outageDP);
+            poutageErrors(i) = 1.96 * (std(outageSCPF) + std(outageDP)) ...
+                / sqrt(simulationTime);
         end
     end
     
@@ -229,6 +242,7 @@ for i = 1:length(meanFactorVec)
         utilityGain(4, i) = nanmean(utilGPS);
     else
         utilityGain(i) = nanmean(utilDP) - nanmean(utilGPS);
+        utilityErrors(i) = 1.96 * (nanstd(utilDP) + nanstd(utilGPS)) / sqrt(simulationTime);
     end
 end
 

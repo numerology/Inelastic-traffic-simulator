@@ -1,10 +1,10 @@
-function [poutageGain, utilityGain] = GREETsimulation(satVector, ...
+function [poutageGain, utilityGain] = GREETsimulation(meanFactorVec, ...
     simulationTime, profile, mode)
 %GREETsimulation simulate the gain over GPS in utility and gain over SCPF
 %in P(outage) under various load, provided the network configuration
 %pattern
 %   Params:
-%   satVector: vector of sat := |U|/|B|
+%   satVector: vector of the multiplicator of mean rate over min rate.
 %   simulationTime: duration of the simulation, < 1000
 %   profile: index of configuration, 1 to 5. They are:
 %   for 1 - 5, Slices 1 and 2 are rate-adaptive, 3 and 4 are best-effort.
@@ -30,11 +30,11 @@ function [poutageGain, utilityGain] = GREETsimulation(satVector, ...
 %   utility under GPS.
 
 if (mode == 1)
-    poutageGain = zeros(4, length(satVector)); 
-    utilityGain = zeros(4, length(satVector)); 
+    poutageGain = zeros(4, length(meanFactorVec)); 
+    utilityGain = zeros(4, length(meanFactorVec)); 
 else
-    poutageGain = zeros(1, length(satVector)); % over SCPF
-    utilityGain = zeros(1, length(satVector)); % over GPS
+    poutageGain = zeros(1, length(meanFactorVec)); % over SCPF
+    utilityGain = zeros(1, length(meanFactorVec)); % over GPS
 end
 
 nSlices = 4; % num of slices
@@ -49,12 +49,9 @@ minSharePerBS = 0.001;
 % RWP for roughly uniform spatial loads.
 model = {'RWP'};
 
-for i = 1:length(satVector)
-    if (mode == 1)
-        sat = 5;
-    else
-        sat = satVector(i); % U/B (use only integers...)
-    end
+for i = 1:length(meanFactorVec)
+    sat = 5;
+    
     shareVec = 1/4 * ones(1, 4); % this only means user numbers are the same.
     sliceCats = [0 0 1 1];
     
@@ -78,11 +75,9 @@ for i = 1:length(satVector)
         simulationTime);
     minRateReq = 1 / (sat) * ones(1, nSlices);
     
-    if (mode == 1)
-        minRateReq(3:4) = satVector(i) * minRateReq(3:4);
-    else
-        minRateReq(3:4) = 5 * minRateReq(3:4);
-    end
+
+    minRateReq(3:4) = meanFactorVec(i) * minRateReq(3:4);
+    
     
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
             minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
@@ -174,7 +169,11 @@ for i = 1:length(satVector)
         poutageGain(3, i) = outageSCPF / totalNumUsers;
         poutageGain(4, i) = outageGPS / totalNumUsers;
     else
-        poutageGain(i) = (outageSCPF - outageDP) / totalNumUsers;
+        if (outageSCPF == 0)
+            poutageGain(i) = 1;
+        else
+            poutageGain(i) = outageDP / outageSCPF;
+        end
     end
     
     
@@ -209,22 +208,17 @@ for i = 1:length(satVector)
             utilDPoptimal(t) = ratetoutil_old(tmpRatesDPoptimal, shareVec, ...
                 opVec, sliceCats, perUserMinRateReq, weightPerUser);
         else
-            goodUsers = (rates_GPS(:, t)' > perUserMinRateReq & rates_SCPF(:, t)' ...
-                > perUserMinRateReq & rates_DP(:, t)' > perUserMinRateReq);
+            goodUsers = (rates_GPS(:, t)' > perUserMinRateReq ...
+                & rates_DP(:, t)' > perUserMinRateReq);
             tmpRatesGPS = nan(size(rates_GPS(:, t)'));
             tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
-            utilGPS(t) = ratetoutil(tmpRatesGPS, shareVec, ...
-                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
-
-            tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
-            tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
-            utilSCPF(t) = ratetoutil(tmpRatesSCPF, shareVec, ...
-                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+            utilGPS(t) = ratetoutil_old(tmpRatesGPS, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
 
             tmpRatesDP = nan(size(rates_DP(:, t)'));
             tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
-            utilDP(t) = ratetoutil(tmpRatesDP, shareVec, ...
-                opVec, sliceCats, perUserMinRateReq, weightPerUser, -500);
+            utilDP(t) = ratetoutil_old(tmpRatesDP, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
         end
     end
     if (mode == 1)

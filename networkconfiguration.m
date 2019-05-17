@@ -63,11 +63,11 @@ switch mobilityConfiguration
         trace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :) ... 
             = hetTrace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
+            = hetTrace2(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
+            = hetTrace3(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
+            = hetTrace4(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
         
     case 5 % super heteroneous case, all SLAW with different hotspots, but also 
            % inelastic users are of different phi within a single slice. 
@@ -75,11 +75,11 @@ switch mobilityConfiguration
         trace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :) ... 
             = hetTrace(OpSettings.ops_belongs == 1, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
+            = hetTrace2(OpSettings.ops_belongs == 2, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
+            = hetTrace3(OpSettings.ops_belongs == 3, 1:NetSettings.simulation_time, :);
         trace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :) ... 
-            = hetTrace(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
+            = hetTrace4(OpSettings.ops_belongs == 4, 1:NetSettings.simulation_time, :);
 end
 
          

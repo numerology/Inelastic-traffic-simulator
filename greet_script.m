@@ -29,7 +29,7 @@ set([h1 h2 h3 h4 h5 h6], 'LineWidth', 2, 'MarkerSize', 10);
 legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
     'Scenario 6');
 xlabel('mean rate requirement / minimum rate requirement');
-ylabel('P(outage) ratio of GREET-PR over SCPF');
+ylabel('P(outage) gain over SCPF');
 savefig(sprintf('figs/GREET-poutage-multicases-%s.fig', datestring))
 
 figure(2);
@@ -43,6 +43,6 @@ h6 = plot(satVec, utilGain(5, :), 'mp:');
 set([h1 h2 h3 h4 h5 h6], 'LineWidth', 2, 'MarkerSize', 10);
 legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
     'Scenario 6');
-xlabel('number of users per resource');
+xlabel('mean rate requirement / minimum rate requirement');
 ylabel('utility gain over GPS');
 savefig(sprintf('figs/GREET-util-multicases-%s.fig', datestring))

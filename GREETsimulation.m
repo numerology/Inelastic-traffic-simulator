@@ -172,7 +172,7 @@ for i = 1:length(meanFactorVec)
         if (outageSCPF == 0)
             poutageGain(i) = 1;
         else
-            poutageGain(i) = outageDP / outageSCPF;
+            poutageGain(i) = outageSCPF / outageDP;
         end
     end
     

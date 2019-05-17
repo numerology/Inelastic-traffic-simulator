@@ -23,12 +23,12 @@ end
 datestring = datestr(now, 30);
 figure(1);
 hold on; grid on;
-h1 = errorbar(elasticShares(1, :), poutageGain(1, :), 'bo-');
-h2 = errorbar(elasticShares(2, :), poutageGain(2, :), 'r+-');
-h3 = errorbar(elasticShares(3, :), poutageGain(3, :), 'kd-');
-h4 = errorbar(elasticShares(4, :), poutageGain(4, :), 'gh-');
-h5 = errorbar(elasticShares(5, :), poutageGain(5, :), 'c*-.');
-h6 = errorbar(elasticShares(6, :), poutageGain(6, :), 'mp:');
+h1 = errorbar(elasticShares(1, :), poutageGain(1, :), poutageError(1, :), 'bo-');
+h2 = errorbar(elasticShares(2, :), poutageGain(2, :), poutageError(2, :), 'r+-');
+h3 = errorbar(elasticShares(3, :), poutageGain(3, :), poutageError(3, :), 'kd-');
+h4 = errorbar(elasticShares(4, :), poutageGain(4, :), poutageError(4, :), 'gh-');
+h5 = errorbar(elasticShares(5, :), poutageGain(5, :), poutageError(5, :), 'c*-.');
+h6 = errorbar(elasticShares(6, :), poutageGain(6, :), poutageError(6, :), 'mp:');
 set([h1 h2 h3 h4 h5 h6], 'LineWidth', 2, 'MarkerSize', 10);
 legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
     'Scenario 6');
@@ -38,12 +38,12 @@ savefig(sprintf('figs/GREET-poutage-multicases-%s.fig', datestring))
 
 figure(2);
 hold on; grid on;
-h1 = errorbar(elasticShares(1, :), utilGain(1, :), 'bo-');
-h2 = errorbar(elasticShares(2, :), utilGain(2, :), 'r+-');
-h3 = errorbar(elasticShares(3, :), utilGain(3, :), 'kd-');
-h4 = errorbar(elasticShares(4, :), utilGain(4, :), 'gh-');
-h5 = errorbar(elasticShares(5, :), utilGain(5, :), 'c*-.');
-h6 = errorbar(elasticShares(6, :), utilGain(6, :), 'mp:');
+h1 = errorbar(elasticShares(1, :), utilGain(1, :), utilError(1, :), 'bo-');
+h2 = errorbar(elasticShares(2, :), utilGain(2, :), utilError(2, :), 'r+-');
+h3 = errorbar(elasticShares(3, :), utilGain(3, :), utilError(3, :), 'kd-');
+h4 = errorbar(elasticShares(4, :), utilGain(4, :), utilError(4, :), 'gh-');
+h5 = errorbar(elasticShares(5, :), utilGain(5, :), utilError(5, :), 'c*-.');
+h6 = errorbar(elasticShares(6, :), utilGain(6, :), utilError(6, :), 'mp:');
 set([h1 h2 h3 h4 h5 h6], 'LineWidth', 2, 'MarkerSize', 10);
 legend('Scenario 1', 'Scenario 2', 'Scenario 3', 'Scenario 4', 'Scenario 5', ...
     'Scenario 6');

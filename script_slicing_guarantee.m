@@ -1,9 +1,9 @@
 clc, close all, clear all
 nSlice = 4;
-parpool('local', 40);
+%parpool('local', 40);
 warning('off','all');
 
-simulationTime = 3000;
+simulationTime = 4;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.
@@ -66,7 +66,7 @@ for i = 1:length(meanFactorVec)
     rhoVec = relativeRhoVec * varFactor;
     bsAssociation = cell(1, simulationTime);
     capacities = cell(1, simulationTime);
-    minRateReq = 0.01 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
+    minRateReq = 0.025 * capacity / (varFactor * perBSLoad) * ones(1, nSlice);
     minRateReq(3:4) = meanFactorVec(i) * minRateReq(3:4);
     afterMinRate = minRateReq;
     afterMinRate(sliceCats > 0) = 0;

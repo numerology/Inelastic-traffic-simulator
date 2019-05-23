@@ -21,13 +21,13 @@ relativeRhoVec = perBSLoad * [[2 2 6 6];
                               [2 2 6 6]]';
 nBaseStations = size(relativeRhoVec, 2);
 capacity = 1;
-minSharePerBS = 0.01;
-outageTol = 0.05;
+minSharePerBS = 0.001;
+outageTol = 0.01;
 netSettings = [];
 netSettings.bsNS = nBaseStations;
 opSettings = [];
 
-meanFactorVec = 1:10;
+meanFactorVec = 1:0.5:4;
 
 btdGainVecSCPF = zeros(1, length(meanFactorVec)); % BTD gain over (flexible) GPS.
 btdGainVecDP = zeros(1, length(meanFactorVec));

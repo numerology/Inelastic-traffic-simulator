@@ -11,4 +11,4 @@
 #SBATCH --mail-type=all
 
 module load matlab
-matlab -nodesktop -nodisplay -nosplash < greet_script.m
+matlab -nodesktop -nodisplay -nosplash < script_slicing_guarantee.m

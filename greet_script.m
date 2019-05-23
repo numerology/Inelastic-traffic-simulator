@@ -1,10 +1,10 @@
 % greet_script simulate gain of GREET practical approach under different scenarios
 clc, close all, clear all
-parpool('local', 40);
+%parpool('local', 40);
 warning('off','all');
 
-meanMinFactor = 1:10;
-simulationTime = 1000;
+meanMinFactor = 16:21;
+simulationTime = 4;
 
 poutageGain = zeros(6, length(meanMinFactor));
 poutageError = zeros(6, length(meanMinFactor));

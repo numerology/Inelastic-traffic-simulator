@@ -3,7 +3,7 @@ nSlice = 4;
 parpool('local', 40);
 warning('off','all');
 
-simulationTime = 2000;
+simulationTime = 20000;
 % Setup:
 % Two inelastic slices, with uniform minimal rate requirements, and no 
 % elasticity in the utility function.

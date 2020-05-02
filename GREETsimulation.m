@@ -1,27 +1,30 @@
-function [poutageGain, utilityGain, poutageErrors, utilityErrors, ...
+function [poutageGainAgainstSCPF, poutageGainAgainstReservation, ...
+    utilityGainAgainstReservation, utilityGainAgainstSCPF, ...
+    poutageErrorsAgainstSCPF, poutageErrorsAgainstReservation,...
+    utilityErrorsAgainstReservation, utilityErrorsAgainstSCPF, ...
     elasticShareVec] = GREETsimulation(meanFactorVec, ...
     simulationTime, profile, mode)
-%GREETsimulation simulate the gain over GPS in utility and gain over SCPF
-%in P(outage) under various load, provided the network configuration
-%pattern
+% GREETsimulation simulates the gain over GPS in utility and gain over SCPF
+% in P(outage) under various load, provided the network configuration
+% pattern
 %   Params:
 %   satVector: vector of the multiplicator of mean rate over min rate.
 %   simulationTime: duration of the simulation, < 1000
 %   profile: index of configuration, 1 to 5. They are:
-%   (for 1 - 5, Slices 1 and 2 are rate-adaptive, 3 and 4 are best-effort.)
-%   1: all slices are uniform (RWP). Namely: Uniform.
-%   2: 1 and 2 SLAW, 3 and 4 RWP. Namely: TBD.
-%   3: all slices are SLAW, with the same hotspots. Namely: Heterogeneous
-%      aligned.
-%   4: all slices are SLAW, with different hotspots. Namely: Heterogeneous
-%      orthogonal.
-%   5: all slices are SLAW, with different hotspots, also, Slice 1 and 2
-%      have different phi's within each slice. Namely: TBD
-%   6: change Slice 1 (or 1 and 2) in setting 2 to purely inelastic slice
-%      mode: 
-%        change Slice 1 for simulation for the P(outage) - utility 
-%        trade-off figure; 
-%        change Slice 1 and 2 for simulation for the multi-scenario figure.
+%     (for 1 - 5, Slices 1 and 2 are rate-adaptive, 3 and 4 are best-effort.)
+%     1: all slices are uniform (RWP). Namely: Uniform.
+%     2: 1 and 2 SLAW, 3 and 4 RWP. Namely: TBD.
+%     3: all slices are SLAW, with the same hotspots. Namely: Heterogeneous
+%        aligned.
+%     4: all slices are SLAW, with different hotspots. Namely: Heterogeneous
+%        orthogonal.
+%     5: all slices are SLAW, with different hotspots, also, Slice 1 and 2
+%        have different phi's within each slice. Namely: TBD
+%     6: change Slice 1 (or 1 and 2) in setting 2 to purely inelastic slice
+%   mode: 
+%      1. change Slice 1 for simulation for the P(outage) - utility 
+%      trade-off figure; 
+%      2. change Slice 1 and 2 for simulation for the multi-scenario figure.
 %      Namely: Mixed
 %
 %   Returns:
@@ -41,14 +44,18 @@ function [poutageGain, utilityGain, poutageErrors, utilityErrors, ...
 %   utilityGain: 1 x length(satVector), utility under DP-practical -
 %   utility under GPS.
 elasticShareVec = zeros(1, length(meanFactorVec));
-poutageErrors = zeros(1, length(meanFactorVec));
-utilityErrors = zeros(1, length(meanFactorVec));
+poutageErrorsAgainstSCPF = zeros(1, length(meanFactorVec));
+poutageErrorsAgainstReservation = zeros(1, length(meanFactorVec));
+utilityErrorsAgainstReservation = zeros(1, length(meanFactorVec));
+utilityErrorsAgainstSCPF = zeros(1, length(meanFactorVec));
 if (mode == 1)
-    poutageGain = zeros(4, length(meanFactorVec)); 
-    utilityGain = zeros(4, length(meanFactorVec)); 
+    poutageGainAgainstSCPF = zeros(4, length(meanFactorVec)); 
+    utilityGainAgainstReservation = zeros(4, length(meanFactorVec)); 
 else
-    poutageGain = zeros(1, length(meanFactorVec)); % over SCPF
-    utilityGain = zeros(1, length(meanFactorVec)); % over GPS
+    poutageGainAgainstSCPF = zeros(1, length(meanFactorVec)); % over SCPF
+    poutageGainAgainstReservation = zeros(1, length(meanFactorVec)); % over GPS
+    utilityGainAgainstReservation = zeros(1, length(meanFactorVec)); % over GPS
+    utilityGainAgainstSCPF = zeros(1, length(meanFactorVec)); % over SCPF
 end
 
 nSlices = 4; % num of slices
@@ -182,20 +189,32 @@ for i = 1:length(meanFactorVec)
         fprintf('finish at time %d\n', t);
     end
     if (mode == 1)
-        poutageGain(1, i) = mean(outageDP);
-        poutageGain(2, i) = mean(outageDPoptimal);
-        poutageGain(3, i) = mean(outageSCPF);
-        poutageGain(4, i) = mean(outageGPS);
+        poutageGainAgainstSCPF(1, i) = mean(outageDP);
+        poutageGainAgainstSCPF(2, i) = mean(outageDPoptimal);
+        poutageGainAgainstSCPF(3, i) = mean(outageSCPF);
+        poutageGainAgainstSCPF(4, i) = mean(outageGPS);
     else
+        % Handle all zero case.
         if (outageSCPF == 0)
-            poutageGain(i) = 1;
-            poutageErrors(i) = 0;
-        else
-            fprintf('SCPF outage is %d', mean(outageSCPF));
-            fprintf('GREET outage is %d', mean(outageDP));
-            poutageGain(i) = mean(outageSCPF) / mean(outageDP);
-            poutageErrors(i) = 1.96 * (std(outageSCPF) + std(outageDP)) ...
+            poutageGainAgainstSCPF(i) = 1;
+            poutageErrorsAgainstSCPF(i) = 0;
+        end
+        if (outageGPS == 0)
+            poutageGainAgainstReservation(i) = 1;
+            poutageErrorsAgainstReservation(i) = 0;
+        end
+        fprintf('SCPF outage is %d\n', mean(outageSCPF));
+        fprintf('GPS(Reservation) outage is %d\n', mean(outageGPS));
+        fprintf('GREET outage is %d\n', mean(outageDP));
+        if (poutageGainAgainstSCPF(i) == 0) % Not set by all-zero handling, proceed as normal.
+            poutageGainAgainstSCPF(i) = mean(outageSCPF) / mean(outageDP);
+            poutageErrorsAgainstSCPF(i) = 1.96 * (std(outageSCPF) + std(outageDP)) ...
                 / sqrt(simulationTime);
+        end
+        if (poutageGainAgainstReservation(i) == 0) % Not set by all-zero handling, proceed as normal.
+            poutageGainAgainstReservation(i) = mean(outageGPS) / mean(outageDP);
+            poutageErrorsAgainstReservation(i) = 1.96 * (std(outageGPS) ...
+                + std(outageDP)) / sqrt(simulationTime);
         end
     end
     
@@ -237,6 +256,11 @@ for i = 1:length(meanFactorVec)
             tmpRatesGPS(goodUsers) = rates_GPS(goodUsers, t);
             utilGPS(t) = ratetoutil_old(tmpRatesGPS, shareVec, ...
                 opVec, sliceCats, perUserMinRateReq, weightPerUser);
+            
+            tmpRatesSCPF = nan(size(rates_SCPF(:, t)'));
+            tmpRatesSCPF(goodUsers) = rates_SCPF(goodUsers, t);
+            utilSCPF(t) = ratetoutil_old(tmpRatesSCPF, shareVec, ...
+                opVec, sliceCats, perUserMinRateReq, weightPerUser);
 
             tmpRatesDP = nan(size(rates_DP(:, t)'));
             tmpRatesDP(goodUsers) = rates_DP(goodUsers, t);
@@ -245,13 +269,17 @@ for i = 1:length(meanFactorVec)
         end
     end
     if (mode == 1)
-        utilityGain(1, i) = nanmean(utilDP);
-        utilityGain(2, i) = nanmean(utilDPoptimal);
-        utilityGain(3, i) = nanmean(utilSCPF);
-        utilityGain(4, i) = nanmean(utilGPS);
+        utilityGainAgainstReservation(1, i) = nanmean(utilDP);
+        utilityGainAgainstReservation(2, i) = nanmean(utilDPoptimal);
+        utilityGainAgainstReservation(3, i) = nanmean(utilSCPF);
+        utilityGainAgainstReservation(4, i) = nanmean(utilGPS);
     else
-        utilityGain(i) = nanmean(utilDP) - nanmean(utilGPS);
-        utilityErrors(i) = 1.96 * (nanstd(utilDP) + nanstd(utilGPS)) / sqrt(simulationTime);
+        utilityGainAgainstReservation(i) = nanmean(utilDP) - nanmean(utilGPS);
+        utilityGainAgainstSCPF(i) = nanmean(utilDP) - nanmean(utilSCPF);
+        utilityErrorsAgainstReservation(i) = 1.96 * (nanstd(utilDP) ...
+            + nanstd(utilGPS)) / sqrt(simulationTime);
+        utilityErrorsAgainstSCPF(i) = 1.96 * (nanstd(utilDP) ...
+            + nanstd(utilSCPF)) / sqrt(simulationTime);
     end
 end
 

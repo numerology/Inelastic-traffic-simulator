@@ -3,8 +3,8 @@ clc, close all, clear all
 %parpool('local', 40);
 warning('off','all');
 
-meanMinFactor = 16:21;
-simulationTime = 4;
+meanMinFactor = 1:10;
+simulationTime = 40;
 
 poutageGain = zeros(6, length(meanMinFactor));
 poutageError = zeros(6, length(meanMinFactor));
@@ -12,7 +12,7 @@ utilGain = zeros(6, length(meanMinFactor));
 utilError = zeros(6, length(meanMinFactor));
 elasticShares = zeros(6, length(meanMinFactor));
 
-for netProfile = 1:6
+for netProfile = 5:5
     fprintf('beginning configuration no. %d\n', netProfile);
     [poutageGain(netProfile, :), utilGain(netProfile, :), ...
         poutageError(netProfile, :), utilError(netProfile, :), elasticShares(netProfile, :)] = ...

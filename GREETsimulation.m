@@ -8,16 +8,22 @@ function [poutageGain, utilityGain, poutageErrors, utilityErrors, ...
 %   satVector: vector of the multiplicator of mean rate over min rate.
 %   simulationTime: duration of the simulation, < 1000
 %   profile: index of configuration, 1 to 5. They are:
-%   for 1 - 5, Slices 1 and 2 are rate-adaptive, 3 and 4 are best-effort.
-%   1: all slices are uniform (RWP)
-%   2: 1 and 2 SLAW, 3 and 4 RWP
-%   3: all slices are SLAW, with the same hotspots
-%   4: all slices are SLAW, with different hotspots
+%   (for 1 - 5, Slices 1 and 2 are rate-adaptive, 3 and 4 are best-effort.)
+%   1: all slices are uniform (RWP). Namely: Uniform.
+%   2: 1 and 2 SLAW, 3 and 4 RWP. Namely: TBD.
+%   3: all slices are SLAW, with the same hotspots. Namely: Heterogeneous
+%      aligned.
+%   4: all slices are SLAW, with different hotspots. Namely: Heterogeneous
+%      orthogonal.
 %   5: all slices are SLAW, with different hotspots, also, Slice 1 and 2
-%   have different phi's within each slice
+%      have different phi's within each slice. Namely: TBD
 %   6: change Slice 1 (or 1 and 2) in setting 2 to purely inelastic slice
-%   mode: 1 for simulation for the P(outage) - utility trade-off figure, 2
-%   for simulation for the multi-scenario figure.
+%      mode: 
+%        change Slice 1 for simulation for the P(outage) - utility 
+%        trade-off figure; 
+%        change Slice 1 and 2 for simulation for the multi-scenario figure.
+%      Namely: Mixed
+%
 %   Returns:
 %   
 %   elaticShareVec: 1 x length(meanFactorVec), corresponding share of
@@ -92,6 +98,7 @@ for i = 1:length(meanFactorVec)
     [shareDist, gpsShareDist, shareVec] = sharedimension(minRateReq, loadDist, outageTol, ...
             minSharePerBS, 1, 0, sliceCats, bsMask, meanCapacityDist);
     elasticShareVec(i) = sum(sliceCats .* shareVec);
+    fprintf('Elastic share = %d', elasticShareVec(i));
     
     weightPerUser = zeros(1, NetSettings.users);
     if (profile ~= 5)
@@ -184,6 +191,8 @@ for i = 1:length(meanFactorVec)
             poutageGain(i) = 1;
             poutageErrors(i) = 0;
         else
+            fprintf('SCPF outage is %d', mean(outageSCPF));
+            fprintf('GREET outage is %d', mean(outageDP));
             poutageGain(i) = mean(outageSCPF) / mean(outageDP);
             poutageErrors(i) = 1.96 * (std(outageSCPF) + std(outageDP)) ...
                 / sqrt(simulationTime);

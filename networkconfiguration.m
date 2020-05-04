@@ -27,22 +27,22 @@ Mspeed = 10; %m/s
 [uX,uY,uZ]=RWP_border_circle(NetSettings.users,NetSettings.simulation_time,...
                              UE_height,rad,Mspeed, 1, OpSettings);
                          
-S = load('./SLAW model/Heterogeneity/alpha2nUser1710');
+S = load('./SLAW model/Heterogeneity/alpha2nUser1710'); % max simulation time = 5000 
 hetTrace = circlewrap(S.trace(1:users, :, 1:2), rad);
 
-S2 = load('./SLAW model/Heterogeneity/H6_seed12');
+S2 = load('./SLAW model/Heterogeneity/H6_long_seed12'); % max simulation time = 1000
 %S2 = S;
 hetTrace2 = circlewrap(S2.trace(1:users, :, 1:2), rad);
 
-S3 = load('./SLAW model/Heterogeneity/H6_seed13');
+S3 = load('./SLAW model/Heterogeneity/H6_long_seed13'); % max simulation time = 1000
 %S3 = S;
 hetTrace3 = circlewrap(S3.trace(1:users, :, 1:2), rad);
 
-S4 = load('./SLAW model/Heterogeneity/H6_seed14');
+S4 = load('./SLAW model/Heterogeneity/H6_long_seed14'); % max simulation time = 1000
 %S4 = S;
 hetTrace4 = circlewrap(S4.trace(1:users, :, 1:2), rad);
 
-nHetTraceUser = size(hetTrace, 1)
+nHetTraceUser = size(hetTrace, 1);
 
 switch mobilityConfiguration
     

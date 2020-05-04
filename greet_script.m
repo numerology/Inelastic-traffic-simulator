@@ -5,7 +5,7 @@ warning('off','all');
 
 meanMinFactor = 1:10;
 % Simulation time span, cannot exceed 1000.
-simulationTime = 1000;
+simulationTime = 5000;
 
 poutageGainAgainstSCPF = zeros(6, length(meanMinFactor));
 poutageErrorAgainstSCPF = zeros(6, length(meanMinFactor));
